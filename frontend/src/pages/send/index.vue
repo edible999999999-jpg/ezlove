@@ -46,8 +46,10 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { onShow } from "@dcloudio/uni-app";
 import { useRelationStore } from "@/stores/relation";
 import { useMomentStore } from "@/stores/moment";
+import { uploadImage } from "@/api/upload";
 
 const relationStore = useRelationStore();
 const momentStore = useMomentStore();
@@ -55,11 +57,22 @@ const momentStore = useMomentStore();
 const selectedElderId = ref("");
 const textContent = ref("");
 const imageUrl = ref("");
+const uploadedUrl = ref("");
 
-onMounted(() => {
-  relationStore.loadRelations();
+defineExpose({ textContent });
+
+onMounted(async () => {
+  await relationStore.loadRelations();
   if (relationStore.relations.length > 0) {
     selectedElderId.value = relationStore.relations[0].elder_user_id;
+  }
+});
+
+onShow(() => {
+  const eventData = uni.getStorageSync("ai_suggest_text");
+  if (eventData) {
+    textContent.value = eventData;
+    uni.removeStorageSync("ai_suggest_text");
   }
 });
 
@@ -67,8 +80,14 @@ function chooseImage() {
   uni.chooseImage({
     count: 1,
     sizeType: ["compressed"],
-    success: (res) => {
+    success: async (res) => {
       imageUrl.value = res.tempFilePaths[0];
+      try {
+        uploadedUrl.value = await uploadImage(res.tempFilePaths[0]);
+      } catch (e) {
+        uni.showToast({ title: "图片上传失败", icon: "none" });
+        imageUrl.value = "";
+      }
     },
   });
 }
@@ -78,7 +97,7 @@ async function handleSend() {
     uni.showToast({ title: "请先选择家人", icon: "none" });
     return;
   }
-  if (!textContent.value && !imageUrl.value) {
+  if (!textContent.value && !uploadedUrl.value) {
     uni.showToast({ title: "写点什么或配张图吧", icon: "none" });
     return;
   }
@@ -87,7 +106,7 @@ async function handleSend() {
     await momentStore.send({
       elder_id: selectedElderId.value,
       text_content: textContent.value,
-      media_urls: imageUrl.value ? [imageUrl.value] : [],
+      media_urls: uploadedUrl.value ? [uploadedUrl.value] : [],
     });
     uni.hideLoading();
     uni.showToast({ title: "已发送", icon: "success" });

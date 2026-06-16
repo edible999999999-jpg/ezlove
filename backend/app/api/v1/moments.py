@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -35,7 +37,7 @@ async def list_moments(user: User = Depends(get_current_user), db: AsyncSession 
 
 
 @router.get("/{moment_id}", response_model=MomentResponse)
-async def get_moment(moment_id: str, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+async def get_moment(moment_id: UUID, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     from sqlalchemy import select
     from app.models.care_moment import CareMoment
     result = await db.execute(select(CareMoment).where(CareMoment.id == moment_id))
@@ -50,7 +52,7 @@ async def get_moment(moment_id: str, user: User = Depends(get_current_user), db:
 
 @router.post("/{moment_id}/view")
 async def view_moment(
-    moment_id: str, body: ViewRequest = None,
+    moment_id: UUID, body: ViewRequest = None,
     user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db),
 ):
     duration = body.view_duration if body else None
@@ -60,7 +62,7 @@ async def view_moment(
 
 @router.post("/{moment_id}/response")
 async def respond_to_moment(
-    moment_id: str, data: ResponseCreate,
+    moment_id: UUID, data: ResponseCreate,
     user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db),
 ):
     resp = await create_response(db, moment_id, user.id, data.response_type, data.content)
@@ -68,7 +70,7 @@ async def respond_to_moment(
 
 
 @router.delete("/{moment_id}")
-async def delete_moment(moment_id: str, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+async def delete_moment(moment_id: UUID, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     from sqlalchemy import select
     from app.models.care_moment import CareMoment
     result = await db.execute(select(CareMoment).where(CareMoment.id == moment_id, CareMoment.sender_id == user.id))

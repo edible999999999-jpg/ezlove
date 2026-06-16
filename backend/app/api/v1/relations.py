@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -32,7 +34,7 @@ async def list_relations(user: User = Depends(get_current_user), db: AsyncSessio
 
 @router.put("/{relation_id}", response_model=RelationResponse)
 async def update_relation(
-    relation_id: str, data: RelationUpdate,
+    relation_id: UUID, data: RelationUpdate,
     user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db),
 ):
     from sqlalchemy import select
@@ -50,7 +52,7 @@ async def update_relation(
 
 @router.delete("/{relation_id}")
 async def delete_relation(
-    relation_id: str,
+    relation_id: UUID,
     user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db),
 ):
     from sqlalchemy import select

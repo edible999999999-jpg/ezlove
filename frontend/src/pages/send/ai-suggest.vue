@@ -65,11 +65,7 @@ function regenerate() {
 function useSuggestion() {
   if (suggestions.value.length === 0) return;
   const selected = suggestions.value[selectedIndex.value];
-  const pages = getCurrentPages();
-  const prevPage = pages[pages.length - 2];
-  if (prevPage) {
-    prevPage.$vm.textContent = selected.text;
-  }
+  uni.setStorageSync("ai_suggest_text", selected.text);
   uni.navigateBack();
 }
 </script>

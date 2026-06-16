@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
@@ -9,11 +10,12 @@ from app.deps import get_current_user
 from app.models.user import User
 from app.models.alert import Alert
 from app.models.care_relation import CareRelation
+from app.schemas.alert import AlertResponse
 
 router = APIRouter(prefix="/alerts", tags=["alerts"])
 
 
-@router.get("")
+@router.get("", response_model=list[AlertResponse])
 async def list_alerts(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     relation_ids_result = await db.execute(
         select(CareRelation.id).where(
@@ -31,7 +33,7 @@ async def list_alerts(user: User = Depends(get_current_user), db: AsyncSession =
 
 
 @router.put("/{alert_id}/resolve")
-async def resolve_alert(alert_id: str, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+async def resolve_alert(alert_id: UUID, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Alert).where(Alert.id == alert_id))
     alert = result.scalar_one_or_none()
     if not alert:

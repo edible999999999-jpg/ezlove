@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+from uuid import UUID
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import select, func
@@ -17,7 +18,7 @@ WEEKDAY_LABELS = ["周一", "周二", "周三", "周四", "周五", "周六", "�
 
 
 @router.get("/{elder_id}/status", response_model=ElderStatusResponse)
-async def get_elder_status(elder_id: str, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+async def get_elder_status(elder_id: UUID, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     elder_result = await db.execute(select(User).where(User.id == elder_id))
     elder = elder_result.scalar_one_or_none()
     elder_name = elder.nickname if elder else None
@@ -45,7 +46,7 @@ async def get_elder_status(elder_id: str, user: User = Depends(get_current_user)
 
 @router.get("/{elder_id}/activity", response_model=ActivityResponse)
 async def get_elder_activity(
-    elder_id: str, days: int = 7,
+    elder_id: UUID, days: int = 7,
     user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db),
 ):
     now = datetime.now(timezone.utc)
