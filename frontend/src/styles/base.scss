@@ -1,0 +1,64 @@
+@import "@/styles/variables.scss";
+
+view, picker, input, textarea {
+  box-sizing: border-box;
+}
+
+page {
+  background-color: $c-bg;
+  color: $c-text;
+  font-size: $fs-body;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Helvetica Neue", sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 0 $sp-24;
+  padding-bottom: 160rpx;
+}
+
+.card {
+  background: $c-surface;
+  border-radius: $r-lg;
+  padding: $sp-24;
+  box-shadow: $shadow-2;
+  border: 1rpx solid $c-border;
+}
+
+.btn-primary {
+  background: $c-primary;
+  color: #FFFFFF;
+  border-radius: $r-full;
+  padding: $sp-16 $sp-32;
+  font-size: $fs-subtitle;
+  font-weight: $fw-semibold;
+  text-align: center;
+  border: none;
+  &:active {
+    opacity: 0.85;
+  }
+}
+
+.btn-elder {
+  background: $c-primary;
+  color: #FFFFFF;
+  border-radius: $r-xl;
+  padding: $sp-24 $sp-48;
+  font-size: $fs-elder-body;
+  font-weight: $fw-bold;
+  text-align: center;
+  min-height: 96rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-read {
+  color: $c-safe;
+}
+
+.status-unread {
+  color: $c-warn;
+}

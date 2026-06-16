@@ -1,0 +1,68 @@
+// ── Color System — 暖橙色系，温暖牵挂 ──
+$c-primary: #FF8C42;
+$c-primary-soft: #FFB380;
+$c-primary-bg: #FFF3E8;
+$c-primary-surface: #FFF8F2;
+
+$c-secondary: #FFD166;
+$c-secondary-soft: #FFE599;
+$c-secondary-bg: #FFFBEB;
+
+$c-safe: #06D6A0;
+$c-safe-bg: #E8FFF6;
+
+$c-warn: #EF476F;
+$c-warn-bg: #FFF0F3;
+
+$c-text: #333333;
+$c-text-sub: #666666;
+$c-text-hint: #A8A29E;
+$c-border: #F0EBE6;
+$c-bg: #FFF8F0;
+$c-surface: #FFFFFF;
+
+// ── Typography ──
+$fs-caption: 20rpx;
+$fs-body-sm: 24rpx;
+$fs-body: 28rpx;
+$fs-subtitle: 30rpx;
+$fs-title: 34rpx;
+$fs-headline: 40rpx;
+$fs-display: 56rpx;
+
+// 老人端专用字号
+$fs-elder-body: 36rpx;
+$fs-elder-title: 44rpx;
+$fs-elder-headline: 52rpx;
+
+$fw-regular: 400;
+$fw-medium: 500;
+$fw-semibold: 600;
+$fw-bold: 700;
+
+// ── Spacing (4px grid) ──
+$sp-4: 8rpx;
+$sp-8: 16rpx;
+$sp-12: 24rpx;
+$sp-16: 32rpx;
+$sp-20: 40rpx;
+$sp-24: 48rpx;
+$sp-32: 64rpx;
+$sp-48: 96rpx;
+
+// ── Border Radius ──
+$r-sm: 8rpx;
+$r-md: 16rpx;
+$r-lg: 24rpx;
+$r-xl: 36rpx;
+$r-full: 9999rpx;
+
+// ── Shadows ──
+$shadow-1: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+$shadow-2: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+$shadow-3: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
+
+// ── Animation ──
+$duration-fast: 150ms;
+$duration-normal: 250ms;
+$ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);

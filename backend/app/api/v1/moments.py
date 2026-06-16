@@ -1,0 +1,80 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.database import get_db
+from app.deps import get_current_user
+from app.models.user import User
+from app.schemas.moment import MomentCreate, MomentResponse, ViewRequest, ResponseCreate
+from app.services.moment import (
+    create_moment, get_moments_for_user, record_view, is_moment_read, create_response,
+)
+
+router = APIRouter(prefix="/moments", tags=["moments"])
+
+
+@router.post("", response_model=MomentResponse)
+async def send_moment(data: MomentCreate, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    moment = await create_moment(
+        db, sender_id=user.id, elder_id=data.elder_id,
+        text_content=data.text_content, media_urls=data.media_urls,
+        is_ai_generated=data.is_ai_generated,
+    )
+    return moment
+
+
+@router.get("", response_model=list[MomentResponse])
+async def list_moments(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    moments = await get_moments_for_user(db, user.id, user.role or "family")
+    result = []
+    for m in moments:
+        read = await is_moment_read(db, m.id)
+        resp = MomentResponse.model_validate(m)
+        resp.is_read = read
+        result.append(resp)
+    return result
+
+
+@router.get("/{moment_id}", response_model=MomentResponse)
+async def get_moment(moment_id: str, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import select
+    from app.models.care_moment import CareMoment
+    result = await db.execute(select(CareMoment).where(CareMoment.id == moment_id))
+    moment = result.scalar_one_or_none()
+    if not moment:
+        raise HTTPException(status_code=404, detail="内容不存在")
+    read = await is_moment_read(db, moment.id)
+    resp = MomentResponse.model_validate(moment)
+    resp.is_read = read
+    return resp
+
+
+@router.post("/{moment_id}/view")
+async def view_moment(
+    moment_id: str, body: ViewRequest = None,
+    user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db),
+):
+    duration = body.view_duration if body else None
+    await record_view(db, moment_id, user.id, duration)
+    return {"ok": True}
+
+
+@router.post("/{moment_id}/response")
+async def respond_to_moment(
+    moment_id: str, data: ResponseCreate,
+    user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db),
+):
+    resp = await create_response(db, moment_id, user.id, data.response_type, data.content)
+    return {"ok": True, "id": str(resp.id)}
+
+
+@router.delete("/{moment_id}")
+async def delete_moment(moment_id: str, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import select
+    from app.models.care_moment import CareMoment
+    result = await db.execute(select(CareMoment).where(CareMoment.id == moment_id, CareMoment.sender_id == user.id))
+    moment = result.scalar_one_or_none()
+    if not moment:
+        raise HTTPException(status_code=404, detail="内容不存在")
+    await db.delete(moment)
+    await db.commit()
+    return {"ok": True}

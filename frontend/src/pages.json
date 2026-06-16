@@ -1,0 +1,44 @@
+{
+  "easycom": {
+    "autoscan": true,
+    "custom": {
+      "^u--(.*)": "uview-plus/components/u-$1/u-$1.vue",
+      "^up-(.*)": "uview-plus/components/u-$1/u-$1.vue",
+      "^u-([^-].*)": "uview-plus/components/u-$1/u-$1.vue"
+    }
+  },
+  "pages": [
+    { "path": "pages/index/index", "style": { "navigationBarTitleText": "易挂念", "navigationStyle": "custom" } },
+    { "path": "pages/send/index", "style": { "navigationBarTitleText": "发送牵挂" } },
+    { "path": "pages/send/ai-suggest", "style": { "navigationBarTitleText": "AI 帮我写" } },
+    { "path": "pages/view/detail", "style": { "navigationBarTitleText": "", "navigationStyle": "custom" } },
+    { "path": "pages/history/index", "style": { "navigationBarTitleText": "发送记录" } },
+    { "path": "pages/bind/invite", "style": { "navigationBarTitleText": "邀请绑定" } },
+    { "path": "pages/bind/list", "style": { "navigationBarTitleText": "我的家人" } },
+    { "path": "pages/elder/status", "style": { "navigationBarTitleText": "老人状态" } },
+    { "path": "pages/elder/settings", "style": { "navigationBarTitleText": "提醒设置" } },
+    { "path": "pages/alerts/index", "style": { "navigationBarTitleText": "提醒中心" } },
+    { "path": "pages/profile/index", "style": { "navigationBarTitleText": "我的" } },
+    { "path": "pages/login/index", "style": { "navigationBarTitleText": "", "navigationStyle": "custom" } },
+    { "path": "pages/login/role", "style": { "navigationBarTitleText": "", "navigationStyle": "custom" } }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "易挂念",
+    "navigationBarBackgroundColor": "#FFF8F0",
+    "backgroundColor": "#FFF8F0"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#A8A29E",
+    "selectedColor": "#FF8C42",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/index/index", "text": "首页" },
+      { "pagePath": "pages/history/index", "text": "记录" },
+      { "pagePath": "pages/alerts/index", "text": "提醒" },
+      { "pagePath": "pages/profile/index", "text": "我的" }
+    ]
+  }
+}
