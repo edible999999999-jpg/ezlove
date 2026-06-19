@@ -9,18 +9,20 @@ from app.config import settings
 from app.models.user import User
 
 
-def create_access_token(user_id: UUID) -> str:
+def create_access_token(user_id: UUID, extra_claims: dict | None = None) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
-    return jwt.encode({"sub": str(user_id), "exp": expire}, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
+    payload = {"sub": str(user_id), "exp": expire}
+    if extra_claims:
+        payload.update(extra_claims)
+    return jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
 
 
-def create_refresh_token(user_id: UUID) -> str:
+def create_refresh_token(user_id: UUID, extra_claims: dict | None = None) -> str:
     expire = datetime.now(timezone.utc) + timedelta(days=settings.JWT_REFRESH_TOKEN_EXPIRE_DAYS)
-    return jwt.encode(
-        {"sub": str(user_id), "exp": expire, "type": "refresh"},
-        settings.JWT_SECRET,
-        algorithm=settings.JWT_ALGORITHM,
-    )
+    payload = {"sub": str(user_id), "exp": expire, "type": "refresh"}
+    if extra_claims:
+        payload.update(extra_claims)
+    return jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
 
 
 async def get_or_create_user(db: AsyncSession, openid: str) -> User:
