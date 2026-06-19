@@ -28,5 +28,13 @@ services:
       - db
       - redis
 
+  admin-frontend:
+    build: ./admin-frontend
+    ports:
+      - "5174:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
 volumes:
   pgdata:
