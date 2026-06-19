@@ -91,9 +91,14 @@ async def _generate_absent_events(
         care_level = care_map.get(elder_id_str, "C")
         severity = "urgent" if care_level == "A" else "warning" if care_level == "B" else "info"
 
+        try:
+            elder_uuid = uuid.UUID(elder_id_str)
+        except (ValueError, TypeError):
+            continue
+
         event = CommunityEvent(
             community_id=community_id,
-            elder_id=uuid.UUID(elder_id_str),
+            elder_id=elder_uuid,
             event_type="absent",
             source="canteen",
             description=f"{att.get('elder_name', '未知')} 今日{parsed.get('meal_type', '')}未就餐",

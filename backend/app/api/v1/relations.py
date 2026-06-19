@@ -39,7 +39,12 @@ async def update_relation(
 ):
     from sqlalchemy import select
     from app.models.care_relation import CareRelation
-    result = await db.execute(select(CareRelation).where(CareRelation.id == relation_id))
+    result = await db.execute(
+        select(CareRelation).where(
+            CareRelation.id == relation_id,
+            (CareRelation.family_user_id == user.id) | (CareRelation.elder_user_id == user.id),
+        )
+    )
     relation = result.scalar_one_or_none()
     if not relation:
         raise HTTPException(status_code=404, detail="关系不存在")
@@ -57,7 +62,12 @@ async def delete_relation(
 ):
     from sqlalchemy import select
     from app.models.care_relation import CareRelation
-    result = await db.execute(select(CareRelation).where(CareRelation.id == relation_id))
+    result = await db.execute(
+        select(CareRelation).where(
+            CareRelation.id == relation_id,
+            (CareRelation.family_user_id == user.id) | (CareRelation.elder_user_id == user.id),
+        )
+    )
     relation = result.scalar_one_or_none()
     if not relation:
         raise HTTPException(status_code=404, detail="关系不存在")

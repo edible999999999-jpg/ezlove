@@ -82,11 +82,15 @@ async def list_elders(
 async def get_elder_detail(
     db: AsyncSession,
     elder_record_id: uuid.UUID,
+    community_id: uuid.UUID,
 ) -> dict | None:
     stmt = (
         select(CommunityElder, User.nickname, User.phone)
         .join(User, CommunityElder.elder_id == User.id)
-        .where(CommunityElder.id == elder_record_id)
+        .where(
+            CommunityElder.id == elder_record_id,
+            CommunityElder.community_id == community_id,
+        )
     )
     result = await db.execute(stmt)
     row = result.one_or_none()

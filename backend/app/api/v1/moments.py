@@ -40,7 +40,12 @@ async def list_moments(user: User = Depends(get_current_user), db: AsyncSession 
 async def get_moment(moment_id: UUID, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     from sqlalchemy import select
     from app.models.care_moment import CareMoment
-    result = await db.execute(select(CareMoment).where(CareMoment.id == moment_id))
+    result = await db.execute(
+        select(CareMoment).where(
+            CareMoment.id == moment_id,
+            (CareMoment.sender_id == user.id) | (CareMoment.elder_id == user.id),
+        )
+    )
     moment = result.scalar_one_or_none()
     if not moment:
         raise HTTPException(status_code=404, detail="内容不存在")

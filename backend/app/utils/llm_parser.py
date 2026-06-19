@@ -1,4 +1,5 @@
 import json
+import re
 from app.config import settings
 
 
@@ -48,10 +49,9 @@ async def parse_canteen_text(
             messages=[{"role": "user", "content": raw_text}],
         )
         text = response.content[0].text
-        if "```json" in text:
-            text = text.split("```json")[1].split("```")[0]
-        elif "```" in text:
-            text = text.split("```")[1].split("```")[0]
+        match = re.search(r'```(?:json)?\s*(.*?)```', text, re.DOTALL)
+        if match:
+            text = match.group(1)
         return json.loads(text.strip())
     except Exception as e:
         return {"error": str(e), "fallback": True}

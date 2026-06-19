@@ -18,6 +18,8 @@ access_logger = logging.getLogger("ezlove.access")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    if not settings.DEBUG and not settings.JWT_SECRET:
+        raise RuntimeError("JWT_SECRET must be set in production (DEBUG=False)")
     from app.tasks.alert_checker import start_scheduler
     start_scheduler()
     yield

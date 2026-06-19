@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from sqlalchemy import select
@@ -22,7 +22,7 @@ async def check_unread_alerts():
         )
         relations = result.scalars().all()
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now()
         today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
         for rel in relations:
@@ -53,7 +53,7 @@ async def check_unread_alerts():
                 continue
 
             earliest_moment = min(today_moments, key=lambda m: m.created_at)
-            hours_since = (now - earliest_moment.created_at.replace(tzinfo=timezone.utc)).total_seconds() / 3600
+            hours_since = (now - earliest_moment.created_at).total_seconds() / 3600
 
             if hours_since < rel.alert_threshold:
                 continue
