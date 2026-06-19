@@ -57,7 +57,7 @@ async def list_elders(
     result = await db.execute(stmt)
     rows = result.all()
 
-    today_start = datetime.combine(date.today(), datetime.min.time()).replace(tzinfo=timezone.utc)
+    today_start = datetime.combine(date.today(), datetime.min.time())
     elder_ids = [row[0].elder_id for row in rows]
     active_stmt = (
         select(ViewEvent.viewer_id)

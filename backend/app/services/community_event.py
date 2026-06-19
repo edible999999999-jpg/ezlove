@@ -71,7 +71,7 @@ async def get_dashboard_data(
 
     total = sum(level_counts.values())
 
-    today_start = datetime.combine(date.today(), datetime.min.time()).replace(tzinfo=timezone.utc)
+    today_start = datetime.combine(date.today(), datetime.min.time())
     elder_stmt = select(CommunityElder.elder_id).where(
         CommunityElder.community_id == community_id
     )
