@@ -5,6 +5,9 @@ from app.models.view_event import ViewEvent
 from app.models.response import Response
 from app.models.alert import Alert
 from app.models.community_contact import CommunityContact
+from app.models.community import Community, CommunityWorker, CommunityElder
+from app.models.canteen import CanteenRecord
+from app.models.community_event import CommunityEvent
 
 __all__ = [
     "User",
@@ -14,4 +17,9 @@ __all__ = [
     "Response",
     "Alert",
     "CommunityContact",
+    "Community",
+    "CommunityWorker",
+    "CommunityElder",
+    "CanteenRecord",
+    "CommunityEvent",
 ]
