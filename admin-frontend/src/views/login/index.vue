@@ -1,107 +1,161 @@
 <template>
-  <div class="login-page">
-    <!-- Left: Brand Panel -->
-    <div class="brand-panel">
-      <div class="brand-content">
-        <div class="brand-logo">
-          <div class="logo-icon">
-            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-              <path d="M24 4C14 4 8 12 8 20c0 6 4 10 8 13v7a2 2 0 002 2h12a2 2 0 002-2v-7c4-3 8-7 8-13C40 12 34 4 24 4z" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"/>
-              <path d="M18 30h12M18 34h12" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-linecap="round"/>
-              <circle cx="24" cy="18" r="5" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.6)" stroke-width="1.5"/>
-              <path d="M24 16v4M22 18h4" stroke="rgba(255,255,255,0.8)" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
+  <main class="flex min-h-screen w-full overflow-hidden">
+    <!-- Left Side: Brand Section (44%) -->
+    <section class="relative hidden md:flex flex-col justify-center items-center w-[44%] bg-login-gradient p-12 overflow-hidden">
+      <!-- Decorative Elements -->
+      <div class="decorative-circle w-[600px] h-[600px] -top-20 -left-20"></div>
+      <div class="decorative-circle w-[400px] h-[400px] -bottom-40 -right-10"></div>
+      <div class="decorative-circle w-[300px] h-[300px] top-1/2 left-1/4"></div>
+      <div class="relative z-10 flex flex-col items-center text-center max-w-md">
+        <div class="mb-8 p-1 bg-white/10 rounded-2xl">
+          <div class="w-24 h-24 rounded-2xl glass-effect flex items-center justify-center">
+            <span class="material-symbols-outlined text-white text-5xl">home_health</span>
           </div>
         </div>
-        <h1 class="brand-title">易挂念</h1>
-        <p class="brand-subtitle">社区关爱管理平台</p>
-        <p class="brand-desc">让关心自然流动，让牵挂被看见。<br/>连接家庭与社区，守护每一位长者。</p>
-      </div>
-      <div class="brand-decoration">
-        <div class="deco-circle deco-circle--1"></div>
-        <div class="deco-circle deco-circle--2"></div>
-        <div class="deco-circle deco-circle--3"></div>
-      </div>
-    </div>
-
-    <!-- Right: Login Form -->
-    <div class="form-panel">
-      <div class="form-container animate-fade-in-up">
-        <div class="form-header">
-          <h2 class="form-title">欢迎回来</h2>
-          <p class="form-hint">请登录您的社区管理账号</p>
-        </div>
-
-        <el-form ref="formRef" :model="form" :rules="rules" @submit.prevent="handleLogin" class="login-form">
-          <el-form-item prop="phone">
-            <el-input
-              v-model="form.phone"
-              placeholder="请输入手机号"
-              size="large"
-              :prefix-icon="Phone"
-            />
-          </el-form-item>
-
-          <el-form-item prop="password">
-            <el-input
-              v-model="form.password"
-              type="password"
-              placeholder="请输入密码"
-              size="large"
-              show-password
-              :prefix-icon="Lock"
-            />
-          </el-form-item>
-
-          <el-form-item>
-            <el-button
-              type="primary"
-              size="large"
-              :loading="loading"
-              @click="handleLogin"
-              class="login-btn"
-            >
-              {{ loading ? '登录中...' : '登 录' }}
-            </el-button>
-          </el-form-item>
-        </el-form>
-
-        <div class="form-footer">
-          <span class="form-footer-text">需要帮助？联系系统管理员</span>
+        <h1 class="font-headline text-5xl font-bold text-white mb-4 tracking-tight">易挂念</h1>
+        <p class="text-white/60 text-lg font-medium mb-10 tracking-widest uppercase">社区关爱管理平台</p>
+        <div class="space-y-4 pt-10 border-t border-white/10 w-full">
+          <p class="text-white/80 text-lg font-light leading-relaxed">
+            "让关心自然流动，让牵挂被看见"
+          </p>
+          <p class="text-white/60 text-sm font-light leading-relaxed">
+            连接家庭与社区，守护每一位长者
+          </p>
         </div>
       </div>
-    </div>
-  </div>
+      <!-- Footer indicator -->
+      <div class="absolute bottom-8 left-12">
+        <span class="text-white/20 text-xs tracking-tighter uppercase font-label">Designed for Human Connection</span>
+      </div>
+    </section>
+
+    <!-- Right Side: Login Form Section (56%) -->
+    <section class="flex flex-col justify-center items-center w-full md:w-[56%] bg-surface px-6 sm:px-12 lg:px-24">
+      <div class="w-full max-w-md">
+        <!-- Mobile Branding -->
+        <div class="md:hidden flex flex-col items-center mb-12">
+          <div class="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+            <span class="material-symbols-outlined text-primary text-3xl">home_health</span>
+          </div>
+          <h1 class="font-headline text-3xl font-bold text-charcoal">易挂念</h1>
+        </div>
+
+        <header class="mb-10 text-center md:text-left">
+          <h2 class="font-display text-4xl font-bold text-charcoal mb-2">欢迎回来</h2>
+          <p class="text-on-surface-variant font-light">请登录您的社区管理账号</p>
+        </header>
+
+        <form class="space-y-6" @submit.prevent="handleLogin">
+          <!-- Phone Input -->
+          <div class="space-y-1.5">
+            <label class="text-sm font-semibold text-charcoal ml-1" for="phone">手机号码</label>
+            <div class="relative group">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">phone</span>
+              <input
+                v-model="form.phone"
+                class="w-full pl-12 pr-4 py-4 bg-white border border-outline-variant rounded-xl text-charcoal placeholder:text-outline-variant/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200 shadow-sm"
+                id="phone"
+                name="phone"
+                placeholder="请输入手机号"
+                type="tel"
+              />
+            </div>
+            <p v-if="errors.phone" class="text-xs text-primary ml-1 mt-1">{{ errors.phone }}</p>
+          </div>
+
+          <!-- Password Input -->
+          <div class="space-y-1.5">
+            <label class="text-sm font-semibold text-charcoal ml-1" for="password">登录密码</label>
+            <div class="relative group">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-primary transition-colors">lock</span>
+              <input
+                v-model="form.password"
+                :type="showPassword ? 'text' : 'password'"
+                class="w-full pl-12 pr-12 py-4 bg-white border border-outline-variant rounded-xl text-charcoal placeholder:text-outline-variant/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200 shadow-sm"
+                id="password"
+                name="password"
+                placeholder="请输入密码"
+              />
+              <button
+                class="absolute right-4 top-1/2 -translate-y-1/2 text-outline-variant hover:text-charcoal transition-colors"
+                type="button"
+                @click="showPassword = !showPassword"
+              >
+                <span class="material-symbols-outlined">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+              </button>
+            </div>
+            <p v-if="errors.password" class="text-xs text-primary ml-1 mt-1">{{ errors.password }}</p>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex items-center justify-between pt-2">
+            <label class="flex items-center space-x-2 cursor-pointer group">
+              <input class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary/20" type="checkbox" />
+              <span class="text-sm text-on-surface-variant group-hover:text-charcoal transition-colors">记住账号</span>
+            </label>
+            <a class="text-sm text-primary hover:underline font-medium transition-all" href="#">短信验证码登录</a>
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            :disabled="loading"
+            :class="{ 'opacity-80 cursor-not-allowed': loading }"
+            class="w-full py-4 bg-primary text-white font-semibold rounded-full shadow-lg shadow-primary/20 hover:bg-terracotta hover:shadow-xl hover:-translate-y-0.5 active:scale-95 transition-all duration-200"
+            type="submit"
+          >
+            {{ loading ? '登录中...' : '立即登录' }}
+          </button>
+        </form>
+
+        <footer class="mt-12 text-center">
+          <p class="text-xs text-outline font-light">
+            忘记密码？<a class="text-on-surface-variant hover:text-charcoal hover:underline font-medium transition-colors" href="#">联系系统管理员</a>
+          </p>
+          <div class="mt-12 flex justify-center space-x-6">
+            <span class="text-[10px] text-outline-variant uppercase tracking-widest">&copy; 2024 EZLove Technology</span>
+          </div>
+        </footer>
+      </div>
+    </section>
+  </main>
 </template>
 
 <script setup>
 import { reactive, ref } from 'vue'
 import { useUserStore } from '@/stores/user'
-import { Phone, Lock } from '@element-plus/icons-vue'
 
 const userStore = useUserStore()
 const loading = ref(false)
-const formRef = ref(null)
+const showPassword = ref(false)
 const form = reactive({ phone: '', password: '' })
+const errors = reactive({ phone: '', password: '' })
 
-const rules = {
-  phone: [
-    { required: true, message: '请输入手机号', trigger: 'blur' },
-    { pattern: /^1\d{10}$/, message: '请输入正确的11位手机号', trigger: 'blur' },
-  ],
-  password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码至少6个字符', trigger: 'blur' },
-  ],
+function validate() {
+  let valid = true
+  errors.phone = ''
+  errors.password = ''
+
+  if (!form.phone) {
+    errors.phone = '请输入手机号'
+    valid = false
+  } else if (!/^1\d{10}$/.test(form.phone)) {
+    errors.phone = '请输入正确的11位手机号'
+    valid = false
+  }
+
+  if (!form.password) {
+    errors.password = '请输入密码'
+    valid = false
+  } else if (form.password.length < 6) {
+    errors.password = '密码至少6个字符'
+    valid = false
+  }
+
+  return valid
 }
 
 async function handleLogin() {
-  if (!formRef.value) return
-  try {
-    await formRef.value.validate()
-  } catch {
-    return
-  }
+  if (!validate()) return
   loading.value = true
   try {
     await userStore.login(form.phone, form.password)
@@ -112,180 +166,3 @@ async function handleLogin() {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-@use '@/styles/variables.scss' as *;
-
-.login-page {
-  min-height: 100vh;
-  display: flex;
-}
-
-// — Brand Panel —
-.brand-panel {
-  flex: 0 0 44%;
-  background: linear-gradient(160deg, $dark-hearth 0%, $brand-terracotta-dark 60%, $brand-terracotta 100%);
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  padding: $sp-10;
-}
-
-.brand-content {
-  position: relative;
-  z-index: 2;
-  text-align: center;
-  animation: fadeInUp 0.8s $ease-out both;
-}
-
-.logo-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 80px;
-  height: 80px;
-  border-radius: $radius-xl;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px);
-  margin-bottom: $sp-6;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.brand-title {
-  font-family: $font-display;
-  font-size: $fs-4xl;
-  font-weight: $fw-bold;
-  color: #fff;
-  letter-spacing: 0.08em;
-  margin-bottom: $sp-2;
-}
-
-.brand-subtitle {
-  font-family: $font-body;
-  font-size: $fs-lg;
-  color: rgba(255, 255, 255, 0.75);
-  font-weight: $fw-medium;
-  margin-bottom: $sp-8;
-}
-
-.brand-desc {
-  font-size: $fs-base;
-  color: rgba(255, 255, 255, 0.5);
-  line-height: $lh-relaxed;
-  max-width: 280px;
-  margin: 0 auto;
-}
-
-// — Decorative Circles —
-.brand-decoration {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.deco-circle {
-  position: absolute;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-
-  &--1 {
-    width: 400px;
-    height: 400px;
-    top: -100px;
-    right: -80px;
-    background: radial-gradient(circle, rgba(199, 92, 58, 0.15) 0%, transparent 70%);
-    animation: float 20s ease-in-out infinite;
-  }
-  &--2 {
-    width: 260px;
-    height: 260px;
-    bottom: -60px;
-    left: -40px;
-    background: radial-gradient(circle, rgba(212, 162, 78, 0.1) 0%, transparent 70%);
-    animation: float 15s ease-in-out infinite reverse;
-  }
-  &--3 {
-    width: 160px;
-    height: 160px;
-    top: 40%;
-    right: 15%;
-    background: radial-gradient(circle, rgba(107, 143, 113, 0.1) 0%, transparent 70%);
-    animation: float 12s ease-in-out infinite;
-  }
-}
-
-@keyframes float {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(10px, -15px) scale(1.02); }
-  66% { transform: translate(-8px, 10px) scale(0.98); }
-}
-
-// — Form Panel —
-.form-panel {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: $warm-cream;
-  padding: $sp-10;
-}
-
-.form-container {
-  width: 100%;
-  max-width: 380px;
-}
-
-.form-header {
-  margin-bottom: $sp-10;
-}
-
-.form-title {
-  font-family: $font-display;
-  font-size: $fs-3xl;
-  font-weight: $fw-bold;
-  color: $text-primary;
-  margin-bottom: $sp-2;
-}
-
-.form-hint {
-  font-size: $fs-md;
-  color: $text-secondary;
-}
-
-.login-form {
-  .el-form-item {
-    margin-bottom: $sp-5;
-  }
-}
-
-.login-btn {
-  width: 100%;
-  height: 48px;
-  font-size: $fs-md;
-  font-weight: $fw-semibold;
-  letter-spacing: 0.08em;
-  border-radius: $radius-sm;
-}
-
-.form-footer {
-  margin-top: $sp-8;
-  text-align: center;
-}
-
-.form-footer-text {
-  font-size: $fs-sm;
-  color: $text-placeholder;
-}
-
-// — Responsive —
-@media (max-width: 900px) {
-  .brand-panel {
-    display: none;
-  }
-  .form-panel {
-    padding: $sp-6;
-  }
-}
-</style>

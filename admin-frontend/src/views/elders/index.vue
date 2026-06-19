@@ -1,182 +1,193 @@
 <template>
-  <div v-loading="store.loading">
-    <div class="page-header">
+  <div>
+    <!-- Page Header -->
+    <div class="flex justify-between items-center mb-6">
       <div>
-        <h2>老人档案</h2>
-        <p class="page-desc">管理社区老人信息，设置关爱分级</p>
+        <h2 class="font-headline text-2xl font-bold text-on-surface">老人档案</h2>
+        <p class="text-on-surface-variant text-sm mt-1">管理社区老人信息，设置关爱分级</p>
       </div>
-      <el-button type="primary" @click="showDialog = true" :icon="Plus">新增老人</el-button>
+      <button
+        class="flex items-center gap-2 bg-primary text-white rounded-full px-6 py-2.5 font-semibold text-sm shadow-lg shadow-primary/20 hover:bg-terracotta hover:shadow-xl hover:-translate-y-0.5 active:scale-95 transition-all duration-200"
+        @click="showDialog = true"
+      >
+        <span class="material-symbols-outlined text-lg">add</span>
+        新增老人
+      </button>
     </div>
 
     <!-- Filters -->
-    <div class="filter-bar">
-      <el-select v-model="filters.care_level" placeholder="按分级筛选" clearable @change="store.load(filters)" class="filter-select">
-        <el-option label="A级（需重点关爱）" value="A" />
-        <el-option label="B级（独居需关注）" value="B" />
-        <el-option label="C级（健康可互助）" value="C" />
-      </el-select>
-      <el-input v-model="filters.search" placeholder="搜索姓名..." clearable @input="store.load(filters)" class="filter-search" :prefix-icon="Search" />
+    <div class="flex gap-3 mb-5">
+      <select
+        v-model="filters.care_level"
+        @change="store.load(filters)"
+        class="bg-white border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-48"
+      >
+        <option value="">按分级筛选</option>
+        <option value="A">A级（需重点关爱）</option>
+        <option value="B">B级（独居需关注）</option>
+        <option value="C">C级（健康可互助）</option>
+      </select>
+      <div class="relative">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">search</span>
+        <input
+          v-model="filters.search"
+          @input="store.load(filters)"
+          class="bg-white border border-outline-variant rounded-xl pl-10 pr-4 py-2.5 text-sm text-on-surface placeholder:text-outline-variant/60 focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-56"
+          placeholder="搜索姓名..."
+          type="text"
+        />
+      </div>
     </div>
 
     <!-- Table -->
-    <div class="table-wrapper">
-      <el-table :data="store.elders" @row-click="row => $router.push(`/elders/${row.id}`)" :row-class-name="() => 'clickable-row'">
-        <el-table-column prop="elder_name" label="姓名" min-width="100">
-          <template #default="{ row }">
-            <div class="elder-name">
-              <div class="name-avatar" :class="`avatar--${row.care_level?.toLowerCase()}`">
-                {{ row.elder_name?.charAt(0) }}
+    <div class="bg-white rounded-2xl border border-outline-variant/20 shadow-sm overflow-hidden">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-outline-variant/20">
+            <th class="text-left px-6 py-4 text-xs font-bold text-on-surface-variant tracking-wider uppercase">姓名</th>
+            <th class="text-left px-6 py-4 text-xs font-bold text-on-surface-variant tracking-wider uppercase">分级</th>
+            <th class="text-left px-6 py-4 text-xs font-bold text-on-surface-variant tracking-wider uppercase">楼栋/门牌</th>
+            <th class="text-left px-6 py-4 text-xs font-bold text-on-surface-variant tracking-wider uppercase">今日状态</th>
+            <th class="text-left px-6 py-4 text-xs font-bold text-on-surface-variant tracking-wider uppercase">健康备注</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="row in store.elders"
+            :key="row.id"
+            class="border-b border-outline-variant/10 hover:bg-surface-container/50 cursor-pointer transition-colors"
+            @click="$router.push(`/elders/${row.id}`)"
+          >
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <div
+                  :class="[
+                    'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0',
+                    row.care_level === 'A' ? 'bg-primary' : row.care_level === 'B' ? 'bg-accent' : 'bg-secondary'
+                  ]"
+                >
+                  {{ row.elder_name?.charAt(0) }}
+                </div>
+                <span class="text-sm font-medium text-on-surface">{{ row.elder_name }}</span>
               </div>
-              <span>{{ row.elder_name }}</span>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="care_level" label="分级" width="100">
-          <template #default="{ row }">
-            <span class="care-badge" :class="`care-badge--${row.care_level?.toLowerCase()}`">
-              {{ row.care_level }}级
-            </span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="address" label="楼栋/门牌" min-width="120" />
-        <el-table-column prop="today_active" label="今日状态" width="100">
-          <template #default="{ row }">
-            <div class="status-cell">
-              <span class="status-dot" :class="row.today_active ? 'status-dot--active' : 'status-dot--inactive'"></span>
-              {{ row.today_active ? '活跃' : '未活跃' }}
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="health_notes" label="健康备注" min-width="150">
-          <template #default="{ row }">
-            <span class="text-muted">{{ row.health_notes || '—' }}</span>
-          </template>
-        </el-table-column>
-      </el-table>
+            </td>
+            <td class="px-6 py-4">
+              <span
+                :class="[
+                  'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold',
+                  row.care_level === 'A' ? 'bg-primary/10 text-primary' : row.care_level === 'B' ? 'bg-accent/10 text-accent' : 'bg-secondary/10 text-secondary'
+                ]"
+              >
+                {{ row.care_level }}级
+              </span>
+            </td>
+            <td class="px-6 py-4 text-sm text-on-surface">{{ row.address || '—' }}</td>
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-2 text-sm">
+                <span
+                  :class="[
+                    'w-2 h-2 rounded-full',
+                    row.today_active ? 'bg-secondary shadow-[0_0_0_3px_rgba(107,143,113,0.15)]' : 'bg-inactive-gray shadow-[0_0_0_3px_rgba(196,186,176,0.15)]'
+                  ]"
+                ></span>
+                {{ row.today_active ? '活跃' : '未活跃' }}
+              </div>
+            </td>
+            <td class="px-6 py-4 text-sm text-on-surface-variant">{{ row.health_notes || '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div v-if="!store.elders.length && !store.loading" class="text-center py-16">
+        <span class="material-symbols-outlined text-5xl text-inactive-gray">groups</span>
+        <p class="text-inactive-gray text-sm mt-3">暂无老人数据</p>
+      </div>
     </div>
 
     <!-- Create Dialog -->
-    <el-dialog v-model="showDialog" title="新增老人" width="520px" :close-on-click-modal="false">
-      <el-form :model="form" label-width="100px" label-position="top">
-        <el-form-item label="老人ID（UUID）">
-          <el-input v-model="form.elder_id" placeholder="输入老人的用户ID" />
-        </el-form-item>
-        <el-form-item label="关爱分级">
-          <el-radio-group v-model="form.care_level" class="level-radio">
-            <el-radio-button value="A">A级 · 重点关爱</el-radio-button>
-            <el-radio-button value="B">B级 · 独居关注</el-radio-button>
-            <el-radio-button value="C">C级 · 健康互助</el-radio-button>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="楼栋/门牌">
-          <el-input v-model="form.address" placeholder="例：1号楼203" />
-        </el-form-item>
-        <el-form-item label="健康备注">
-          <el-input v-model="form.health_notes" type="textarea" :rows="3" placeholder="如：高血压、认知障碍、行动不便等" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="showDialog = false">取消</el-button>
-        <el-button type="primary" @click="handleCreate">确认添加</el-button>
-      </template>
-    </el-dialog>
+    <div v-if="showDialog" class="fixed inset-0 z-[200] flex items-center justify-center">
+      <div class="absolute inset-0 bg-on-surface/40 backdrop-blur-sm" @click="showDialog = false"></div>
+      <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg p-0 overflow-hidden animate-fade-in-up">
+        <div class="px-6 py-5 border-b border-outline-variant/20">
+          <h3 class="font-headline text-lg font-bold text-on-surface">新增老人</h3>
+        </div>
+        <div class="px-6 py-5 space-y-5">
+          <div>
+            <label class="text-sm font-semibold text-charcoal ml-1 block mb-1.5">老人ID（UUID）</label>
+            <input v-model="form.elder_id" class="w-full px-4 py-3 bg-white border border-outline-variant rounded-xl text-charcoal placeholder:text-outline-variant/60 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all" placeholder="输入老人的用户ID" />
+          </div>
+          <div>
+            <label class="text-sm font-semibold text-charcoal ml-1 block mb-1.5">关爱分级</label>
+            <div class="flex gap-2">
+              <button
+                v-for="level in ['A', 'B', 'C']"
+                :key="level"
+                :class="[
+                  'flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all',
+                  form.care_level === level
+                    ? level === 'A' ? 'bg-primary/10 border-primary text-primary' : level === 'B' ? 'bg-accent/10 border-accent text-accent' : 'bg-secondary/10 border-secondary text-secondary'
+                    : 'bg-white border-outline-variant text-on-surface-variant hover:border-outline'
+                ]"
+                @click="form.care_level = level"
+              >
+                {{ level }}级{{ level === 'A' ? ' · 重点关爱' : level === 'B' ? ' · 独居关注' : ' · 健康互助' }}
+              </button>
+            </div>
+          </div>
+          <div>
+            <label class="text-sm font-semibold text-charcoal ml-1 block mb-1.5">楼栋/门牌</label>
+            <input v-model="form.address" class="w-full px-4 py-3 bg-white border border-outline-variant rounded-xl text-charcoal placeholder:text-outline-variant/60 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all" placeholder="例：1号楼203" />
+          </div>
+          <div>
+            <label class="text-sm font-semibold text-charcoal ml-1 block mb-1.5">健康备注</label>
+            <textarea v-model="form.health_notes" rows="3" class="w-full px-4 py-3 bg-white border border-outline-variant rounded-xl text-charcoal placeholder:text-outline-variant/60 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all resize-none" placeholder="如：高血压、认知障碍、行动不便等"></textarea>
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-outline-variant/20 flex justify-end gap-3">
+          <button class="px-6 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-container transition-colors" @click="showDialog = false">取消</button>
+          <button class="px-6 py-2.5 rounded-xl text-sm font-semibold bg-primary text-white shadow-sm hover:bg-terracotta transition-colors" @click="handleCreate">确认添加</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
 import { useEldersStore } from '@/stores/elders'
-import { ElMessage } from 'element-plus'
-import { Plus, Search } from '@element-plus/icons-vue'
 
 const store = useEldersStore()
 const showDialog = ref(false)
 const filters = reactive({ care_level: '', search: '' })
 const form = reactive({ elder_id: '', care_level: 'B', address: '', health_notes: '' })
+const toastMsg = ref('')
 
 onMounted(() => store.load())
 
 async function handleCreate() {
   if (!form.elder_id || !form.care_level) {
-    ElMessage.warning('请填写必填项')
+    toastMsg.value = '请填写必填项'
+    setTimeout(() => toastMsg.value = '', 2000)
     return
   }
   try {
     await store.create(form)
     showDialog.value = false
-    ElMessage.success('添加成功')
+    form.elder_id = ''
+    form.care_level = 'B'
+    form.address = ''
+    form.health_notes = ''
   } catch (e) {
     // handled by interceptor
   }
 }
 </script>
 
-<style lang="scss" scoped>
-@use '@/styles/variables.scss' as *;
-
-.page-desc {
-  font-size: $fs-sm;
-  color: $text-secondary;
-  margin-top: $sp-1;
+<style scoped>
+.animate-fade-in-up {
+  animation: fadeInUp 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-
-.filter-bar {
-  display: flex;
-  gap: $sp-3;
-  margin-bottom: $sp-5;
-}
-
-.filter-select {
-  width: 200px;
-}
-
-.filter-search {
-  width: 220px;
-}
-
-.table-wrapper {
-  background: $surface-white;
-  border-radius: $radius-md;
-  border: 1px solid $warm-paper;
-  overflow: hidden;
-}
-
-.elder-name {
-  display: flex;
-  align-items: center;
-  gap: $sp-3;
-}
-
-.name-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: $radius-full;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: $fs-sm;
-  font-weight: $fw-bold;
-  color: #fff;
-  flex-shrink: 0;
-}
-
-.avatar--a { background: $level-a; }
-.avatar--b { background: $level-b; }
-.avatar--c { background: $level-c; }
-
-.status-cell {
-  display: flex;
-  align-items: center;
-  gap: $sp-2;
-  font-size: $fs-sm;
-}
-
-.clickable-row {
-  cursor: pointer;
-}
-
-.level-radio {
-  display: flex;
-  gap: $sp-2;
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>

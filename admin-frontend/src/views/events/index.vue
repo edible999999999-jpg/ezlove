@@ -1,132 +1,158 @@
 <template>
-  <div v-loading="store.loading">
-    <div class="page-header">
+  <div>
+    <!-- Page Header -->
+    <div class="flex justify-between items-center mb-6">
       <div>
-        <h2>事件中心</h2>
-        <p class="page-desc">查看和处理社区老人相关事件</p>
+        <h2 class="font-headline text-2xl font-bold text-on-surface">事件中心</h2>
+        <p class="text-on-surface-variant text-sm mt-1">查看和处理社区老人相关事件</p>
       </div>
-      <el-button type="primary" @click="showDialog = true" :icon="Plus">手动新增</el-button>
+      <button
+        class="flex items-center gap-2 bg-primary text-white rounded-full px-6 py-2.5 font-semibold text-sm shadow-lg shadow-primary/20 hover:bg-terracotta hover:shadow-xl hover:-translate-y-0.5 active:scale-95 transition-all duration-200"
+        @click="showDialog = true"
+      >
+        <span class="material-symbols-outlined text-lg">add</span>
+        手动新增
+      </button>
     </div>
 
     <!-- Filters -->
-    <div class="filter-bar">
-      <el-select v-model="filters.severity" placeholder="严重程度" clearable @change="store.load(filters)">
-        <el-option label="紧急" value="urgent" />
-        <el-option label="警告" value="warning" />
-        <el-option label="信息" value="info" />
-      </el-select>
-      <el-select v-model="filters.event_type" placeholder="事件类型" clearable @change="store.load(filters)">
-        <el-option label="跌倒" value="fall" />
-        <el-option label="缺勤" value="absent" />
-        <el-option label="紧急" value="emergency" />
-        <el-option label="探访" value="visit" />
-        <el-option label="其他" value="other" />
-      </el-select>
-      <el-select v-model="filters.is_resolved" placeholder="处理状态" clearable @change="store.load(filters)">
-        <el-option label="未处理" :value="false" />
-        <el-option label="已处理" :value="true" />
-      </el-select>
+    <div class="flex gap-3 mb-5">
+      <select
+        v-model="filters.severity"
+        @change="store.load(filters)"
+        class="bg-white border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-40"
+      >
+        <option value="">严重程度</option>
+        <option value="urgent">紧急</option>
+        <option value="warning">警告</option>
+        <option value="info">信息</option>
+      </select>
+      <select
+        v-model="filters.event_type"
+        @change="store.load(filters)"
+        class="bg-white border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-40"
+      >
+        <option value="">事件类型</option>
+        <option value="fall">跌倒</option>
+        <option value="absent">缺勤</option>
+        <option value="emergency">紧急</option>
+        <option value="visit">探访</option>
+        <option value="other">其他</option>
+      </select>
+      <select
+        v-model="filters.is_resolved"
+        @change="store.load(filters)"
+        class="bg-white border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-40"
+      >
+        <option :value="null">处理状态</option>
+        <option :value="false">未处理</option>
+        <option :value="true">已处理</option>
+      </select>
     </div>
 
     <!-- Events Table -->
-    <div class="table-wrapper">
-      <el-table :data="store.events">
-        <el-table-column prop="severity" label="级别" width="90">
-          <template #default="{ row }">
-            <div class="severity-badge" :class="`severity--${row.severity}`">
-              <span class="severity-dot"></span>
-              {{ severityLabel(row.severity) }}
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="event_type" label="类型" width="80">
-          <template #default="{ row }">
-            <span class="type-label">{{ typeLabel(row.event_type) }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="description" label="描述" min-width="200">
-          <template #default="{ row }">
-            <span class="desc-text">{{ row.description || '—' }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="source" label="来源" width="80">
-          <template #default="{ row }">
-            <el-tag size="small" type="info" disable-transitions>{{ sourceLabel(row.source) }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="is_resolved" label="状态" width="90">
-          <template #default="{ row }">
-            <div class="resolve-status" :class="row.is_resolved ? 'resolved' : 'unresolved'">
-              <span class="resolve-dot"></span>
-              {{ row.is_resolved ? '已处理' : '待处理' }}
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="created_at" label="时间" width="160">
-          <template #default="{ row }">
-            <span class="text-muted">{{ formatTime(row.created_at) }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="90" fixed="right">
-          <template #default="{ row }">
-            <el-button
-              v-if="!row.is_resolved"
-              size="small"
-              type="primary"
-              @click.stop="handleResolve(row.id)"
-            >
-              处理
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+    <div class="bg-white rounded-2xl border border-outline-variant/20 shadow-sm overflow-hidden">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-outline-variant/20">
+            <th class="text-left px-6 py-4 text-xs font-bold text-on-surface-variant tracking-wider uppercase">级别</th>
+            <th class="text-left px-6 py-4 text-xs font-bold text-on-surface-variant tracking-wider uppercase">类型</th>
+            <th class="text-left px-6 py-4 text-xs font-bold text-on-surface-variant tracking-wider uppercase">描述</th>
+            <th class="text-left px-6 py-4 text-xs font-bold text-on-surface-variant tracking-wider uppercase">来源</th>
+            <th class="text-left px-6 py-4 text-xs font-bold text-on-surface-variant tracking-wider uppercase">状态</th>
+            <th class="text-left px-6 py-4 text-xs font-bold text-on-surface-variant tracking-wider uppercase">时间</th>
+            <th class="text-left px-6 py-4 text-xs font-bold text-on-surface-variant tracking-wider uppercase">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="row in store.events" :key="row.id" class="border-b border-outline-variant/10 hover:bg-surface-container/50 transition-colors">
+            <td class="px-6 py-4">
+              <div :class="['flex items-center gap-2 text-sm font-semibold', severityColor(row.severity)]">
+                <span :class="['w-2 h-2 rounded-full', severityDot(row.severity)]"></span>
+                {{ severityLabel(row.severity) }}
+              </div>
+            </td>
+            <td class="px-6 py-4 text-sm text-on-surface">{{ typeLabel(row.event_type) }}</td>
+            <td class="px-6 py-4 text-sm text-on-surface max-w-xs truncate">{{ row.description || '—' }}</td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-container text-on-surface-variant">
+                {{ sourceLabel(row.source) }}
+              </span>
+            </td>
+            <td class="px-6 py-4">
+              <div :class="['flex items-center gap-1.5 text-sm font-medium', row.is_resolved ? 'text-secondary' : 'text-primary']">
+                <span :class="['w-1.5 h-1.5 rounded-full', row.is_resolved ? 'bg-secondary' : 'bg-primary']"></span>
+                {{ row.is_resolved ? '已处理' : '待处理' }}
+              </div>
+            </td>
+            <td class="px-6 py-4 text-sm text-on-surface-variant whitespace-nowrap">{{ formatTime(row.created_at) }}</td>
+            <td class="px-6 py-4">
+              <button
+                v-if="!row.is_resolved"
+                class="px-4 py-1.5 rounded-xl text-xs font-semibold bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                @click.stop="handleResolve(row.id)"
+              >
+                处理
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div v-if="!store.events.length && !store.loading" class="text-center py-16">
+        <span class="material-symbols-outlined text-5xl text-inactive-gray">notifications_active</span>
+        <p class="text-inactive-gray text-sm mt-3">暂无事件记录</p>
+      </div>
     </div>
 
     <!-- Create Dialog -->
-    <el-dialog v-model="showDialog" title="新增事件" width="520px" :close-on-click-modal="false">
-      <el-form :model="form" label-position="top">
-        <el-form-item label="老人ID">
-          <el-input v-model="form.elder_id" placeholder="UUID" />
-        </el-form-item>
-        <el-row :gutter="16">
-          <el-col :span="12">
-            <el-form-item label="事件类型">
-              <el-select v-model="form.event_type" style="width: 100%">
-                <el-option label="跌倒" value="fall" />
-                <el-option label="缺勤" value="absent" />
-                <el-option label="紧急" value="emergency" />
-                <el-option label="探访" value="visit" />
-                <el-option label="其他" value="other" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="严重程度">
-              <el-select v-model="form.severity" style="width: 100%">
-                <el-option label="信息" value="info" />
-                <el-option label="警告" value="warning" />
-                <el-option label="紧急" value="urgent" />
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="描述">
-          <el-input v-model="form.description" type="textarea" :rows="3" placeholder="描述事件详情..." />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="showDialog = false">取消</el-button>
-        <el-button type="primary" @click="handleCreate">确认创建</el-button>
-      </template>
-    </el-dialog>
+    <div v-if="showDialog" class="fixed inset-0 z-[200] flex items-center justify-center">
+      <div class="absolute inset-0 bg-on-surface/40 backdrop-blur-sm" @click="showDialog = false"></div>
+      <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg p-0 overflow-hidden animate-fade-in-up">
+        <div class="px-6 py-5 border-b border-outline-variant/20">
+          <h3 class="font-headline text-lg font-bold text-on-surface">新增事件</h3>
+        </div>
+        <div class="px-6 py-5 space-y-5">
+          <div>
+            <label class="text-sm font-semibold text-charcoal ml-1 block mb-1.5">老人ID</label>
+            <input v-model="form.elder_id" class="w-full px-4 py-3 bg-white border border-outline-variant rounded-xl text-charcoal placeholder:text-outline-variant/60 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all" placeholder="UUID" />
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-sm font-semibold text-charcoal ml-1 block mb-1.5">事件类型</label>
+              <select v-model="form.event_type" class="w-full px-4 py-3 bg-white border border-outline-variant rounded-xl text-charcoal focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all">
+                <option value="fall">跌倒</option>
+                <option value="absent">缺勤</option>
+                <option value="emergency">紧急</option>
+                <option value="visit">探访</option>
+                <option value="other">其他</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-sm font-semibold text-charcoal ml-1 block mb-1.5">严重程度</label>
+              <select v-model="form.severity" class="w-full px-4 py-3 bg-white border border-outline-variant rounded-xl text-charcoal focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all">
+                <option value="info">信息</option>
+                <option value="warning">警告</option>
+                <option value="urgent">紧急</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="text-sm font-semibold text-charcoal ml-1 block mb-1.5">描述</label>
+            <textarea v-model="form.description" rows="3" class="w-full px-4 py-3 bg-white border border-outline-variant rounded-xl text-charcoal placeholder:text-outline-variant/60 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all resize-none" placeholder="描述事件详情..."></textarea>
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-outline-variant/20 flex justify-end gap-3">
+          <button class="px-6 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-container transition-colors" @click="showDialog = false">取消</button>
+          <button class="px-6 py-2.5 rounded-xl text-sm font-semibold bg-primary text-white shadow-sm hover:bg-terracotta transition-colors" @click="handleCreate">确认创建</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
 import { useEventsStore } from '@/stores/events'
-import { ElMessage } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
 
 const store = useEventsStore()
 const showDialog = ref(false)
@@ -137,6 +163,16 @@ onMounted(() => store.load())
 
 function severityLabel(s) {
   return { urgent: '紧急', warning: '警告', info: '信息' }[s] || s
+}
+function severityColor(s) {
+  return { urgent: 'text-primary', warning: 'text-accent', info: 'text-on-surface-variant' }[s] || ''
+}
+function severityDot(s) {
+  return {
+    urgent: 'bg-primary shadow-[0_0_0_3px_rgba(196,77,62,0.15)]',
+    warning: 'bg-accent shadow-[0_0_0_3px_rgba(212,162,78,0.15)]',
+    info: 'bg-inactive-gray shadow-[0_0_0_3px_rgba(143,136,128,0.1)]'
+  }[s] || ''
 }
 function typeLabel(t) {
   return { fall: '跌倒', absent: '缺勤', emergency: '紧急', visit: '探访', other: '其他' }[t] || t
@@ -152,111 +188,32 @@ function formatTime(t) {
 async function handleResolve(id) {
   try {
     await store.resolve(id)
-    ElMessage.success('已标记为处理完成')
   } catch (e) {
     // handled by interceptor
   }
 }
 
 async function handleCreate() {
-  if (!form.elder_id) {
-    ElMessage.warning('请填写老人ID')
-    return
-  }
+  if (!form.elder_id) return
   try {
     await store.create(form)
     showDialog.value = false
-    ElMessage.success('事件已创建')
+    form.elder_id = ''
+    form.event_type = 'other'
+    form.severity = 'info'
+    form.description = ''
   } catch (e) {
     // handled by interceptor
   }
 }
 </script>
 
-<style lang="scss" scoped>
-@use '@/styles/variables.scss' as *;
-
-.page-desc {
-  font-size: $fs-sm;
-  color: $text-secondary;
-  margin-top: $sp-1;
+<style scoped>
+.animate-fade-in-up {
+  animation: fadeInUp 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-
-.filter-bar {
-  display: flex;
-  gap: $sp-3;
-  margin-bottom: $sp-5;
-
-  .el-select {
-    width: 160px;
-  }
-}
-
-.table-wrapper {
-  background: $surface-white;
-  border-radius: $radius-md;
-  border: 1px solid $warm-paper;
-  overflow: hidden;
-}
-
-.severity-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: $sp-1;
-  font-size: $fs-sm;
-  font-weight: $fw-semibold;
-}
-
-.severity-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: $radius-full;
-}
-
-.severity--urgent {
-  color: $severity-urgent;
-  .severity-dot { background: $severity-urgent; box-shadow: 0 0 0 3px rgba(196, 77, 62, 0.15); }
-}
-.severity--warning {
-  color: $severity-warning;
-  .severity-dot { background: $severity-warning; box-shadow: 0 0 0 3px rgba(196, 148, 62, 0.15); }
-}
-.severity--info {
-  color: $severity-info;
-  .severity-dot { background: $severity-info; box-shadow: 0 0 0 3px rgba(143, 136, 128, 0.1); }
-}
-
-.type-label {
-  font-size: $fs-sm;
-  color: $text-regular;
-}
-
-.desc-text {
-  font-size: $fs-sm;
-  color: $text-primary;
-}
-
-.resolve-status {
-  display: inline-flex;
-  align-items: center;
-  gap: $sp-1;
-  font-size: $fs-sm;
-  font-weight: $fw-medium;
-}
-
-.resolve-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: $radius-full;
-}
-
-.resolved {
-  color: $status-active;
-  .resolve-dot { background: $status-active; }
-}
-
-.unresolved {
-  color: $level-a;
-  .resolve-dot { background: $level-a; }
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
