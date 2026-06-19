@@ -2,11 +2,11 @@
   <div class="login-page">
     <el-card class="login-card">
       <h2 class="login-title">易挂念 · 社区管理</h2>
-      <el-form :model="form" @submit.prevent="handleLogin">
-        <el-form-item>
+      <el-form ref="formRef" :model="form" :rules="rules" @submit.prevent="handleLogin">
+        <el-form-item prop="phone">
           <el-input v-model="form.phone" placeholder="手机号" prefix-icon="Phone" size="large" />
         </el-form-item>
-        <el-form-item>
+        <el-form-item prop="password">
           <el-input v-model="form.password" type="password" placeholder="密码" prefix-icon="Lock" size="large" show-password />
         </el-form-item>
         <el-form-item>
@@ -26,11 +26,25 @@ import { ElMessage } from 'element-plus'
 
 const userStore = useUserStore()
 const loading = ref(false)
+const formRef = ref(null)
 const form = reactive({ phone: '', password: '' })
 
+const rules = {
+  phone: [
+    { required: true, message: '请输入手机号', trigger: 'blur' },
+    { pattern: /^1\d{10}$/, message: '请输入正确的11位手机号', trigger: 'blur' },
+  ],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
+    { min: 6, message: '密码至少6个字符', trigger: 'blur' },
+  ],
+}
+
 async function handleLogin() {
-  if (!form.phone || !form.password) {
-    ElMessage.warning('请输入手机号和密码')
+  if (!formRef.value) return
+  try {
+    await formRef.value.validate()
+  } catch {
     return
   }
   loading.value = true

@@ -20,10 +20,6 @@ export function recordView(id) {
   return api.post(`/moments/${id}/view`);
 }
 
-export function getMomentStatus(id) {
-  return api.get(`/moments/${id}/status`);
-}
-
 export function sendResponse(id, data) {
   return api.post(`/moments/${id}/response`, data);
 }

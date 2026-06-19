@@ -2,8 +2,8 @@
   <view class="elder-page">
     <view class="moment-card">
       <view class="sender-info">
-        <text class="sender-name">{{ moment.sender_name || '家人' }}</text>
-        <text class="send-time">{{ moment.time_text || '' }}</text>
+        <text class="sender-name">{{ moment.sender_nickname || '家人' }}</text>
+        <text class="send-time">{{ timeText }}</text>
       </view>
 
       <view class="content-area">
@@ -29,12 +29,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { onLoad } from "@dcloudio/uni-app";
 import { getMomentDetail, recordView, sendResponse } from "@/api/moment";
+import { formatDateTime } from "@/utils/date";
 
 const moment = ref({});
 const momentId = ref("");
+
+const timeText = computed(() => formatDateTime(moment.value.created_at));
 
 const emojis = [
   { code: "thumbsup", icon: "👍" },

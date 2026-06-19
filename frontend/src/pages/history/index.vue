@@ -12,14 +12,14 @@
     <view v-else class="moment-list">
       <view v-for="m in momentStore.moments" :key="m.id" class="card moment-item">
         <view class="moment-header">
-          <text class="elder-label">{{ m.elder_label || '家人' }}</text>
+          <text class="elder-label">{{ m.elder_nickname || '家人' }}</text>
           <view class="status-dot" :class="m.is_read ? 'read' : 'unread'" />
           <text class="status-text" :class="m.is_read ? 'status-read' : 'status-unread'">
             {{ m.is_read ? '已读' : '未读' }}
           </text>
         </view>
         <text class="moment-content">{{ m.text_content }}</text>
-        <text class="moment-time">{{ m.created_at_text }}</text>
+        <text class="moment-time">{{ formatTime(m.created_at) }}</text>
       </view>
     </view>
   </view>
@@ -28,8 +28,13 @@
 <script setup>
 import { onShow } from "@dcloudio/uni-app";
 import { useMomentStore } from "@/stores/moment";
+import { formatRelativeTime } from "@/utils/date";
 
 const momentStore = useMomentStore();
+
+function formatTime(isoStr) {
+  return formatRelativeTime(isoStr);
+}
 
 onShow(() => {
   momentStore.loadMoments();

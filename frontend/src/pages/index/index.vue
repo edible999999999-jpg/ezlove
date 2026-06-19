@@ -6,7 +6,7 @@
     </view>
 
     <view v-if="userStore.isFamily" class="elder-list">
-      <view v-for="elder in relationStore.relations" :key="elder.id" class="card elder-card" @tap="goElderStatus(elder)">
+      <view v-for="elder in elderStatuses" :key="elder.id" class="card elder-card" @tap="goElderStatus(elder)">
         <view class="elder-info">
           <text class="elder-name">{{ elder.relation_label || '家人' }}</text>
           <view class="status-badge" :class="elder.today_read ? 'read' : 'unread'">
@@ -24,13 +24,17 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed } from "vue";
 import { onShow } from "@dcloudio/uni-app";
 import { useUserStore } from "@/stores/user";
 import { useRelationStore } from "@/stores/relation";
+import { getElderStatus } from "@/api/elder";
+import { formatRelativeTime } from "@/utils/date";
 
 const userStore = useUserStore();
 const relationStore = useRelationStore();
+
+const elderStatuses = ref([]);
 
 const greeting = computed(() => {
   const hour = new Date().getHours();
@@ -39,11 +43,37 @@ const greeting = computed(() => {
   return "晚上好";
 });
 
-onShow(() => {
+onShow(async () => {
   if (userStore.isFamily) {
-    relationStore.loadRelations();
+    await relationStore.loadRelations();
+    await loadElderStatuses();
   }
 });
+
+async function loadElderStatuses() {
+  const relations = relationStore.relations;
+  const results = await Promise.all(
+    relations.map(async (r) => {
+      try {
+        const status = await getElderStatus(r.elder_user_id);
+        return {
+          ...r,
+          today_read: status.today_read ?? false,
+          last_active_text: status.last_active_at
+            ? formatRelativeTime(status.last_active_at)
+            : "暂无活跃记录",
+        };
+      } catch {
+        return {
+          ...r,
+          today_read: false,
+          last_active_text: "暂无活跃记录",
+        };
+      }
+    })
+  );
+  elderStatuses.value = results;
+}
 
 function goSend() {
   uni.navigateTo({ url: "/pages/send/index" });

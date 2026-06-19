@@ -14,6 +14,9 @@ export const useUserStore = defineStore('user', () => {
     token.value = data.access_token
     worker.value = data.worker
     localStorage.setItem('community_access_token', data.access_token)
+    if (data.refresh_token) {
+      localStorage.setItem('community_refresh_token', data.refresh_token)
+    }
     localStorage.setItem('community_worker', JSON.stringify(data.worker))
     router.push('/')
   }
@@ -22,6 +25,7 @@ export const useUserStore = defineStore('user', () => {
     token.value = ''
     worker.value = null
     localStorage.removeItem('community_access_token')
+    localStorage.removeItem('community_refresh_token')
     localStorage.removeItem('community_worker')
     router.push('/login')
   }

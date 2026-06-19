@@ -1,10 +1,4 @@
-// Production API base URL - set before deploying mini-program
-const PROD_API_BASE = "";
-
-const BASE_URL =
-  process.env.NODE_ENV === "development"
-    ? "http://localhost:8001/api/v1"
-    : PROD_API_BASE + "/api/v1";
+import { BASE_URL } from "./config";
 
 function getToken() {
   return uni.getStorageSync("access_token");

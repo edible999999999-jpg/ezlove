@@ -6,7 +6,7 @@
     </view>
 
     <view class="login-actions">
-      <button class="btn-wx" open-type="getUserInfo" @tap="handleLogin">
+      <button class="btn-wx" @tap="handleLogin">
         微信一键登录
       </button>
     </view>
