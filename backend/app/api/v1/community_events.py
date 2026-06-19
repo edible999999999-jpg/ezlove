@@ -1,0 +1,71 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+from uuid import UUID
+from pydantic import BaseModel
+
+from app.database import get_db
+from app.deps import get_current_worker
+from app.models.community import CommunityWorker
+from app.services import community_event as event_service
+
+router = APIRouter(prefix="/community/events", tags=["community-events"])
+
+
+class EventCreate(BaseModel):
+    elder_id: UUID
+    event_type: str
+    description: str | None = None
+    severity: str = "info"
+
+
+@router.get("")
+async def list_events(
+    severity: str | None = None,
+    event_type: str | None = None,
+    is_resolved: bool | None = None,
+    worker: CommunityWorker = Depends(get_current_worker),
+    db: AsyncSession = Depends(get_db),
+):
+    events = await event_service.list_events(
+        db, worker.community_id,
+        severity=severity, event_type=event_type, is_resolved=is_resolved,
+    )
+    return [
+        {
+            "id": str(e.id),
+            "elder_id": str(e.elder_id),
+            "event_type": e.event_type,
+            "source": e.source,
+            "description": e.description,
+            "severity": e.severity,
+            "is_resolved": e.is_resolved,
+            "created_at": e.created_at.isoformat(),
+        }
+        for e in events
+    ]
+
+
+@router.post("")
+async def create_event(
+    data: EventCreate,
+    worker: CommunityWorker = Depends(get_current_worker),
+    db: AsyncSession = Depends(get_db),
+):
+    event = await event_service.create_event(
+        db, worker.community_id,
+        {**data.model_dump(), "source": "manual"},
+    )
+    return {"id": str(event.id)}
+
+
+@router.put("/{event_id}/resolve")
+async def resolve_event(
+    event_id: UUID,
+    worker: CommunityWorker = Depends(get_current_worker),
+    db: AsyncSession = Depends(get_db),
+):
+    try:
+        event = await event_service.resolve_event(db, event_id, worker.id)
+        return {"ok": True}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
