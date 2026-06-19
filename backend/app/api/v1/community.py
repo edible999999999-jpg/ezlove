@@ -7,6 +7,7 @@ from app.deps import get_current_worker
 from app.models.community import CommunityWorker
 from app.schemas.community import ElderCreate, ElderUpdate, ElderResponse
 from app.services import community as community_service
+from app.services.community_elder_detail import get_elder_full_detail
 
 router = APIRouter(prefix="/community", tags=["community"])
 
@@ -58,7 +59,19 @@ async def get_elder(
     worker: CommunityWorker = Depends(get_current_worker),
     db: AsyncSession = Depends(get_db),
 ):
-    detail = await community_service.get_elder_detail(db, elder_id)
+    detail = await community_service.get_elder_detail(db, elder_id, worker.community_id)
+    if not detail:
+        raise HTTPException(status_code=404, detail="老人档案不存在")
+    return detail
+
+
+@router.get("/elders/{elder_id}/full")
+async def get_elder_full(
+    elder_id: UUID,
+    worker: CommunityWorker = Depends(get_current_worker),
+    db: AsyncSession = Depends(get_db),
+):
+    detail = await get_elder_full_detail(db, elder_id, worker.community_id)
     if not detail:
         raise HTTPException(status_code=404, detail="老人档案不存在")
     return detail

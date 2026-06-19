@@ -65,7 +65,19 @@ async def resolve_event(
     db: AsyncSession = Depends(get_db),
 ):
     try:
-        event = await event_service.resolve_event(db, event_id, worker.id)
+        event = await event_service.resolve_event(db, event_id, worker.id, worker.community_id)
         return {"ok": True}
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.post("/sync-alerts")
+async def sync_alerts(
+    worker: CommunityWorker = Depends(get_current_worker),
+    db: AsyncSession = Depends(get_db),
+):
+    """Sync unresolved family-side alerts to community events."""
+    result = await event_service.sync_family_alerts_to_community(
+        db, worker.community_id,
+    )
+    return result

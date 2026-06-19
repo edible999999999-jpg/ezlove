@@ -42,8 +42,12 @@ async def resolve_event(
     db: AsyncSession,
     event_id: uuid.UUID,
     worker_id: uuid.UUID,
+    community_id: uuid.UUID,
 ) -> CommunityEvent:
-    stmt = select(CommunityEvent).where(CommunityEvent.id == event_id)
+    stmt = select(CommunityEvent).where(
+        CommunityEvent.id == event_id,
+        CommunityEvent.community_id == community_id,
+    )
     result = await db.execute(stmt)
     event = result.scalar_one_or_none()
     if not event:
@@ -143,3 +147,87 @@ async def _build_heatmap(
             "today_active": elder.elder_id in active_ids,
         })
     return heatmap
+
+
+async def sync_family_alerts_to_community(
+    db: AsyncSession,
+    community_id: uuid.UUID,
+) -> dict:
+    """
+    Find unresolved family-side alerts for elders in this community.
+    Create corresponding community_events for any that don't already exist.
+    """
+    from app.models.care_relation import CareRelation
+    from app.models.alert import Alert
+
+    # 1. Get all elder_ids in this community
+    elder_stmt = select(CommunityElder.elder_id).where(
+        CommunityElder.community_id == community_id
+    )
+    elder_result = await db.execute(elder_stmt)
+    elder_ids = list(elder_result.scalars().all())
+
+    if not elder_ids:
+        return {"synced": 0, "total_alerts": 0}
+
+    # 2. Find care_relations where elder_user_id IN (elder_ids)
+    rel_stmt = select(CareRelation.id).where(
+        CareRelation.elder_user_id.in_(elder_ids)
+    )
+    rel_result = await db.execute(rel_stmt)
+    relation_ids = list(rel_result.scalars().all())
+
+    if not relation_ids:
+        return {"synced": 0, "total_alerts": 0}
+
+    # 3. Find unresolved alerts for those relations
+    alert_stmt = select(Alert).where(
+        Alert.care_relation_id.in_(relation_ids),
+        Alert.is_resolved == False,
+    )
+    alert_result = await db.execute(alert_stmt)
+    alerts = list(alert_result.scalars().all())
+
+    # 4. For each alert, check if a community_event already exists (by description match)
+    synced = 0
+    for alert in alerts:
+        # Find the elder_id for this alert's care_relation
+        elder_for_rel_stmt = select(CareRelation.elder_user_id).where(
+            CareRelation.id == alert.care_relation_id
+        )
+        elder_for_rel_result = await db.execute(elder_for_rel_stmt)
+        elder_user_id = elder_for_rel_result.scalar_one_or_none()
+
+        if not elder_user_id:
+            continue
+
+        # Check if a community_event already exists with matching description
+        existing_stmt = select(CommunityEvent.id).where(
+            CommunityEvent.community_id == community_id,
+            CommunityEvent.source == "alert",
+            CommunityEvent.description == alert.message,
+        )
+        existing_result = await db.execute(existing_stmt)
+        existing = existing_result.scalar_one_or_none()
+
+        if not existing:
+            # 5. Create a community_event with source='alert'
+            severity_map = {"critical": "urgent", "warning": "warning", "info": "info"}
+            severity = severity_map.get(alert.alert_level, "info")
+
+            event = CommunityEvent(
+                community_id=community_id,
+                elder_id=elder_user_id,
+                event_type="other",
+                source="alert",
+                description=alert.message,
+                severity=severity,
+                is_resolved=False,
+            )
+            db.add(event)
+            synced += 1
+
+    if synced > 0:
+        await db.commit()
+
+    return {"synced": synced, "total_alerts": len(alerts)}
