@@ -1,7 +1,38 @@
+import base64
 import json
 from datetime import datetime
+from pathlib import Path
 
 from app.config import settings
+
+
+PHOTO_ANALYSIS_PROMPT = """你是一个温暖的家庭关怀助手。一位子女拍了一张日常生活照片想分享给独居的老人。
+
+请完成以下任务：
+1. 用一句话描述照片内容（photo_description）
+2. 生成3条不同风格的配文（captions），每条不超过60字，语气温暖口语化，像孩子跟父母说话：
+   - 第1条：日常分享风格（tag: "日常"）
+   - 第2条：回忆触发风格（tag: "回忆"）
+   - 第3条：轻松幽默风格（tag: "幽默"）
+3. 从4个海报模板中推荐最适合的（recommended_template）：
+   - warm_letter: 温暖信笺风格，适合文字较多、情感深的内容
+   - sunset_glow: 暮光温情风格，适合风景、户外照片
+   - garden_frame: 花园相框风格，适合食物、小物件
+   - simple_elegant: 素雅留白风格，适合人物照片
+
+{user_text_hint}
+
+请严格按以下JSON格式返回：
+{{
+  "photo_description": "照片描述",
+  "captions": [
+    {{"tag": "日常", "text": "配文内容"}},
+    {{"tag": "回忆", "text": "配文内容"}},
+    {{"tag": "幽默", "text": "配文内容"}}
+  ],
+  "recommended_template": "模板名称"
+}}
+"""
 
 
 PROMPT_TEMPLATE = """你是一个温暖的家庭关怀助手。请为一位子女生成3条可以发给独居老人的温暖问候。
@@ -47,6 +78,82 @@ async def generate_suggestions() -> list[dict]:
         return json.loads(text)
     except Exception:
         return _fallback_suggestions()
+
+
+TEMPLATE_KEYWORDS = {
+    "sunset_glow": ["天空", "日落", "风景", "户外", "公园", "山", "海", "河", "树", "路", "散步", "阳光"],
+    "garden_frame": ["菜", "饭", "花", "水果", "食物", "厨房", "盆栽", "茶", "杯", "碗"],
+    "simple_elegant": ["人", "自拍", "合影", "笑", "坐", "站"],
+    "warm_letter": [],
+}
+
+
+async def analyze_photo_and_suggest(image_path: str, user_text: str | None = None) -> dict:
+    user_text_hint = f"用户附带的文字：「{user_text}」\n请在配文中自然融入用户想表达的内容。" if user_text else "用户没有附带文字。"
+    prompt = PHOTO_ANALYSIS_PROMPT.format(user_text_hint=user_text_hint)
+
+    if not settings.ANTHROPIC_API_KEY:
+        return _fallback_photo_analysis(user_text)
+
+    try:
+        import anthropic
+
+        img_path = Path(image_path)
+        if not img_path.exists():
+            return _fallback_photo_analysis(user_text)
+
+        with open(img_path, "rb") as f:
+            img_data = base64.standard_b64encode(f.read()).decode("utf-8")
+
+        suffix = img_path.suffix.lower()
+        media_type = {"jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png", "gif": "image/gif", "webp": "image/webp"}.get(suffix.lstrip("."), "image/jpeg")
+
+        client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
+        message = await client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=512,
+            messages=[{
+                "role": "user",
+                "content": [
+                    {"type": "image", "source": {"type": "base64", "media_type": media_type, "data": img_data}},
+                    {"type": "text", "text": prompt},
+                ],
+            }],
+        )
+        text = message.content[0].text
+        return json.loads(text)
+    except Exception:
+        return _fallback_photo_analysis(user_text)
+
+
+def _fallback_photo_analysis(user_text: str | None = None) -> dict:
+    hour = datetime.now().hour
+    base_text = user_text or ""
+
+    if hour < 12:
+        captions = [
+            {"tag": "日常", "text": f"妈，早上好！{base_text or '今天天气真不错，出门走走吧。'}"},
+            {"tag": "回忆", "text": f"看到这个就想起小时候你带我去公园的日子。{base_text or ''}".strip()},
+            {"tag": "幽默", "text": f"妈你看！{base_text or '是不是觉得我越来越会拍照了哈哈'}"},
+        ]
+    elif hour < 18:
+        captions = [
+            {"tag": "日常", "text": f"妈，给你看看我今天的生活！{base_text or ''}".strip()},
+            {"tag": "回忆", "text": f"这个让我想到小时候家里的味道。{base_text or '你还记得吗？'}"},
+            {"tag": "幽默", "text": f"哈哈妈你猜这是啥？{base_text or '提示：跟吃有关！'}"},
+        ]
+    else:
+        captions = [
+            {"tag": "日常", "text": f"妈，分享一下今天的小确幸。{base_text or '明天继续加油！'}"},
+            {"tag": "回忆", "text": f"晚上看到这个突然好想家。{base_text or '想你做的饭了。'}"},
+            {"tag": "幽默", "text": f"妈，你看我今天的战果！{base_text or '是不是该表扬我？'}"},
+        ]
+
+    return {
+        "photo_description": "一张温馨的日常生活照片",
+        "captions": captions,
+        "recommended_template": "warm_letter",
+    }
 
 
 def _fallback_suggestions() -> list[dict]:

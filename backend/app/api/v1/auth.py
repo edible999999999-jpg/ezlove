@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
 from app.database import get_db
-from app.schemas.auth import WxLoginRequest, RefreshRequest, TokenResponse
+from app.schemas.auth import WxLoginRequest, DevLoginRequest, RefreshRequest, TokenResponse
 from app.services.auth import get_or_create_user, create_access_token, create_refresh_token
 from app.utils.wechat import code_to_openid
 
@@ -25,10 +25,11 @@ async def wx_login(req: WxLoginRequest, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/dev-login", response_model=TokenResponse)
-async def dev_login(db: AsyncSession = Depends(get_db)):
+async def dev_login(req: DevLoginRequest = None, db: AsyncSession = Depends(get_db)):
     if not settings.DEBUG:
         raise HTTPException(status_code=403, detail="仅开发环境可用")
-    user = await get_or_create_user(db, "dev_test_user")
+    openid = req.openid if req else "dev_test_user"
+    user = await get_or_create_user(db, openid)
     return TokenResponse(
         access_token=create_access_token(user.id),
         refresh_token=create_refresh_token(user.id),

@@ -7,3 +7,7 @@ export function getElderStatus(elderId) {
 export function getElderActivity(elderId, params) {
   return api.get(`/elders/${elderId}/activity`, params);
 }
+
+export function manualCheckin(elderId) {
+  return api.post(`/elders/${elderId}/checkin`);
+}

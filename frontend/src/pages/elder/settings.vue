@@ -1,11 +1,21 @@
 <template>
   <view class="page">
-    <view class="card">
-      <text class="section-title">提醒设置</text>
+    <view class="settings-card fade-in">
+      <text class="settings-title">提醒设置</text>
+      <text class="settings-desc">设置未读多久后提醒你</text>
+
+      <view class="divider" />
+
       <view class="setting-row">
-        <text>未读提醒时间</text>
+        <view class="setting-left">
+          <text class="setting-icon">⏰</text>
+          <text class="setting-label">未读提醒时间</text>
+        </view>
         <picker :value="thresholdIndex" :range="thresholdOptions" @change="onThresholdChange">
-          <text class="picker-value">{{ thresholdOptions[thresholdIndex] }}</text>
+          <view class="picker-trigger">
+            <text class="picker-value">{{ thresholdOptions[thresholdIndex] }}</text>
+            <text class="picker-arrow">›</text>
+          </view>
         </picker>
       </view>
     </view>
@@ -44,21 +54,74 @@ async function onThresholdChange(e) {
 </script>
 
 <style lang="scss" scoped>
-.section-title {
-  font-size: $fs-subtitle;
-  font-weight: $fw-semibold;
-  margin-bottom: $sp-24;
+.settings-card {
+  background: $c-surface;
+  border-radius: $r-xl;
+  padding: $sp-32;
+  box-shadow: $shadow-sm;
+  border: 1rpx solid $c-border-light;
+}
+
+.settings-title {
+  font-size: $fs-title;
+  font-weight: $fw-bold;
+  color: $c-text;
   display: block;
 }
+
+.settings-desc {
+  font-size: $fs-body;
+  color: $c-text-sub;
+  margin-top: $sp-4;
+  display: block;
+}
+
+.divider {
+  height: 1rpx;
+  background: $c-border-light;
+  margin: $sp-24 0;
+}
+
 .setting-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: $sp-16 0;
-  border-bottom: 1rpx solid $c-border;
 }
-.picker-value {
-  color: $c-primary;
+
+.setting-left {
+  display: flex;
+  align-items: center;
+  gap: $sp-12;
+}
+
+.setting-icon {
+  font-size: $fs-title;
+}
+
+.setting-label {
+  font-size: $fs-body;
   font-weight: $fw-medium;
+  color: $c-text;
+}
+
+.picker-trigger {
+  display: flex;
+  align-items: center;
+  gap: $sp-8;
+  padding: $sp-8 $sp-16;
+  background: $c-primary-bg;
+  border-radius: $r-full;
+}
+
+.picker-value {
+  font-size: $fs-body;
+  color: $c-primary;
+  font-weight: $fw-semibold;
+}
+
+.picker-arrow {
+  font-size: $fs-subtitle;
+  color: $c-primary;
 }
 </style>

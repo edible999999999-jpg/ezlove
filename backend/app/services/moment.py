@@ -10,12 +10,14 @@ from app.models.response import Response
 
 
 async def create_moment(db: AsyncSession, sender_id: UUID, elder_id: UUID, text_content: str | None,
-                        media_urls: list | None, is_ai_generated: bool = False) -> CareMoment:
-    content_type = "text"
-    if media_urls and text_content:
-        content_type = "mixed"
-    elif media_urls:
-        content_type = "image"
+                        media_urls: list | None, is_ai_generated: bool = False,
+                        content_type: str | None = None, poster_meta: dict | None = None) -> CareMoment:
+    if not content_type:
+        content_type = "text"
+        if media_urls and text_content:
+            content_type = "mixed"
+        elif media_urls:
+            content_type = "image"
 
     moment = CareMoment(
         sender_id=sender_id,
@@ -24,6 +26,7 @@ async def create_moment(db: AsyncSession, sender_id: UUID, elder_id: UUID, text_
         text_content=text_content,
         media_urls=media_urls,
         is_ai_generated=is_ai_generated,
+        poster_meta=poster_meta,
     )
     db.add(moment)
     await db.commit()

@@ -18,4 +18,5 @@ class CareRelation(Base):
     invite_code: Mapped[str] = mapped_column(String(8), unique=True, index=True)
     alert_threshold: Mapped[int] = mapped_column(Integer, default=12)
     status: Mapped[str] = mapped_column(String(16), default="pending")
+    alert_paused_until: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())

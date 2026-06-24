@@ -20,6 +20,7 @@ async def send_moment(data: MomentCreate, user: User = Depends(get_current_user)
         db, sender_id=user.id, elder_id=data.elder_id,
         text_content=data.text_content, media_urls=data.media_urls,
         is_ai_generated=data.is_ai_generated,
+        content_type=data.content_type, poster_meta=data.poster_meta,
     )
     return moment
 

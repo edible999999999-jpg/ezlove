@@ -1,50 +1,63 @@
 <template>
   <view class="elder-page">
-    <view class="moment-card">
-      <view class="sender-info">
-        <text class="sender-name">{{ moment.sender_nickname || '家人' }}</text>
-        <text class="send-time">{{ timeText }}</text>
+    <view class="moment-card fade-in">
+      <view class="sender-row">
+        <view class="sender-avatar">
+          <text class="sender-initial">{{ (moment.sender_name || '家')[0] }}</text>
+        </view>
+        <view class="sender-meta">
+          <text class="sender-name">{{ moment.sender_name || '家人' }}</text>
+          <text class="send-time">{{ moment.time_text || '' }}</text>
+        </view>
       </view>
 
+      <view class="divider" />
+
       <view class="content-area">
-        <text class="moment-text">{{ moment.text_content }}</text>
-        <image
-          v-if="moment.media_urls?.length"
-          :src="moment.media_urls[0]"
-          mode="widthFix"
-          class="moment-image"
-        />
+        <view v-if="moment.content_type === 'poster' && moment.media_urls?.length" class="poster-area">
+          <image
+            :src="getFullUrl(moment.media_urls[0])"
+            mode="widthFix"
+            class="poster-image"
+            @tap="previewPoster"
+          />
+        </view>
+        <view v-else>
+          <text class="moment-text">{{ moment.text_content }}</text>
+          <image
+            v-if="moment.media_urls?.length"
+            :src="getFullUrl(moment.media_urls[0])"
+            mode="widthFix"
+            class="moment-image"
+          />
+        </view>
       </view>
     </view>
 
-    <view class="response-area">
-      <text class="response-hint">让Ta知道你看到了</text>
-      <view class="emoji-row">
-        <view v-for="emoji in emojis" :key="emoji.code" class="emoji-btn" @tap="sendEmoji(emoji.code)">
-          <text class="emoji-icon">{{ emoji.icon }}</text>
-        </view>
-      </view>
+    <view class="read-hint fade-in stagger-2">
+      <text class="hint-text">已收到，家人会知道你看过了</text>
     </view>
   </view>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref } from "vue";
 import { onLoad } from "@dcloudio/uni-app";
-import { getMomentDetail, recordView, sendResponse } from "@/api/moment";
-import { formatDateTime } from "@/utils/date";
+import { getMomentDetail, recordView } from "@/api/moment";
+
+const BASE_URL =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:8001"
+    : "https://yuxilab.cn/ezlove";
 
 const moment = ref({});
 const momentId = ref("");
 
-const timeText = computed(() => formatDateTime(moment.value.created_at));
-
-const emojis = [
-  { code: "thumbsup", icon: "👍" },
-  { code: "heart", icon: "❤️" },
-  { code: "smile", icon: "😊" },
-  { code: "hug", icon: "🤗" },
-];
+function getFullUrl(url) {
+  if (!url) return "";
+  if (url.startsWith("http")) return url;
+  return `${BASE_URL}${url}`;
+}
 
 onLoad((query) => {
   momentId.value = query.id;
@@ -60,12 +73,11 @@ async function loadMoment() {
   }
 }
 
-async function sendEmoji(code) {
-  try {
-    await sendResponse(momentId.value, { response_type: "emoji", content: code });
-    uni.showToast({ title: "已回应", icon: "success" });
-  } catch (e) {
-    uni.showToast({ title: "回应失败", icon: "none" });
+function previewPoster() {
+  if (moment.value.media_urls?.length) {
+    uni.previewImage({
+      urls: [getFullUrl(moment.value.media_urls[0])],
+    });
   }
 }
 </script>
@@ -73,67 +85,95 @@ async function sendEmoji(code) {
 <style lang="scss" scoped>
 .elder-page {
   min-height: 100vh;
-  padding: $sp-24;
-  background: $c-bg;
+  padding: $sp-32;
+  padding-bottom: 200rpx;
+  background: $gradient-page;
 }
+
 .moment-card {
   background: $c-surface;
-  border-radius: $r-lg;
-  padding: $sp-32;
-  box-shadow: $shadow-2;
+  border-radius: $r-xl;
+  padding: $sp-48 $sp-40;
+  box-shadow: $shadow-md;
 }
-.sender-info {
-  margin-bottom: $sp-24;
+
+.sender-row {
+  display: flex;
+  align-items: center;
 }
-.sender-name {
-  font-size: $fs-elder-title;
+
+.sender-avatar {
+  width: 140rpx;
+  height: 140rpx;
+  background: $gradient-warm-soft;
+  border-radius: $r-xl;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: $sp-24;
+  flex-shrink: 0;
+}
+
+.sender-initial {
+  font-size: $fs-elder-headline;
   font-weight: $fw-bold;
+  color: $c-primary;
+}
+
+.sender-meta {
+  flex: 1;
+}
+
+.sender-name {
+  font-size: $fs-elder-headline;
+  font-weight: $fw-bold;
+  color: $c-text;
   display: block;
 }
+
 .send-time {
   font-size: $fs-elder-body;
   color: $c-text-hint;
   margin-top: $sp-8;
-}
-.moment-text {
-  font-size: $fs-elder-body;
-  line-height: 1.8;
   display: block;
-  margin-bottom: $sp-24;
 }
+
+.divider {
+  height: 2rpx;
+  background: $c-border-light;
+  margin: $sp-40 0;
+}
+
+.moment-text {
+  font-size: $fs-elder-title;
+  line-height: $lh-relaxed;
+  color: $c-text;
+  display: block;
+  margin-bottom: $sp-32;
+}
+
 .moment-image {
   width: 100%;
-  border-radius: $r-md;
+  border-radius: $r-lg;
+  margin-top: $sp-24;
 }
-.response-area {
-  margin-top: $sp-32;
+
+.poster-area {
+  margin: 0 (-$sp-40);
+}
+
+.poster-image {
+  width: 100%;
+  display: block;
+}
+
+.read-hint {
+  margin-top: $sp-48;
   text-align: center;
 }
-.response-hint {
+
+.hint-text {
   font-size: $fs-elder-body;
-  color: $c-text-sub;
-  display: block;
-  margin-bottom: $sp-24;
-}
-.emoji-row {
-  display: flex;
-  justify-content: center;
-  gap: $sp-24;
-}
-.emoji-btn {
-  width: 120rpx;
-  height: 120rpx;
-  background: $c-surface;
-  border-radius: $r-lg;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: $shadow-1;
-  &:active {
-    transform: scale(0.9);
-  }
-}
-.emoji-icon {
-  font-size: 64rpx;
+  color: $c-text-hint;
 }
 </style>

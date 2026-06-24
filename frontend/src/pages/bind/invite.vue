@@ -1,22 +1,30 @@
 <template>
   <view class="page">
-    <view class="card invite-card">
-      <text class="title">邀请家人加入</text>
-      <text class="desc">把邀请码发给你的家人，帮Ta完成绑定</text>
-
-      <view v-if="inviteCode" class="code-area">
-        <text class="code">{{ inviteCode }}</text>
-        <view class="btn-primary" @tap="copyCode">复制邀请码</view>
+    <view class="invite-section fade-in">
+      <view class="section-icon-wrap">
+        <text class="section-icon">📨</text>
       </view>
-      <view v-else>
-        <view class="btn-primary" @tap="generate">生成邀请码</view>
+      <text class="section-title">邀请家人加入</text>
+      <text class="section-desc">把邀请码发给你的家人，帮Ta完成绑定</text>
+
+      <view v-if="inviteCode" class="code-display">
+        <text class="code-value">{{ inviteCode }}</text>
+        <view class="btn-primary copy-btn" @tap="copyCode">复制邀请码</view>
+      </view>
+      <view v-else class="generate-area">
+        <view class="btn-primary generate-btn" @tap="generate">生成邀请码</view>
       </view>
     </view>
 
-    <view class="card bind-card" style="margin-top: 32rpx;">
-      <text class="title">我有邀请码</text>
-      <input v-model="inputCode" placeholder="输入邀请码" class="code-input" />
-      <view class="btn-primary" @tap="handleBind">绑定</view>
+    <view class="bind-section fade-in stagger-1">
+      <view class="section-icon-wrap small">
+        <text class="section-icon">🔑</text>
+      </view>
+      <text class="section-title">我有邀请码</text>
+      <view class="input-wrap">
+        <input v-model="inputCode" placeholder="输入邀请码" class="code-input" />
+      </view>
+      <view class="btn-primary bind-btn" @tap="handleBind">绑定</view>
     </view>
   </view>
 </template>
@@ -58,39 +66,93 @@ async function handleBind() {
 </script>
 
 <style lang="scss" scoped>
-.invite-card, .bind-card {
+.invite-section, .bind-section {
+  background: $c-surface;
+  border-radius: $r-xl;
+  padding: $sp-40 $sp-32;
+  margin-bottom: $sp-24;
+  box-shadow: $shadow-sm;
+  border: 1rpx solid $c-border-light;
   text-align: center;
 }
-.title {
+
+.section-icon-wrap {
+  width: 100rpx;
+  height: 100rpx;
+  background: $c-primary-bg;
+  border-radius: $r-2xl;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto $sp-20;
+  &.small {
+    width: 80rpx;
+    height: 80rpx;
+  }
+}
+
+.section-icon {
+  font-size: 48rpx;
+}
+
+.section-title {
   font-size: $fs-title;
   font-weight: $fw-bold;
+  color: $c-text;
   display: block;
   margin-bottom: $sp-8;
 }
-.desc {
+
+.section-desc {
   font-size: $fs-body;
   color: $c-text-sub;
   display: block;
-  margin-bottom: $sp-24;
+  margin-bottom: $sp-32;
 }
-.code-area {
+
+.code-display {
   margin-top: $sp-24;
 }
-.code {
+
+.code-value {
   font-size: $fs-display;
   font-weight: $fw-bold;
   color: $c-primary;
   letter-spacing: 16rpx;
   display: block;
-  margin-bottom: $sp-24;
+  margin-bottom: $sp-32;
+  padding: $sp-24;
+  background: $c-primary-bg;
+  border-radius: $r-lg;
 }
+
+.copy-btn {
+  width: 100%;
+}
+
+.generate-area {
+  margin-top: $sp-8;
+}
+
+.generate-btn {
+  width: 100%;
+}
+
+.input-wrap {
+  margin: $sp-24 0;
+}
+
 .code-input {
   text-align: center;
   font-size: $fs-title;
   letter-spacing: 8rpx;
-  padding: $sp-16;
+  padding: $sp-20;
   background: $c-bg;
-  border-radius: $r-md;
-  margin-bottom: $sp-24;
+  border-radius: $r-lg;
+  border: 1rpx solid $c-border-light;
+}
+
+.bind-btn {
+  width: 100%;
 }
 </style>

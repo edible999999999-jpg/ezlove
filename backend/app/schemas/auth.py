@@ -5,6 +5,10 @@ class WxLoginRequest(BaseModel):
     code: str
 
 
+class DevLoginRequest(BaseModel):
+    openid: str = "dev_test_user"
+
+
 class RefreshRequest(BaseModel):
     refresh_token: str
 

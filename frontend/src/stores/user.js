@@ -21,7 +21,7 @@ export const useUserStore = defineStore("user", () => {
     }
   }
 
-  async function login() {
+  async function login(openid) {
     // #ifdef MP-WEIXIN
     const { code } = await new Promise((resolve, reject) => {
       uni.login({ success: resolve, fail: reject });
@@ -29,7 +29,7 @@ export const useUserStore = defineStore("user", () => {
     const res = await wxLogin(code);
     // #endif
     // #ifdef H5
-    const res = await devLogin();
+    const res = await devLogin(openid);
     // #endif
     uni.setStorageSync("access_token", res.access_token);
     uni.setStorageSync("refresh_token", res.refresh_token);
