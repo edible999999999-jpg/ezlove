@@ -1,33 +1,57 @@
 <template>
   <view class="page">
-    <view v-if="alertStore.alerts.length === 0" class="empty-state fade-in">
-      <view class="safe-icon-wrap">
-        <text class="safe-icon">🌿</text>
-      </view>
-      <text class="safe-title">一切安好</text>
-      <text class="safe-desc">家人们都好好的，放心吧</text>
+    <!-- Header -->
+    <view class="section-header">
+      <text class="section-subtitle">实时关注家人动态</text>
     </view>
 
-    <view v-else class="alert-list">
+    <!-- Alert Cards -->
+    <view v-if="alertStore.alerts.length > 0" class="alert-list">
       <view
         v-for="(a, index) in alertStore.alerts"
         :key="a.id"
-        class="alert-item fade-in"
-        :class="[{ resolved: a.is_resolved }, 'stagger-' + Math.min(index + 1, 4)]"
+        class="alert-card fade-in"
+        :class="[
+          { resolved: a.is_resolved },
+          'stagger-' + Math.min(index + 1, 4)
+        ]"
       >
-        <view class="alert-header">
-          <view class="level-badge" :class="a.alert_level">
-            <text>{{ levelText(a.alert_level) }}</text>
+        <!-- Left Color Bar (only for unresolved) -->
+        <view
+          v-if="!a.is_resolved"
+          class="color-bar"
+          :class="'bar-' + a.alert_level"
+        />
+
+        <view class="card-body">
+          <!-- Card Header: Badge + Time -->
+          <view class="card-header">
+            <view class="level-badge" :class="'badge-' + a.alert_level">
+              <text>{{ levelText(a.alert_level) }}</text>
+            </view>
+            <text class="alert-time">{{ a.created_at_text }}</text>
           </view>
-          <text class="alert-time">{{ a.created_at_text }}</text>
-        </view>
-        <text class="alert-msg">{{ a.message }}</text>
-        <view v-if="!a.is_resolved" class="alert-actions">
-          <view class="resolve-btn" @tap="handleResolve(a.id)">
-            <text>已确认安好</text>
+
+          <!-- Alert Message -->
+          <text class="alert-message">{{ a.message }}</text>
+
+          <!-- Action Button (unresolved only) -->
+          <view v-if="!a.is_resolved" class="alert-actions">
+            <view class="resolve-btn" @tap="handleResolve(a.id)">
+              <text class="resolve-btn-text">已确认安好</text>
+            </view>
           </view>
         </view>
       </view>
+    </view>
+
+    <!-- Empty State -->
+    <view class="empty-state fade-in">
+      <view class="empty-icon-circle">
+        <image class="empty-icon-img" src="/static/icons/checkmark.svg" mode="aspectFit" />
+      </view>
+      <text class="empty-title">暂无提醒，一切安好</text>
+      <view class="empty-divider" />
     </view>
   </view>
 </template>
@@ -54,110 +78,181 @@ async function handleResolve(id) {
 </script>
 
 <style lang="scss" scoped>
-.empty-state {
+// 告警专用颜色
+$c-error: #BA1A1A;
+$c-caution: #D97706;
+$c-info-gray: #717171;
+
+/* Section Header */
+.section-header {
+  margin-bottom: $sp-32;
+  margin-top: $sp-8;
+}
+
+.section-subtitle {
+  font-size: $fs-body-sm;
+  color: $c-text-hint;
+  opacity: 0.8;
+  display: block;
+}
+
+/* Alert List */
+.alert-list {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding-top: 240rpx;
+  gap: $sp-16;
 }
 
-.safe-icon-wrap {
-  width: 140rpx;
-  height: 140rpx;
-  background: $c-safe-bg;
-  border-radius: $r-2xl;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: $sp-24;
-}
-
-.safe-icon {
-  font-size: 64rpx;
-}
-
-.safe-title {
-  font-size: $fs-title;
-  font-weight: $fw-bold;
-  color: $c-safe;
-  display: block;
-}
-
-.safe-desc {
-  font-size: $fs-body;
-  color: $c-text-sub;
-  margin-top: $sp-8;
-  display: block;
-}
-
-.alert-item {
+/* Alert Card */
+.alert-card {
   background: $c-surface;
-  border-radius: $r-lg;
-  padding: $sp-24;
-  margin-bottom: $sp-16;
-  box-shadow: $shadow-sm;
-  border: 1rpx solid $c-border-light;
-  transition: opacity $duration-normal;
+  border-radius: $r-xl;
+  padding: $sp-20;
+  box-shadow: 0 4rpx 40rpx -4rpx rgba(199, 92, 58, 0.05);
+  border: 2rpx solid rgba($c-primary, 0.05);
+  position: relative;
+  overflow: hidden;
+  transition: all $duration-normal $ease-out;
+
   &.resolved {
-    opacity: 0.5;
+    background: rgba($c-surface, 0.6);
+    opacity: 0.6;
   }
 }
 
-.alert-header {
+/* Left Color Bar */
+.color-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4rpx;
+  height: 100%;
+
+  &.bar-urgent {
+    background: $c-error;
+  }
+
+  &.bar-warning {
+    background: $c-caution;
+  }
+
+  &.bar-info {
+    background: $c-info-gray;
+  }
+}
+
+.card-body {
+  padding-left: $sp-4;
+}
+
+/* Card Header */
+.card-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: $sp-12;
 }
 
+/* Level Badge */
 .level-badge {
-  padding: $sp-4 $sp-16;
-  border-radius: $r-full;
-  font-size: $fs-body-sm;
-  font-weight: $fw-medium;
-  &.info {
-    background: $c-accent-bg;
-    color: $c-accent;
+  padding: $sp-2 $sp-8;
+  border-radius: $r-xs;
+  font-size: $fs-caption;
+  font-weight: $fw-bold;
+
+  &.badge-urgent {
+    background: rgba($c-error, 0.1);
+    color: $c-error;
   }
-  &.warning {
-    background: $c-warn-bg;
-    color: $c-warn;
+
+  &.badge-warning {
+    background: rgba($c-caution, 0.1);
+    color: $c-caution;
   }
-  &.urgent {
-    background: rgba($c-warn, 0.15);
-    color: $c-warn;
-    font-weight: $fw-semibold;
+
+  &.badge-info {
+    background: rgba($c-info-gray, 0.1);
+    color: $c-info-gray;
   }
 }
 
 .alert-time {
   font-size: $fs-caption;
-  color: $c-text-hint;
+  color: rgba($c-text-hint, 0.6);
 }
 
-.alert-msg {
-  font-size: $fs-body;
-  line-height: $lh-normal;
+/* Alert Message */
+.alert-message {
+  font-size: 36rpx;
+  font-weight: $fw-medium;
+  line-height: $lh-relaxed;
   color: $c-text;
   display: block;
+  margin-bottom: $sp-16;
 }
 
+/* Actions */
 .alert-actions {
-  margin-top: $sp-20;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .resolve-btn {
-  text-align: center;
-  padding: $sp-12;
+  background: $c-primary;
+  padding: $sp-8 $sp-20;
   border-radius: $r-full;
-  border: 2rpx solid $c-safe;
-  color: $c-safe;
-  font-size: $fs-body;
-  font-weight: $fw-medium;
+  box-shadow: 0 4rpx 16rpx rgba($c-primary, 0.2);
   transition: all $duration-normal $ease-out;
+
   &:active {
-    background: $c-safe-bg;
-    transform: scale(0.97);
+    opacity: 0.9;
+    transform: scale(0.95);
   }
+}
+
+.resolve-btn-text {
+  font-size: $fs-body-sm;
+  font-weight: $fw-medium;
+  color: $c-text-inverse;
+}
+
+/* Empty State */
+.empty-state {
+  margin-top: $sp-64;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 $sp-40;
+}
+
+.empty-icon-circle {
+  width: 128rpx;
+  height: 128rpx;
+  background: rgba($c-primary-bg, 0.3);
+  border-radius: $r-full;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: $sp-16;
+}
+
+.empty-icon-img {
+  width: 60rpx;
+  height: 60rpx;
+}
+
+.empty-title {
+  font-size: 36rpx;
+  color: rgba($c-text, 0.5);
+  font-weight: $fw-medium;
+  display: block;
+}
+
+.empty-divider {
+  margin-top: $sp-40;
+  width: 96rpx;
+  height: 2rpx;
+  background: linear-gradient(90deg, transparent 0%, rgba($c-primary, 0.1) 50%, transparent 100%);
 }
 </style>

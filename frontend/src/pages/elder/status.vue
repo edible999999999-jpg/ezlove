@@ -161,8 +161,9 @@ async function resumeAlert() {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8rpx 32rpx rgba(196, 116, 92, 0.25);
+  box-shadow: $shadow-glow;
   margin-bottom: $sp-20;
+  border: 6rpx solid rgba(255, 255, 255, 0.8);
 }
 
 .avatar-letter {
@@ -182,11 +183,17 @@ async function resumeAlert() {
   background: $c-surface;
   border-radius: $r-xl;
   padding: $sp-32;
-  box-shadow: $shadow-sm;
+  box-shadow: $shadow-md;
   margin-bottom: $sp-20;
-  border: 1rpx solid $c-border-light;
-  &.safe { border-left: 8rpx solid $c-safe; }
-  &.warn { border-left: 8rpx solid $c-warn; }
+  border: $border-subtle;
+  &.safe {
+    border-left: 8rpx solid $c-safe;
+    background: linear-gradient(135deg, $c-safe-bg 0%, $c-surface 30%);
+  }
+  &.warn {
+    border-left: 8rpx solid $c-warn;
+    background: linear-gradient(135deg, $c-warn-bg 0%, $c-surface 30%);
+  }
 }
 
 .status-indicator {
@@ -200,8 +207,20 @@ async function resumeAlert() {
   width: 20rpx;
   height: 20rpx;
   border-radius: 50%;
-  &.active { background: $c-safe; }
-  &.inactive { background: $c-warn; }
+  &.active {
+    background: $c-safe;
+    box-shadow: 0 0 0 6rpx rgba(123, 174, 142, 0.2);
+  }
+  &.inactive {
+    background: $c-warn;
+    box-shadow: 0 0 0 6rpx rgba(201, 123, 107, 0.2);
+    animation: pulse-warn 2s infinite;
+  }
+}
+
+@keyframes pulse-warn {
+  0%, 100% { box-shadow: 0 0 0 6rpx rgba(201, 123, 107, 0.2); }
+  50% { box-shadow: 0 0 0 10rpx rgba(201, 123, 107, 0.1); }
 }
 
 .status-label {
@@ -240,9 +259,9 @@ async function resumeAlert() {
   background: $c-surface;
   border-radius: $r-xl;
   padding: $sp-32;
-  box-shadow: $shadow-sm;
+  box-shadow: $shadow-md;
   margin-bottom: $sp-20;
-  border: 1rpx solid $c-border-light;
+  border: $border-subtle;
 }
 
 .pause-header {
@@ -318,8 +337,8 @@ async function resumeAlert() {
   background: $c-surface;
   border-radius: $r-xl;
   padding: $sp-32;
-  box-shadow: $shadow-sm;
-  border: 1rpx solid $c-border-light;
+  box-shadow: $shadow-md;
+  border: $border-subtle;
 }
 
 .calendar-row {
@@ -348,7 +367,11 @@ async function resumeAlert() {
   display: flex;
   align-items: center;
   justify-content: center;
-  &.active { border-color: $c-safe; }
+  transition: all $duration-normal $ease-out;
+  &.active {
+    border-color: $c-safe;
+    box-shadow: 0 0 0 4rpx rgba(123, 174, 142, 0.15);
+  }
 }
 
 .day-fill {
@@ -356,5 +379,6 @@ async function resumeAlert() {
   height: 28rpx;
   border-radius: 50%;
   background: $c-safe;
+  box-shadow: 0 2rpx 6rpx rgba(123, 174, 142, 0.3);
 }
 </style>

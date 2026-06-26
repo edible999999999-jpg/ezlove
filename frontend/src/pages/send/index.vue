@@ -1,52 +1,118 @@
 <template>
-  <view class="page">
-    <view class="photo-section fade-in">
-      <view v-if="imageUrl" class="photo-preview" @tap="chooseImage">
-        <image :src="imageUrl" mode="aspectFill" class="preview-img" />
-        <view class="photo-change">
-          <text>点击换一张</text>
+  <view class="send-page">
+    <!-- TopAppBar -->
+    <view class="top-app-bar">
+      <view class="top-app-bar__status-spacer" />
+      <view class="top-app-bar__content">
+        <view class="top-app-bar__nav" @tap="uni.navigateBack()">
+          <text class="nav-icon">&lt;</text>
         </view>
-      </view>
-      <view v-else class="photo-placeholder" @tap="chooseImage">
-        <text class="photo-icon">📷</text>
-        <text class="photo-title">选一张照片</text>
-        <text class="photo-hint">分享你身边的事，让家人感受你的生活</text>
+        <text class="top-app-bar__title">发送牵挂</text>
+        <view class="top-app-bar__right" />
       </view>
     </view>
 
-    <view class="text-section fade-in stagger-1">
-      <view class="input-wrap">
-        <textarea
-          v-model="textContent"
-          placeholder="随手写两句（可选）"
-          :maxlength="100"
-          class="input-area"
-        />
-        <text class="char-count">{{ textContent.length }}/100</text>
-      </view>
-    </view>
-
-    <view class="elder-section fade-in stagger-2">
-      <text class="section-label">分享给</text>
-      <view class="elder-picker">
-        <view
-          v-for="r in relationStore.relations"
-          :key="r.id"
-          class="elder-chip"
-          :class="{ active: selectedElderId === r.elder_user_id }"
-          @tap="selectedElderId = r.elder_user_id"
-        >
-          <view class="chip-avatar">
-            <text>{{ (r.relation_label || '家')[0] }}</text>
+    <view class="page-body">
+      <!-- Recipient Selection -->
+      <view class="section fade-in">
+        <text class="section__label">发送给</text>
+        <scroll-view scroll-x class="chips-scroll">
+          <view class="chips-row">
+            <view
+              v-for="r in relationStore.relations"
+              :key="r.id"
+              class="recipient-chip"
+              :class="{ 'recipient-chip--active': selectedElderId === r.elder_user_id }"
+              @tap="selectedElderId = r.elder_user_id"
+            >
+              <text class="recipient-chip__label">{{ r.relation_label || '家人' }}</text>
+            </view>
           </view>
-          <text>{{ r.relation_label || '家人' }}</text>
+        </scroll-view>
+      </view>
+
+      <!-- Text Input -->
+      <view class="section fade-in stagger-1">
+        <view class="text-card">
+          <textarea
+            v-model="textContent"
+            placeholder="今天想和Ta说点什么..."
+            :maxlength="200"
+            class="text-card__input"
+            placeholder-class="text-card__placeholder"
+          />
+          <view class="text-card__footer">
+            <text
+              class="text-card__counter"
+              :class="{ 'text-card__counter--max': textContent.length >= 200 }"
+            >{{ textContent.length }}/200</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- Image Upload -->
+      <view class="section fade-in stagger-2">
+        <view class="image-grid">
+          <!-- Add Image Button -->
+          <view class="image-add-wrap">
+            <view class="image-add" @tap="chooseImage">
+              <text class="image-add__icon">+</text>
+              <text class="image-add__label">添加照片</text>
+            </view>
+          </view>
+          <!-- Image Preview -->
+          <view v-if="imageUrl" class="image-item-wrap">
+            <view class="image-preview">
+              <image :src="imageUrl" mode="aspectFill" class="image-preview__img" />
+              <view
+                class="image-preview__remove"
+                @tap.stop="imageUrl = ''; uploadedUrl = ''"
+              >
+                <text class="remove-icon">×</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- Info Cards (Bento) -->
+      <view class="bento-grid fade-in stagger-3">
+        <view class="bento-card bento-card--amber">
+          <image class="bento-card__icon" src="/static/icons/sun.svg" mode="aspectFit" />
+          <view class="bento-card__body">
+            <text class="bento-card__hint">老家今日晴朗</text>
+            <text class="bento-card__value">适合出门晒太阳</text>
+          </view>
+        </view>
+        <view class="bento-card bento-card--sage">
+          <image class="bento-card__icon" src="/static/icons/clock.svg" mode="aspectFit" />
+          <view class="bento-card__body">
+            <text class="bento-card__hint">最佳发送时间</text>
+            <text class="bento-card__value">预计 10:30 送达</text>
+          </view>
         </view>
       </view>
     </view>
 
+    <!-- Bottom Action Bar -->
     <view class="bottom-bar">
-      <view class="btn-primary generate-btn" :class="{ disabled: !canGenerate }" @tap="handleGenerate">
-        <text class="btn-text">生成海报</text>
+      <view class="bottom-bar__inner">
+        <!-- AI Assist Button -->
+        <view
+          class="action-btn action-btn--outline"
+          @tap="uni.navigateTo({ url: '/pages/send/ai-suggest' })"
+        >
+          <text class="action-btn__sparkle">✦</text>
+          <text class="action-btn__text">AI 帮我写</text>
+        </view>
+        <!-- Send Button -->
+        <view
+          class="action-btn action-btn--primary"
+          :class="{ 'action-btn--disabled': !canGenerate }"
+          @tap="handleGenerate"
+        >
+          <text class="action-btn__text">发送牵挂</text>
+        </view>
       </view>
     </view>
   </view>
@@ -114,189 +180,391 @@ function handleGenerate() {
 </script>
 
 <style lang="scss" scoped>
-.photo-section {
-  margin-bottom: $sp-20;
+// ── TopAppBar — 固定顶部，毛玻璃效果 ──
+.top-app-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: rgba(250, 246, 241, 0.8);
+  backdrop-filter: blur(24rpx);
+  -webkit-backdrop-filter: blur(24rpx);
 }
 
-.photo-placeholder {
-  height: 400rpx;
-  background: $c-surface;
-  border-radius: $r-xl;
-  border: 3rpx dashed $c-border;
+.top-app-bar__status-spacer {
+  // 适配状态栏高度
+  height: var(--status-bar-height, 50rpx);
+}
+
+.top-app-bar__content {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  height: 88rpx;
+  padding: 0 $sp-16;
+}
+
+.top-app-bar__nav {
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: $sp-8;
-  transition: all $duration-normal $ease-out;
   &:active {
-    background: $c-primary-bg;
-    border-color: $c-primary-soft;
-    transform: scale(0.98);
+    opacity: 0.5;
   }
 }
 
-.photo-icon {
-  font-size: 80rpx;
+.nav-icon {
+  font-size: 40rpx;
+  color: $c-text-sub;
+  font-weight: $fw-regular;
 }
 
-.photo-title {
+.top-app-bar__title {
+  flex: 1;
+  text-align: center;
   font-size: $fs-title;
   font-weight: $fw-semibold;
   color: $c-text;
 }
 
-.photo-hint {
-  font-size: $fs-body-sm;
-  color: $c-text-hint;
+.top-app-bar__right {
+  width: 80rpx;
 }
 
-.photo-preview {
-  position: relative;
-  border-radius: $r-xl;
-  overflow: hidden;
-  box-shadow: $shadow-md;
+// ── Page Layout ──
+.send-page {
+  min-height: 100vh;
+  background: $c-bg;
 }
 
-.preview-img {
-  width: 100%;
-  height: 400rpx;
+.page-body {
+  // 状态栏 + 导航栏 + 间距
+  padding-top: calc(var(--status-bar-height, 50rpx) + 88rpx + #{$sp-32});
+  padding-left: $sp-24;
+  padding-right: $sp-24;
+  padding-bottom: 260rpx;
+}
+
+// ── Section ──
+.section {
+  margin-bottom: $sp-32;
+}
+
+.section__label {
   display: block;
-}
-
-.photo-change {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: $sp-12 0;
-  text-align: center;
-  background: rgba(45, 32, 22, 0.5);
-  color: $c-text-inverse;
   font-size: $fs-body-sm;
+  font-weight: $fw-medium;
+  color: $c-text-sub;
+  margin-bottom: $sp-16;
 }
 
-.text-section {
+// ── Recipient Chips — 水平滚动选择器 ──
+.chips-scroll {
+  white-space: nowrap;
+  width: 100%;
+  ::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.chips-row {
+  display: inline-flex;
+  gap: $sp-12;
+  padding-bottom: $sp-8;
+}
+
+.recipient-chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: $sp-10 $sp-24;
+  border-radius: $r-full;
+  border: 2rpx solid $c-border;
+  background: transparent;
+  transition: all $duration-normal $ease-out;
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+.recipient-chip__label {
+  font-size: $fs-body-sm;
+  color: $c-text-sub;
+  white-space: nowrap;
+}
+
+.recipient-chip--active {
+  background: $c-primary;
+  border-color: $c-primary;
+  box-shadow: $shadow-sm, 0 4rpx 16rpx rgba(196, 116, 92, 0.15);
+
+  .recipient-chip__label {
+    color: $c-text-inverse;
+    font-weight: $fw-bold;
+  }
+}
+
+// ── Text Card — 白色卡片输入区 ──
+.text-card {
+  position: relative;
   background: $c-surface;
   border-radius: $r-xl;
   padding: $sp-24;
-  margin-bottom: $sp-20;
-  box-shadow: $shadow-sm;
-  border: 1rpx solid $c-border-light;
+  box-shadow: $shadow-xs;
+  border: 2rpx solid rgba($c-border, 0.3);
 }
 
-.input-wrap {
-  position: relative;
-}
-
-.input-area {
+.text-card__input {
   width: 100%;
-  min-height: 120rpx;
+  height: 300rpx;
   font-size: $fs-body;
   line-height: $lh-relaxed;
-  padding: $sp-12;
-  background: $c-bg;
-  border-radius: $r-md;
-  border: 1rpx solid $c-border-light;
+  color: $c-text;
+  background: transparent;
+  border: none;
+  padding: 0;
 }
 
-.char-count {
+.text-card__placeholder {
+  color: $c-text-hint;
+}
+
+.text-card__footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: $sp-8;
+}
+
+.text-card__counter {
   font-size: $fs-caption;
   color: $c-text-hint;
-  text-align: right;
-  display: block;
-  margin-top: $sp-4;
+  font-family: "SF Mono", "Menlo", "Courier New", monospace;
+
+  &--max {
+    color: $c-primary;
+  }
 }
 
-.elder-section {
-  background: $c-surface;
-  border-radius: $r-xl;
-  padding: $sp-24;
-  margin-bottom: 200rpx;
-  box-shadow: $shadow-sm;
-  border: 1rpx solid $c-border-light;
-}
-
-.section-label {
-  font-size: $fs-body;
-  font-weight: $fw-semibold;
-  color: $c-text;
-  margin-bottom: $sp-16;
-  display: block;
-}
-
-.elder-picker {
+// ── Image Grid — 三列方格 ──
+.image-grid {
   display: flex;
   flex-wrap: wrap;
   gap: $sp-12;
 }
 
-.elder-chip {
-  display: flex;
-  align-items: center;
-  gap: $sp-8;
-  padding: $sp-8 $sp-20 $sp-8 $sp-8;
-  border-radius: $r-full;
-  background: $c-bg-warm;
-  color: $c-text-sub;
-  font-size: $fs-body;
-  font-weight: $fw-medium;
+.image-add-wrap,
+.image-item-wrap {
+  // 三列等宽，减去间距
+  width: calc((100% - #{$sp-12} * 2) / 3);
+}
+
+.image-add {
+  width: 100%;
+  padding-top: 100%; // 1:1 正方形
+  position: relative;
+  border-radius: $r-xl;
+  border: 3rpx dashed $c-border;
+  background: rgba($c-surface, 0.5);
+  overflow: hidden;
   transition: all $duration-normal $ease-out;
-  &.active {
-    background: $gradient-warm;
-    color: $c-text-inverse;
-    box-shadow: 0 4rpx 12rpx rgba(196, 116, 92, 0.2);
-    .chip-avatar {
-      background: rgba(255, 255, 255, 0.3);
-    }
+
+  &:active {
+    background: rgba($c-border, 0.08);
+    transform: scale(0.97);
   }
 }
 
-.chip-avatar {
-  width: 48rpx;
-  height: 48rpx;
+.image-add__icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -70%);
+  font-size: 56rpx;
+  color: $c-primary;
+  line-height: 1;
+}
+
+.image-add__label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, 40%);
+  font-size: 20rpx;
+  color: $c-text-sub;
+  letter-spacing: 2rpx;
+  white-space: nowrap;
+}
+
+.image-preview {
+  width: 100%;
+  padding-top: 100%;
+  position: relative;
+  border-radius: $r-xl;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
+}
+
+.image-preview__img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.image-preview__remove {
+  position: absolute;
+  top: 8rpx;
+  right: 8rpx;
+  width: 40rpx;
+  height: 40rpx;
   border-radius: 50%;
-  background: $c-primary-bg;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10rpx);
+  -webkit-backdrop-filter: blur(10rpx);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: $fs-body-sm;
-  font-weight: $fw-bold;
-  color: $c-primary;
+  z-index: 2;
 }
 
+.remove-icon {
+  color: $c-text-inverse;
+  font-size: $fs-body-sm;
+  line-height: 1;
+}
+
+// ── Bento Info Cards ──
+.bento-grid {
+  display: flex;
+  gap: $sp-12;
+  margin-bottom: $sp-40;
+}
+
+.bento-card {
+  flex: 1;
+  padding: $sp-16;
+  border-radius: $r-xl;
+  display: flex;
+  flex-direction: column;
+}
+
+.bento-card--amber {
+  background: rgba($c-accent, 0.1);
+  border: 2rpx solid rgba($c-accent, 0.2);
+}
+
+.bento-card--sage {
+  background: rgba($c-safe, 0.1);
+  border: 2rpx solid rgba($c-safe, 0.2);
+}
+
+.bento-card__icon {
+  width: 40rpx;
+  height: 40rpx;
+  margin-bottom: $sp-8;
+}
+
+.bento-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-2;
+}
+
+.bento-card__hint {
+  font-size: 20rpx;
+  color: $c-text-sub;
+  line-height: $lh-tight;
+}
+
+.bento-card__value {
+  font-size: 20rpx;
+  color: $c-text;
+  font-weight: $fw-medium;
+  line-height: $lh-tight;
+}
+
+// ── Bottom Action Bar — 固定底部，毛玻璃 ──
 .bottom-bar {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  padding: $sp-24;
-  padding-bottom: calc(#{$sp-24} + env(safe-area-inset-bottom));
-  background: $c-surface;
-  box-shadow: $shadow-md;
+  z-index: 50;
+  padding: $sp-16 $sp-24;
+  padding-bottom: calc(#{$sp-32} + env(safe-area-inset-bottom));
+  background: rgba(250, 246, 241, 0.7);
+  backdrop-filter: blur(40rpx);
+  -webkit-backdrop-filter: blur(40rpx);
+  border-radius: $r-xl $r-xl 0 0;
+  border-top: 1rpx solid rgba($c-border, 0.4);
 }
 
-.generate-btn {
-  width: 100%;
-  text-align: center;
-  padding: $sp-20 0;
+.bottom-bar__inner {
+  display: flex;
+  gap: $sp-16;
+}
+
+// ── Action Buttons ──
+.action-btn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  height: 96rpx;
   border-radius: $r-full;
-  background: $gradient-warm;
-  box-shadow: 0 6rpx 20rpx rgba(196, 116, 92, 0.3);
   transition: all $duration-normal $ease-out;
+
   &:active {
     transform: scale(0.97);
-    box-shadow: 0 2rpx 8rpx rgba(196, 116, 92, 0.2);
-  }
-  &.disabled {
-    opacity: 0.5;
-    box-shadow: none;
   }
 }
 
-.btn-text {
-  font-size: $fs-title;
-  font-weight: $fw-bold;
-  color: $c-text-inverse;
+.action-btn--outline {
+  flex: 1;
+  border: 2rpx solid $c-primary;
+  background: transparent;
+
+  &:active {
+    background: rgba($c-primary, 0.05);
+  }
+}
+
+.action-btn--primary {
+  flex: 1.5;
+  background: $c-primary;
+  border: none;
+  box-shadow: 0 8rpx 24rpx rgba(196, 116, 92, 0.2);
+}
+
+.action-btn--disabled {
+  opacity: 0.45;
+  box-shadow: none;
+}
+
+.action-btn__sparkle {
+  color: $c-primary;
+  font-size: $fs-body;
+  margin-right: $sp-8;
+}
+
+.action-btn__text {
+  font-size: $fs-body-sm;
+  font-weight: $fw-semibold;
+  letter-spacing: 2rpx;
+
+  .action-btn--outline & {
+    color: $c-primary;
+  }
+
+  .action-btn--primary & {
+    color: $c-text-inverse;
+    font-weight: $fw-bold;
+    letter-spacing: 4rpx;
+  }
 }
 </style>

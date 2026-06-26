@@ -25,7 +25,7 @@
         <view class="suggestion-tag-row">
           <text class="suggestion-tag">{{ item.tag }}</text>
           <view v-if="selectedIndex === index" class="check-mark">
-            <text class="check-icon">✓</text>
+            <image class="check-icon-img" src="/static/icons/checkmark.svg" mode="aspectFit" />
           </view>
         </view>
         <text class="suggestion-text">{{ item.text }}</text>
@@ -116,7 +116,8 @@ function useSuggestion() {
   width: 16rpx;
   height: 16rpx;
   border-radius: 50%;
-  background: $c-primary;
+  background: $gradient-warm;
+  box-shadow: 0 2rpx 8rpx rgba(196, 116, 92, 0.3);
   animation: dotPulse 1.2s ease-in-out infinite;
   &:nth-child(2) { animation-delay: 200ms; }
   &:nth-child(3) { animation-delay: 400ms; }
@@ -137,16 +138,18 @@ function useSuggestion() {
   border-radius: $r-lg;
   padding: $sp-24;
   margin-bottom: $sp-16;
-  box-shadow: $shadow-sm;
-  border: 2rpx solid $c-border-light;
+  box-shadow: $shadow-md;
+  border: $border-subtle;
   transition: all $duration-normal $ease-out;
   &.selected {
     border-color: $c-primary;
     background: $c-primary-surface;
-    box-shadow: 0 4rpx 16rpx rgba(196, 116, 92, 0.12);
+    box-shadow: $shadow-glow;
+    border-left: 6rpx solid $c-primary;
   }
   &:active {
     transform: scale(0.98);
+    transition-timing-function: $ease-spring;
   }
 }
 
@@ -164,22 +167,23 @@ function useSuggestion() {
   padding: $sp-4 $sp-16;
   border-radius: $r-full;
   font-weight: $fw-medium;
+  box-shadow: 0 0 0 4rpx rgba(196, 116, 92, 0.06);
 }
 
 .check-mark {
   width: 40rpx;
   height: 40rpx;
-  background: $c-primary;
+  background: $gradient-warm;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4rpx 12rpx rgba(196, 116, 92, 0.3);
 }
 
-.check-icon {
-  font-size: $fs-body-sm;
-  color: $c-text-inverse;
-  font-weight: $fw-bold;
+.check-icon-img {
+  width: 24rpx;
+  height: 24rpx;
 }
 
 .suggestion-text {
@@ -200,6 +204,7 @@ function useSuggestion() {
   padding-bottom: calc(#{$sp-24} + env(safe-area-inset-bottom));
   background: $c-surface;
   box-shadow: $shadow-md;
+  border-top: $border-subtle;
 }
 
 .refresh-btn {

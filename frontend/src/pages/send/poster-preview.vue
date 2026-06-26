@@ -272,11 +272,11 @@ async function sendPoster() {
   border-radius: $r-xl;
   padding: $sp-12;
   box-shadow: $shadow-sm;
-  border: 3rpx solid $c-border-light;
+  border: 2rpx solid rgba(237, 229, 219, 0.6);
   transition: all $duration-normal $ease-out;
   &.selected {
     border-color: $c-primary;
-    box-shadow: 0 4rpx 20rpx rgba(196, 116, 92, 0.2);
+    box-shadow: $shadow-glow;
     transform: translateY(-8rpx);
   }
   &:active {
@@ -295,6 +295,7 @@ async function sendPoster() {
   padding: 4rpx 16rpx;
   border-radius: $r-full;
   z-index: 1;
+  box-shadow: 0 4rpx 12rpx rgba(196, 116, 92, 0.3);
 }
 
 .poster-img {
@@ -316,7 +317,7 @@ async function sendPoster() {
   padding: $sp-24;
   margin-top: $sp-20;
   box-shadow: $shadow-sm;
-  border: 1rpx solid $c-border-light;
+  border: $border-subtle;
 }
 
 .section-label {
@@ -381,6 +382,7 @@ async function sendPoster() {
   padding-bottom: calc(#{$sp-24} + env(safe-area-inset-bottom));
   background: $c-surface;
   box-shadow: $shadow-md;
+  border-top: $border-subtle;
 }
 
 .regenerate-btn {

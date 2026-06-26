@@ -1,5 +1,6 @@
 <template>
   <view class="page">
+    <!-- Loading -->
     <view v-if="momentStore.loading" class="loading-center fade-in">
       <view class="loading-dot-wrap">
         <view class="loading-dot" />
@@ -8,34 +9,80 @@
       </view>
     </view>
 
+    <!-- Empty State -->
     <view v-else-if="momentStore.moments.length === 0" class="empty-state fade-in">
       <view class="empty-icon-wrap">
-        <text class="empty-icon">📝</text>
+        <image class="empty-icon" src="/static/icons/edit-note.svg" mode="aspectFit" />
       </view>
       <text class="empty-title">第一份牵挂从这里开始</text>
       <text class="empty-desc">一句简单的问候，也能让家人感到温暖</text>
       <view class="btn-primary empty-btn" @tap="goSend">发送第一条</view>
     </view>
 
-    <view v-else class="moment-list">
-      <view
-        v-for="(m, index) in momentStore.moments"
-        :key="m.id"
-        class="moment-item fade-in"
-        :class="'stagger-' + Math.min(index + 1, 4)"
-      >
-        <view class="moment-header">
-          <text class="elder-label">{{ m.elder_label || '家人' }}</text>
-          <view :class="m.is_read ? 'badge-safe' : 'badge-warn'">
-            <text>{{ m.is_read ? '已读' : '未读' }}</text>
+    <!-- History List -->
+    <view v-else class="history-content">
+      <!-- Section Header -->
+      <view class="section-header">
+        <text class="section-title">记录</text>
+        <text class="section-subtitle">珍惜每一次跨越距离的叮嘱</text>
+      </view>
+
+      <!-- Cards -->
+      <view class="card-list">
+        <view
+          v-for="(m, index) in momentStore.moments"
+          :key="m.id"
+          class="history-card fade-in"
+          :class="['stagger-' + Math.min(index + 1, 4), { unread: !m.is_read }]"
+        >
+          <!-- Card Header: Avatar + Name/Status + Time -->
+          <view class="card-header">
+            <view class="card-header-left">
+              <view class="avatar-wrap" :class="{ 'avatar-unread': !m.is_read, 'avatar-read': m.is_read }">
+                <image
+                  v-if="m.elder_avatar"
+                  :src="getFullUrl(m.elder_avatar)"
+                  mode="aspectFill"
+                  class="avatar-img"
+                />
+                <text v-else class="avatar-initial">{{ (m.elder_nickname || m.elder_label || '家')[0] }}</text>
+              </view>
+              <view class="name-status">
+                <text class="elder-name">{{ m.elder_nickname || m.elder_label || '家人' }}</text>
+                <view class="status-row">
+                  <view class="status-dot" :class="m.is_read ? 'dot-read' : 'dot-unread'" />
+                  <text class="status-text" :class="m.is_read ? 'text-read' : 'text-unread'">
+                    {{ m.is_read ? '已读' : '未读' }}
+                  </text>
+                </view>
+              </view>
+            </view>
+            <text class="card-time">{{ formatTime(m.created_at) }}</text>
+          </view>
+
+          <!-- Message Preview -->
+          <view v-if="m.content_type === 'poster' && m.media_urls?.length" class="poster-thumb-row">
+            <image :src="getFullUrl(m.media_urls[0])" mode="aspectFill" class="poster-thumb" />
+            <text class="poster-tag">海报</text>
+          </view>
+          <text v-else class="message-preview">{{ m.text_content }}</text>
+
+          <!-- Footer: Dashed Divider + Action -->
+          <view class="card-footer">
+            <view v-if="!m.is_read" class="footer-action" @tap="goSend">
+              <text class="action-text action-primary">查看详情</text>
+              <text class="action-arrow">›</text>
+            </view>
+            <view v-else class="footer-action">
+              <text class="action-text action-muted">已存入存档</text>
+            </view>
           </view>
         </view>
-        <view v-if="m.content_type === 'poster' && m.media_urls?.length" class="poster-thumb-row">
-          <image :src="getFullUrl(m.media_urls[0])" mode="aspectFill" class="poster-thumb" />
-          <text class="poster-tag">海报</text>
-        </view>
-        <text v-else class="moment-content">{{ m.text_content }}</text>
-        <text class="moment-time">{{ m.created_at_text }}</text>
+      </view>
+
+      <!-- Bottom Hint -->
+      <view class="bottom-hint">
+        <text class="bottom-hint-text">没有更多历史记录了</text>
       </view>
     </view>
   </view>
@@ -73,6 +120,7 @@ function goSend() {
 </script>
 
 <style lang="scss" scoped>
+/* Loading */
 .loading-center {
   display: flex;
   justify-content: center;
@@ -99,6 +147,7 @@ function goSend() {
   40% { opacity: 1; transform: scale(1.2); }
 }
 
+/* Empty State */
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -118,7 +167,8 @@ function goSend() {
 }
 
 .empty-icon {
-  font-size: 56rpx;
+  width: 56rpx;
+  height: 56rpx;
 }
 
 .empty-title {
@@ -140,42 +190,167 @@ function goSend() {
   padding: $sp-16 $sp-48;
 }
 
-.moment-item {
-  background: $c-surface;
-  border-radius: $r-lg;
-  padding: $sp-24;
-  margin-bottom: $sp-16;
-  box-shadow: $shadow-sm;
-  border: 1rpx solid $c-border-light;
+/* Section Header */
+.section-header {
+  margin-bottom: $sp-32;
 }
 
-.moment-header {
+.section-title {
+  font-size: 60rpx;
+  font-weight: $fw-medium;
+  color: $c-text;
+  letter-spacing: -2rpx;
+  display: block;
+  margin-bottom: $sp-4;
+}
+
+.section-subtitle {
+  font-size: $fs-body-sm;
+  color: $c-text-hint;
+  display: block;
+}
+
+/* Card List */
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-16;
+}
+
+/* History Card */
+.history-card {
+  background: $c-surface;
+  border-radius: $r-2xl;
+  padding: $sp-16;
+  box-shadow: 0 4rpx 40rpx -4rpx rgba(44, 40, 37, 0.05);
+  border: 2rpx solid rgba(154, 142, 130, 0.05);
+  transition: transform $duration-normal $ease-out;
+  position: relative;
+  overflow: hidden;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &.unread {
+    border-left: 6rpx solid $c-primary;
+  }
+}
+
+/* Card Header */
+.card-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: $sp-12;
 }
 
-.elder-label {
-  font-size: $fs-body;
-  font-weight: $fw-semibold;
-  color: $c-text;
+.card-header-left {
+  display: flex;
+  align-items: center;
+  gap: $sp-12;
 }
 
-.moment-content {
-  font-size: $fs-body;
-  line-height: $lh-normal;
+.avatar-wrap {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: $r-full;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $c-primary-bg;
+
+  &.avatar-unread {
+    border: 4rpx solid rgba($c-primary, 0.1);
+  }
+
+  &.avatar-read {
+    border: 4rpx solid rgba($c-safe, 0.1);
+  }
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+}
+
+.avatar-initial {
+  font-size: $fs-title;
+  font-weight: $fw-bold;
+  color: $c-primary;
+}
+
+.name-status {
+  display: flex;
+  flex-direction: column;
+}
+
+.elder-name {
+  font-size: 36rpx;
+  font-weight: $fw-bold;
   color: $c-text;
   display: block;
 }
 
-.moment-time {
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: $sp-6;
+  margin-top: $sp-2;
+}
+
+.status-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: $r-full;
+
+  &.dot-unread {
+    background: $c-primary;
+    box-shadow: 0 0 0 4rpx $c-bg, 0 0 0 6rpx rgba($c-primary, 0.2);
+  }
+
+  &.dot-read {
+    background: $c-safe;
+  }
+}
+
+.status-text {
+  font-size: $fs-caption;
+  font-weight: $fw-medium;
+
+  &.text-unread {
+    color: $c-primary;
+  }
+
+  &.text-read {
+    color: $c-text-hint;
+  }
+}
+
+.card-time {
   font-size: $fs-caption;
   color: $c-text-hint;
-  margin-top: $sp-12;
-  display: block;
+  font-weight: $fw-medium;
+  background: $c-bg-warm;
+  padding: $sp-2 $sp-8;
+  border-radius: $r-full;
 }
 
+/* Message Preview */
+.message-preview {
+  font-size: 30rpx;
+  line-height: $lh-relaxed;
+  color: rgba($c-text, 0.8);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Poster Thumbnail */
 .poster-thumb-row {
   display: flex;
   align-items: center;
@@ -186,7 +361,8 @@ function goSend() {
   width: 120rpx;
   height: 160rpx;
   border-radius: $r-md;
-  box-shadow: $shadow-xs;
+  box-shadow: $shadow-sm;
+  border: $border-subtle;
 }
 
 .poster-tag {
@@ -196,5 +372,52 @@ function goSend() {
   padding: $sp-4 $sp-12;
   border-radius: $r-full;
   font-weight: $fw-medium;
+}
+
+/* Card Footer */
+.card-footer {
+  margin-top: $sp-16;
+  padding-top: $sp-12;
+  border-top: 2rpx dashed rgba($c-text, 0.05);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.footer-action {
+  display: flex;
+  align-items: center;
+  gap: $sp-4;
+}
+
+.action-text {
+  font-size: $fs-caption;
+  font-weight: $fw-bold;
+}
+
+.action-primary {
+  color: $c-primary;
+}
+
+.action-muted {
+  color: $c-text-hint;
+}
+
+.action-arrow {
+  font-size: $fs-body-sm;
+  color: $c-primary;
+  font-weight: $fw-bold;
+}
+
+/* Bottom Hint */
+.bottom-hint {
+  margin-top: $sp-48;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.bottom-hint-text {
+  font-size: $fs-caption;
+  color: rgba($c-text-hint, 0.4);
 }
 </style>

@@ -18,7 +18,8 @@ page {
 .page {
   min-height: 100vh;
   padding: 0 $sp-24;
-  padding-bottom: 180rpx;
+  padding-bottom: calc(180rpx + env(safe-area-inset-bottom));
+  overscroll-behavior: contain;
 }
 
 .page-gradient {
@@ -31,8 +32,8 @@ page {
   background: $c-surface;
   border-radius: $r-lg;
   padding: $sp-24;
-  box-shadow: $shadow-sm;
-  border: 1rpx solid $c-border-light;
+  box-shadow: $shadow-md;
+  border: $border-subtle;
   transition: transform $duration-normal $ease-out, box-shadow $duration-normal $ease-out;
 }
 
@@ -69,12 +70,13 @@ page {
   font-weight: $fw-semibold;
   text-align: center;
   border: none;
-  box-shadow: 0 4rpx 16rpx rgba(196, 116, 92, 0.25);
+  box-shadow: $shadow-glow;
   letter-spacing: 2rpx;
   transition: all $duration-normal $ease-out;
   &:active {
-    transform: scale(0.97);
+    transform: scale(0.95);
     box-shadow: 0 2rpx 8rpx rgba(196, 116, 92, 0.2);
+    transition-timing-function: $ease-spring;
   }
   &::after { border: none; }
 }
@@ -139,12 +141,14 @@ page {
   @extend .badge;
   background: $c-safe-bg;
   color: $c-safe;
+  box-shadow: 0 0 0 6rpx rgba(239, 246, 241, 0.6);
 }
 
 .badge-warn {
   @extend .badge;
   background: $c-warn-bg;
   color: $c-warn;
+  box-shadow: 0 0 0 6rpx rgba(250, 240, 238, 0.6);
 }
 
 .badge-neutral {
@@ -185,3 +189,11 @@ page {
 .stagger-2 { animation-delay: 120ms; }
 .stagger-3 { animation-delay: 190ms; }
 .stagger-4 { animation-delay: 260ms; }
+
+// ── Decorative ──
+.deco-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(196, 116, 92, 0.04);
+  pointer-events: none;
+}

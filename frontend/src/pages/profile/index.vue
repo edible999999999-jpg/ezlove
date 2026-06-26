@@ -14,14 +14,14 @@
       <view class="menu-section fade-in stagger-1">
         <view class="menu-card" @tap="goBindList">
           <view class="menu-left">
-            <text class="menu-icon">👨‍👩‍👧</text>
+            <image class="menu-icon-img" src="/static/icons/family.svg" mode="aspectFit" />
             <text class="menu-text">我的家人</text>
           </view>
           <text class="menu-arrow">›</text>
         </view>
         <view class="menu-card" @tap="goInvite">
           <view class="menu-left">
-            <text class="menu-icon">🔗</text>
+            <image class="menu-icon-img" src="/static/icons/link.svg" mode="aspectFit" />
             <text class="menu-text">邀请绑定</text>
           </view>
           <text class="menu-arrow">›</text>
@@ -83,8 +83,9 @@ function handleLogout() {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8rpx 32rpx rgba(196, 116, 92, 0.25);
+  box-shadow: $shadow-glow;
   margin-bottom: $sp-20;
+  border: 6rpx solid rgba(255, 255, 255, 0.8);
 }
 
 .avatar-letter {
@@ -119,16 +120,18 @@ function handleLogout() {
 .menu-card {
   background: $c-surface;
   border-radius: $r-lg;
-  padding: $sp-24;
+  padding: $sp-24 $sp-32;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: $shadow-sm;
-  border: 1rpx solid $c-border-light;
+  box-shadow: $shadow-md;
+  border: $border-subtle;
+  border-left: 6rpx solid $c-primary-soft;
   transition: all $duration-normal $ease-out;
   &:active {
     transform: scale(0.98);
     background: $c-surface-warm;
+    box-shadow: $shadow-sm;
   }
 }
 
@@ -138,8 +141,9 @@ function handleLogout() {
   gap: $sp-16;
 }
 
-.menu-icon {
-  font-size: $fs-title;
+.menu-icon-img {
+  width: 40rpx;
+  height: 40rpx;
 }
 
 .menu-text {
@@ -160,12 +164,14 @@ function handleLogout() {
 .logout-btn {
   text-align: center;
   padding: $sp-20;
-  border-radius: $r-lg;
+  border-radius: $r-full;
   background: $c-surface;
-  border: 1rpx solid $c-border-light;
+  border: 2rpx solid $c-warn-soft;
+  box-shadow: $shadow-sm;
   transition: all $duration-normal $ease-out;
   &:active {
     background: $c-warn-bg;
+    transform: scale(0.97);
   }
 }
 

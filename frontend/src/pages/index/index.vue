@@ -1,16 +1,35 @@
 <template>
-  <view class="page-gradient">
+  <view class="page-home">
+    <!-- 顶部导航栏 -->
+    <view class="top-bar">
+      <view class="top-bar__left">
+        <view class="top-bar__avatar">
+          <text class="top-bar__avatar-text">{{ (userStore.profile?.nickname || '我')[0] }}</text>
+        </view>
+        <text class="top-bar__greeting">你好，{{ userStore.profile?.nickname || '家人' }}</text>
+      </view>
+      <view class="top-bar__bell" @tap="goAlerts">
+        <image class="top-bar__bell-icon" src="/static/icons/notification.svg" mode="aspectFit" />
+      </view>
+    </view>
+
     <view class="home-content">
-      <view class="home-header fade-in" :class="{ 'elder-mode': userStore.isElder }">
-        <text class="greeting">{{ greeting }}，</text>
-        <text class="greeting-sub">{{ userStore.isFamily ? '今日牵挂状态' : '看看孩子们的分享' }}</text>
+      <!-- 大字问候区域 -->
+      <view class="greeting-section fade-in">
+        <text class="greeting-title" :class="{ 'greeting-title--elder': userStore.isElder }">{{ greeting }}</text>
+        <view class="greeting-sub-row">
+          <text class="greeting-sub" :class="{ 'greeting-sub--elder': userStore.isElder }">
+            {{ userStore.isFamily ? '今日牵挂状态' : '看看孩子们的分享' }}
+          </text>
+          <view class="pulse-dot"></view>
+        </view>
       </view>
 
       <!-- 子女端：绑定家人列表 -->
       <view v-if="userStore.isFamily" class="elder-section">
         <view v-if="relationStore.relations.length === 0" class="empty-state fade-in stagger-1">
           <view class="empty-icon-wrap">
-            <text class="empty-icon">🔗</text>
+            <image class="empty-icon" src="/static/icons/link.svg" mode="aspectFit" />
           </view>
           <text class="empty-title">思念需要一个出口</text>
           <text class="empty-desc">邀请家人加入，让关心不再只放在心里</text>
@@ -25,24 +44,29 @@
             :class="'stagger-' + Math.min(index + 1, 4)"
             @tap="goElderStatus(elder)"
           >
-            <view class="elder-card-top">
-              <view class="elder-avatar">
-                <text class="avatar-text">{{ (elder.relation_label || '家')[0] }}</text>
+            <view class="elder-card__left">
+              <view
+                class="elder-card__avatar"
+                :class="elder.today_read ? 'elder-card__avatar--read' : 'elder-card__avatar--unread'"
+              >
+                <text class="elder-card__avatar-text" :class="elder.today_read ? 'text--read' : 'text--unread'">
+                  {{ (elder.relation_label || '家')[0] }}
+                </text>
               </view>
-              <view class="elder-meta">
-                <text class="elder-name">{{ elder.relation_label || '家人' }}</text>
-                <text class="elder-last-active">{{ elder.last_active_text || '暂无活跃记录' }}</text>
-              </view>
-              <view class="elder-status" :class="elder.today_read ? 'badge-safe' : 'badge-warn'">
-                <text>{{ elder.today_read ? '已读' : '未读' }}</text>
+              <view class="elder-card__info">
+                <view class="elder-card__name-row">
+                  <text class="elder-card__name">{{ elder.relation_label || '家人' }}</text>
+                  <view
+                    class="elder-card__badge"
+                    :class="elder.today_read ? 'elder-card__badge--read' : 'elder-card__badge--unread'"
+                  >
+                    <text>{{ elder.today_read ? '今日已读' : '今日未读' }}</text>
+                  </view>
+                </view>
+                <text class="elder-card__time">{{ elder.last_active_text || '暂无活跃记录' }}</text>
               </view>
             </view>
-          </view>
-        </view>
-
-        <view v-if="relationStore.relations.length > 0" class="send-area fade-in stagger-3">
-          <view class="btn-primary send-btn" @tap="goSend">
-            <text>发送牵挂</text>
+            <image class="elder-card__chevron" src="/static/icons/chevron-right.svg" mode="aspectFit" />
           </view>
         </view>
       </view>
@@ -59,7 +83,7 @@
 
         <view v-else-if="momentStore.moments.length === 0" class="empty-state-elder fade-in stagger-1">
           <view class="empty-icon-wrap-elder">
-            <text class="empty-icon-elder">☀️</text>
+            <image class="empty-icon-elder" src="/static/icons/sun.svg" mode="aspectFit" />
           </view>
           <text class="empty-title-elder">今天天气真好呀</text>
           <text class="empty-desc-elder">孩子们正在准备给您的惊喜呢，稍等一会儿~</text>
@@ -73,19 +97,35 @@
             :class="'stagger-' + Math.min(index + 1, 4)"
             @tap="goViewDetail(m)"
           >
-            <text class="elder-moment-sender">{{ m.sender_name || '家人' }} 发来的</text>
-            <view v-if="m.content_type === 'poster' && m.media_urls?.length" class="elder-poster-thumb">
-              <image :src="getFullUrl(m.media_urls[0])" mode="aspectFill" class="thumb-img" />
-              <text class="thumb-label">海报</text>
+            <view class="elder-moment-card__left">
+              <view class="elder-moment-card__avatar">
+                <text class="elder-moment-card__avatar-text">{{ (m.sender_name || '家')[0] }}</text>
+              </view>
+              <view class="elder-moment-card__info">
+                <view class="elder-moment-card__name-row">
+                  <text class="elder-moment-card__name">{{ m.sender_name || '家人' }}</text>
+                  <view class="elder-moment-card__badge">
+                    <text>发来牵挂</text>
+                  </view>
+                </view>
+                <text class="elder-moment-card__time">{{ m.created_at_text || '' }}</text>
+              </view>
             </view>
-            <text v-else class="elder-moment-text">{{ m.text_content || '发了一张图片' }}</text>
-            <view class="elder-moment-footer">
-              <text class="elder-moment-time">{{ m.created_at_text || '' }}</text>
-              <text class="elder-moment-action">点击查看 ›</text>
-            </view>
+            <image class="elder-moment-card__chevron" src="/static/icons/chevron-right.svg" mode="aspectFit" />
           </view>
         </view>
       </view>
+    </view>
+
+    <!-- 底部装饰线 -->
+    <view v-if="userStore.isFamily && relationStore.relations.length > 0" class="deco-line-wrap fade-in stagger-4">
+      <view class="deco-line"></view>
+    </view>
+
+    <!-- FAB 浮动按钮 -->
+    <view v-if="userStore.isFamily && relationStore.relations.length > 0" class="fab fade-in stagger-3" @tap="goSend">
+      <image class="fab__icon" src="/static/icons/heart-send.svg" mode="aspectFit" />
+      <text class="fab__text">发送牵挂</text>
     </view>
   </view>
 </template>
@@ -142,42 +182,146 @@ function goInvite() {
 function goViewDetail(m) {
   uni.navigateTo({ url: `/pages/view/detail?id=${m.id}` });
 }
+
+function goAlerts() {
+  uni.navigateTo({ url: "/pages/alerts/index" });
+}
 </script>
 
 <style lang="scss" scoped>
+// ── 页面背景 ──
+.page-home {
+  min-height: 100vh;
+  background-color: #FBF7F2;
+}
+
+// ── 顶部导航栏 ──
+.top-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 50;
+  background: rgba(250, 246, 241, 0.85);
+  backdrop-filter: blur(24rpx);
+  -webkit-backdrop-filter: blur(24rpx);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $sp-16 $sp-24;
+  padding-top: calc(var(--status-bar-height, 50rpx) + #{$sp-16});
+  box-sizing: border-box;
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: $sp-12;
+  }
+
+  &__avatar {
+    width: 80rpx;
+    height: 80rpx;
+    border-radius: $r-full;
+    background: $c-bg-warm;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  &__avatar-text {
+    font-size: $fs-body;
+    font-weight: $fw-bold;
+    color: $c-primary;
+  }
+
+  &__greeting {
+    font-size: $fs-body;
+    font-weight: $fw-medium;
+    color: $c-primary;
+  }
+
+  &__bell {
+    padding: $sp-8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__bell-icon {
+    width: 44rpx;
+    height: 44rpx;
+  }
+}
+
+// ── 主内容区 ──
 .home-content {
-  padding: 0 $sp-24;
-  padding-bottom: 200rpx;
+  // 顶部留出 top-bar 高度
+  padding-top: calc(var(--status-bar-height, 50rpx) + 140rpx);
+  padding-left: $sp-24;
+  padding-right: $sp-24;
+  padding-bottom: 260rpx;
 }
 
-.home-header {
-  padding-top: 120rpx;
+// ── 问候区域 ──
+.greeting-section {
   margin-bottom: $sp-40;
+  background: $gradient-warm-soft;
+  border-radius: $r-xl;
+  padding: $sp-24 $sp-24 $sp-20;
 }
 
-.greeting {
-  font-size: $fs-headline;
+.greeting-title {
+  font-size: 72rpx;
   font-weight: $fw-bold;
   color: $c-text;
   display: block;
+  margin-bottom: $sp-8;
+  letter-spacing: -2rpx;
+
+  &--elder {
+    font-size: $fs-elder-headline;
+  }
+}
+
+.greeting-sub-row {
+  display: flex;
+  align-items: center;
+  gap: $sp-8;
 }
 
 .greeting-sub {
-  font-size: $fs-body;
+  font-size: 36rpx;
   color: $c-text-sub;
-  margin-top: $sp-8;
-  display: block;
+  opacity: 0.75;
+
+  &--elder {
+    font-size: $fs-elder-body;
+  }
 }
 
-/* ── 子女端样式 ── */
+.pulse-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: $r-full;
+  background-color: $c-primary;
+  animation: pulse 2s ease-in-out infinite;
+}
 
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+// ── 子女端：空状态 ──
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: $sp-64 $sp-24;
   background: $c-surface;
-  border-radius: $r-xl;
+  border-radius: $r-lg;
   box-shadow: $shadow-sm;
 }
 
@@ -185,7 +329,7 @@ function goViewDetail(m) {
   width: 120rpx;
   height: 120rpx;
   background: $c-primary-bg;
-  border-radius: $r-2xl;
+  border-radius: $r-full;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -193,7 +337,8 @@ function goViewDetail(m) {
 }
 
 .empty-icon {
-  font-size: 56rpx;
+  width: 56rpx;
+  height: 56rpx;
 }
 
 .empty-title {
@@ -215,91 +360,120 @@ function goViewDetail(m) {
   padding: $sp-16 $sp-48;
 }
 
+// ── 子女端：长辈卡片列表 ──
+.elder-list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-24;
+}
+
 .elder-card {
   background: $c-surface;
   border-radius: $r-lg;
-  padding: $sp-24;
-  margin-bottom: $sp-16;
+  padding: $sp-20 $sp-20;
   box-shadow: $shadow-sm;
-  border: 1rpx solid $c-border-light;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   transition: all $duration-normal $ease-out;
+
   &:active {
     transform: scale(0.98);
+    background: $c-surface-warm;
     box-shadow: $shadow-xs;
   }
-}
 
-.elder-card-top {
-  display: flex;
-  align-items: center;
-}
-
-.elder-avatar {
-  width: 88rpx;
-  height: 88rpx;
-  background: $gradient-warm-soft;
-  border-radius: $r-xl;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: $sp-16;
-  flex-shrink: 0;
-}
-
-.avatar-text {
-  font-size: $fs-title;
-  font-weight: $fw-bold;
-  color: $c-primary;
-}
-
-.elder-meta {
-  flex: 1;
-  min-width: 0;
-}
-
-.elder-name {
-  font-size: $fs-subtitle;
-  font-weight: $fw-semibold;
-  color: $c-text;
-  display: block;
-}
-
-.elder-last-active {
-  font-size: $fs-body-sm;
-  color: $c-text-hint;
-  margin-top: $sp-4;
-  display: block;
-}
-
-.elder-status {
-  flex-shrink: 0;
-  margin-left: $sp-12;
-}
-
-.send-area {
-  margin-top: $sp-16;
-}
-
-.send-btn {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 104rpx;
-}
-
-.home-header.elder-mode {
-  .greeting {
-    font-size: $fs-elder-headline;
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: $sp-16;
+    flex: 1;
+    min-width: 0;
   }
-  .greeting-sub {
-    font-size: $fs-elder-body;
-    margin-top: $sp-12;
+
+  &__avatar {
+    width: 112rpx;
+    height: 112rpx;
+    border-radius: $r-full;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    &--unread {
+      background-color: $c-warn-bg;
+    }
+
+    &--read {
+      background-color: $c-safe-bg;
+    }
+  }
+
+  &__avatar-text {
+    font-size: 42rpx;
+    font-weight: $fw-bold;
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__name-row {
+    display: flex;
+    align-items: center;
+    gap: $sp-8;
+    margin-bottom: $sp-4;
+  }
+
+  &__name {
+    font-size: 36rpx;
+    font-weight: $fw-bold;
+    color: $c-text;
+  }
+
+  &__badge {
+    padding: $sp-2 $sp-10;
+    border-radius: $r-full;
+    font-size: $fs-caption;
+    font-weight: $fw-medium;
+
+    &--unread {
+      background-color: $c-warn-bg;
+      color: $c-warn;
+    }
+
+    &--read {
+      background-color: $c-safe-bg;
+      color: $c-safe;
+    }
+  }
+
+  &__time {
+    font-size: $fs-body-sm;
+    color: $c-text-sub;
+    display: block;
+  }
+
+  &__chevron {
+    width: 36rpx;
+    height: 36rpx;
+    flex-shrink: 0;
+    margin-left: $sp-8;
+    opacity: 0.4;
   }
 }
 
-/* ── 老人端样式（大字体） ── */
+// 未读/已读文字颜色
+.text--unread {
+  color: $c-warn;
+}
 
+.text--read {
+  color: $c-safe;
+}
+
+// ── 老人端样式（大字体）──
 .loading-center {
   display: flex;
   justify-content: center;
@@ -337,15 +511,17 @@ function goViewDetail(m) {
   width: 200rpx;
   height: 200rpx;
   background: $c-primary-bg;
-  border-radius: $r-2xl;
+  border-radius: $r-full;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: $sp-32;
+  box-shadow: $shadow-sm;
 }
 
 .empty-icon-elder {
-  font-size: 100rpx;
+  width: 100rpx;
+  height: 100rpx;
 }
 
 .empty-title-elder {
@@ -362,76 +538,151 @@ function goViewDetail(m) {
   display: block;
 }
 
+// ── 老人端：牵挂卡片（与子女端统一风格）──
+.elder-moment-list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-24;
+}
+
 .elder-moment-card {
   background: $c-surface;
-  border-radius: $r-xl;
-  padding: $sp-48 $sp-40;
-  margin-bottom: $sp-32;
+  border-radius: $r-lg;
+  padding: $sp-24 $sp-20;
   box-shadow: $shadow-sm;
-  border: 1rpx solid $c-border-light;
-  transition: all $duration-normal $ease-out;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: transform $duration-normal $ease-out;
+
   &:active {
     transform: scale(0.98);
-    background: $c-surface-warm;
+  }
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: $sp-16;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__avatar {
+    width: 128rpx;
+    height: 128rpx;
+    border-radius: $r-full;
+    background-color: $c-primary-bg;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__avatar-text {
+    font-size: $fs-elder-body;
+    font-weight: $fw-bold;
+    color: $c-primary;
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__name-row {
+    display: flex;
+    align-items: center;
+    gap: $sp-8;
+    margin-bottom: $sp-6;
+  }
+
+  &__name {
+    font-size: $fs-elder-title;
+    font-weight: $fw-bold;
+    color: $c-text;
+  }
+
+  &__badge {
+    padding: $sp-4 $sp-12;
+    border-radius: $r-full;
+    font-size: $fs-body;
+    font-weight: $fw-medium;
+    background-color: $c-accent-bg;
+    color: $c-accent;
+  }
+
+  &__time {
+    font-size: $fs-elder-body;
+    color: $c-text-sub;
+    display: block;
+  }
+
+  &__chevron {
+    width: 44rpx;
+    height: 44rpx;
+    flex-shrink: 0;
+    margin-left: $sp-8;
+    opacity: 0.4;
   }
 }
 
-.elder-moment-sender {
-  font-size: $fs-elder-title;
-  color: $c-primary;
-  font-weight: $fw-bold;
-  display: block;
-  margin-bottom: $sp-16;
-}
-
-.elder-moment-text {
-  font-size: $fs-elder-title;
-  line-height: $lh-relaxed;
-  color: $c-text;
-  display: block;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.elder-moment-footer {
+// ── 底部装饰线 ──
+.deco-line-wrap {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: $sp-32;
+  justify-content: center;
+  margin-top: $sp-48;
 }
 
-.elder-moment-time {
-  font-size: $fs-elder-body;
-  color: $c-text-hint;
-}
-
-.elder-moment-action {
-  font-size: $fs-elder-title;
-  color: $c-primary;
-  font-weight: $fw-bold;
-}
-
-.elder-poster-thumb {
-  display: flex;
-  align-items: center;
-  gap: $sp-16;
-  margin-bottom: $sp-8;
-}
-
-.thumb-img {
-  width: 200rpx;
-  height: 260rpx;
-  border-radius: $r-lg;
-  box-shadow: $shadow-sm;
-}
-
-.thumb-label {
-  font-size: $fs-elder-body;
-  color: $c-text-sub;
-  background: $c-primary-bg;
-  padding: $sp-4 $sp-16;
+.deco-line {
+  width: 96rpx;
+  height: 4rpx;
+  background-color: $c-border-light;
   border-radius: $r-full;
+}
+
+// ── FAB 浮动按钮 ──
+.fab {
+  position: fixed;
+  bottom: 180rpx;
+  right: $sp-24;
+  z-index: 40;
+  background: $c-primary;
+  color: $c-text-inverse;
+  display: flex;
+  align-items: center;
+  gap: $sp-8;
+  padding: $sp-16 $sp-24;
+  border-radius: $r-full;
+  box-shadow: $shadow-lg;
+  transition: all $duration-normal $ease-out;
+  animation: fabBounceIn 600ms $ease-spring both 400ms, fabBreath 3s ease-in-out infinite 1.2s;
+
+  &:active {
+    transform: scale(0.9);
+    animation: none;
+  }
+
+  &__icon {
+    width: 36rpx;
+    height: 36rpx;
+  }
+
+  &__text {
+    font-size: $fs-body;
+    font-weight: $fw-medium;
+    letter-spacing: 2rpx;
+    color: $c-text-inverse;
+  }
+}
+
+@keyframes fabBounceIn {
+  0% { opacity: 0; transform: translateY(60rpx) scale(0.6); }
+  60% { opacity: 1; transform: translateY(-8rpx) scale(1.05); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes fabBreath {
+  0%, 100% { box-shadow: $shadow-lg; }
+  50% { box-shadow: 0 12rpx 48rpx rgba(196, 116, 92, 0.35); }
 }
 </style>

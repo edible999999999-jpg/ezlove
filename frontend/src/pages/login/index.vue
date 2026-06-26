@@ -1,28 +1,43 @@
 <template>
   <view class="login-page">
-    <view class="hero-area fade-in">
-      <view class="logo-mark">
-        <text class="logo-icon">💌</text>
+    <!-- 装饰圆 -->
+    <view class="deco-circle deco-1" />
+    <view class="deco-circle deco-2" />
+    <view class="deco-circle deco-3" />
+
+    <!-- 品牌区域 -->
+    <view class="brand-area fade-in">
+      <view class="logo-outer">
+        <view class="logo-inner">
+          <image class="logo-icon" src="/static/icons/logo-heart.svg" mode="aspectFit" />
+        </view>
       </view>
       <text class="brand-name">易挂念</text>
-      <text class="brand-tagline">让关心自然流动</text>
-      <text class="brand-sub">让牵挂被看见</text>
+      <text class="brand-subtitle">家人牵挂平台</text>
+
+      <view class="brand-divider" />
+
+      <text class="brand-quote">"让关心自然流动，让牵挂被看见"</text>
+      <text class="brand-desc">连接家庭与社区，守护每一位长者</text>
     </view>
 
-    <view class="login-bottom fade-in stagger-2">
-      <button class="login-btn" @tap="handleLogin()">
-        <text class="login-btn-text">微信一键登录</text>
+    <!-- 登录操作 -->
+    <view class="login-actions fade-in stagger-2">
+      <button class="wx-login-btn" @tap="handleLogin()">
+        <text class="wx-btn-text">微信一键登录</text>
       </button>
 
-      <!-- H5 测试：老人端入口 -->
       <!-- #ifdef H5 -->
-      <button class="login-btn-elder" @tap="handleLogin('dev_test_elder')">
-        <text class="login-btn-elder-text">老人端测试入口</text>
+      <button class="dev-login-btn" @tap="handleLogin('dev_test_elder')">
+        <text class="dev-btn-text">老人端测试入口</text>
       </button>
       <!-- #endif -->
 
-      <text class="login-hint">登录即代表同意《用户协议》</text>
+      <text class="login-terms">登录即代表您已同意《服务协议》与《隐私政策》</text>
     </view>
+
+    <!-- Footer -->
+    <text class="login-footer">DESIGNED FOR HUMAN CONNECTION</text>
   </view>
 </template>
 
@@ -54,120 +69,203 @@ async function handleLogin(openid) {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  background: $gradient-hero;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #2C2825 0%, #A04828 100%);
+  padding: 64rpx 48rpx;
+  position: relative;
   overflow: hidden;
 }
 
-.hero-area {
-  flex: 1;
+// ── 装饰圆 ──
+.deco-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+  pointer-events: none;
+}
+
+.deco-1 {
+  width: 700rpx;
+  height: 700rpx;
+  top: -120rpx;
+  left: -200rpx;
+}
+
+.deco-2 {
+  width: 500rpx;
+  height: 500rpx;
+  top: 40%;
+  left: 20%;
+}
+
+.deco-3 {
+  width: 600rpx;
+  height: 600rpx;
+  bottom: -180rpx;
+  right: -200rpx;
+}
+
+// ── 品牌区域 ──
+.brand-area {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 0 $sp-48;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 80rpx;
 }
 
-.logo-mark {
+.logo-outer {
   width: 160rpx;
   height: 160rpx;
-  background: $c-surface;
-  border-radius: $r-2xl;
+  border-radius: 32rpx;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: $shadow-lg;
-  margin-bottom: $sp-40;
+  padding: 8rpx;
+  margin-bottom: 40rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+}
+
+.logo-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 26rpx;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .logo-icon {
-  font-size: 80rpx;
+  width: 64rpx;
+  height: 64rpx;
+  opacity: 0.9;
+  filter: brightness(10);
 }
 
 .brand-name {
-  font-size: $fs-hero;
+  font-size: 96rpx;
   font-weight: $fw-bold;
-  color: $c-primary;
+  color: #FFFFFF;
+  letter-spacing: 4rpx;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.brand-subtitle {
+  font-size: 30rpx;
+  color: rgba(255, 255, 255, 0.55);
   letter-spacing: 12rpx;
+  display: block;
+  font-weight: $fw-medium;
+}
+
+.brand-divider {
+  width: 200rpx;
+  height: 1rpx;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 48rpx 0;
+}
+
+.brand-quote {
+  font-size: 32rpx;
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 2rpx;
+  display: block;
+  line-height: $lh-relaxed;
+  font-weight: $fw-medium;
+}
+
+.brand-desc {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 12rpx;
+  letter-spacing: 2rpx;
   display: block;
 }
 
-.brand-tagline {
-  font-size: $fs-title;
-  color: $c-text;
-  margin-top: $sp-16;
-  font-weight: $fw-medium;
-  letter-spacing: 4rpx;
-}
-
-.brand-sub {
-  font-size: $fs-body;
-  color: $c-text-sub;
-  margin-top: $sp-8;
-  letter-spacing: 2rpx;
-}
-
-.login-bottom {
-  padding: $sp-48;
-  padding-bottom: 120rpx;
+// ── 登录操作 ──
+.login-actions {
+  width: 100%;
+  max-width: 560rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 24rpx;
+  position: relative;
+  z-index: 1;
 }
 
-.login-btn {
+.wx-login-btn {
   width: 100%;
   height: 104rpx;
-  background: $gradient-warm;
+  background-color: #07C160;
   border-radius: $r-full;
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
-  box-shadow: 0 8rpx 32rpx rgba(196, 116, 92, 0.3);
+  box-shadow: 0 8rpx 32rpx rgba(7, 193, 96, 0.30);
   transition: all $duration-normal $ease-out;
   &:active {
-    transform: scale(0.97);
-    box-shadow: 0 4rpx 16rpx rgba(196, 116, 92, 0.2);
+    transform: scale(0.95);
+    opacity: 0.9;
   }
   &::after { border: none; }
 }
 
-.login-btn-text {
-  font-size: $fs-subtitle;
+.wx-btn-text {
+  font-size: 32rpx;
   font-weight: $fw-semibold;
-  color: $c-text-inverse;
+  color: #FFFFFF;
   letter-spacing: 4rpx;
 }
 
-.login-btn-elder {
-  width: 100%;
-  height: 96rpx;
-  background: $c-surface;
+.dev-login-btn {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1rpx solid rgba(255, 255, 255, 0.15);
   border-radius: $r-full;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2rpx solid $c-primary-soft;
-  margin-top: $sp-16;
+  padding: 20rpx 48rpx;
   transition: all $duration-normal $ease-out;
   &:active {
+    background: rgba(255, 255, 255, 0.12);
     transform: scale(0.97);
-    background: $c-primary-bg;
   }
   &::after { border: none; }
 }
 
-.login-btn-elder-text {
-  font-size: $fs-body;
+.dev-btn-text {
+  font-size: 28rpx;
   font-weight: $fw-medium;
-  color: $c-primary;
+  color: rgba(255, 255, 255, 0.7);
   letter-spacing: 2rpx;
 }
 
-.login-hint {
-  font-size: $fs-caption;
-  color: $c-text-hint;
-  margin-top: $sp-20;
+.login-terms {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.3);
+  text-align: center;
+  margin-top: 24rpx;
+}
+
+// ── Footer ──
+.login-footer {
+  position: absolute;
+  bottom: 48rpx;
+  left: 48rpx;
+  font-size: 18rpx;
+  color: rgba(255, 255, 255, 0.15);
+  letter-spacing: 2rpx;
+  font-weight: $fw-medium;
 }
 </style>

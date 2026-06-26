@@ -2,7 +2,7 @@
   <view class="page">
     <view class="invite-section fade-in">
       <view class="section-icon-wrap">
-        <text class="section-icon">📨</text>
+        <image class="section-icon-img" src="/static/icons/invite.svg" mode="aspectFit" />
       </view>
       <text class="section-title">邀请家人加入</text>
       <text class="section-desc">把邀请码发给你的家人，帮Ta完成绑定</text>
@@ -18,7 +18,7 @@
 
     <view class="bind-section fade-in stagger-1">
       <view class="section-icon-wrap small">
-        <text class="section-icon">🔑</text>
+        <image class="section-icon-img" src="/static/icons/key.svg" mode="aspectFit" />
       </view>
       <text class="section-title">我有邀请码</text>
       <view class="input-wrap">
@@ -71,28 +71,30 @@ async function handleBind() {
   border-radius: $r-xl;
   padding: $sp-40 $sp-32;
   margin-bottom: $sp-24;
-  box-shadow: $shadow-sm;
-  border: 1rpx solid $c-border-light;
+  box-shadow: $shadow-md;
+  border: $border-subtle;
   text-align: center;
 }
 
 .section-icon-wrap {
   width: 100rpx;
   height: 100rpx;
-  background: $c-primary-bg;
+  background: $gradient-warm-soft;
   border-radius: $r-2xl;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto $sp-20;
+  box-shadow: $shadow-sm;
   &.small {
     width: 80rpx;
     height: 80rpx;
   }
 }
 
-.section-icon {
-  font-size: 48rpx;
+.section-icon-img {
+  width: 48rpx;
+  height: 48rpx;
 }
 
 .section-title {
@@ -149,7 +151,8 @@ async function handleBind() {
   padding: $sp-20;
   background: $c-bg;
   border-radius: $r-lg;
-  border: 1rpx solid $c-border-light;
+  border: $border-subtle;
+  transition: border-color $duration-normal $ease-out;
 }
 
 .bind-btn {

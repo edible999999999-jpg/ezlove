@@ -2,7 +2,7 @@
   <view class="page">
     <view v-if="relationStore.relations.length === 0" class="empty-state fade-in">
       <view class="empty-icon-wrap">
-        <text class="empty-icon">👨‍👩‍👧</text>
+        <image class="empty-icon-img" src="/static/icons/family.svg" mode="aspectFit" />
       </view>
       <text class="empty-title">家人还没加入呢</text>
       <text class="empty-desc">把邀请码分享给家人，一起连接彼此的日常</text>
@@ -86,8 +86,9 @@ function confirmRemove(id) {
   margin-bottom: $sp-24;
 }
 
-.empty-icon {
-  font-size: 56rpx;
+.empty-icon-img {
+  width: 56rpx;
+  height: 56rpx;
 }
 
 .empty-title {
@@ -112,13 +113,19 @@ function confirmRemove(id) {
 .relation-card {
   background: $c-surface;
   border-radius: $r-lg;
-  padding: $sp-24;
+  padding: $sp-24 $sp-32;
   margin-bottom: $sp-12;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: $shadow-sm;
-  border: 1rpx solid $c-border-light;
+  box-shadow: $shadow-md;
+  border: $border-subtle;
+  border-left: 6rpx solid $c-accent;
+  transition: all $duration-normal $ease-out;
+  &:active {
+    transform: scale(0.98);
+    box-shadow: $shadow-sm;
+  }
 }
 
 .relation-left {
@@ -136,6 +143,7 @@ function confirmRemove(id) {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 0 0 4rpx rgba(196, 116, 92, 0.08);
 }
 
 .relation-initial {

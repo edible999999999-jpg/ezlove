@@ -8,7 +8,7 @@
 
       <view class="setting-row">
         <view class="setting-left">
-          <text class="setting-icon">⏰</text>
+          <image class="setting-icon" src="/static/icons/clock.svg" mode="aspectFit" />
           <text class="setting-label">未读提醒时间</text>
         </view>
         <picker :value="thresholdIndex" :range="thresholdOptions" @change="onThresholdChange">
@@ -58,8 +58,8 @@ async function onThresholdChange(e) {
   background: $c-surface;
   border-radius: $r-xl;
   padding: $sp-32;
-  box-shadow: $shadow-sm;
-  border: 1rpx solid $c-border-light;
+  box-shadow: $shadow-md;
+  border: $border-subtle;
 }
 
 .settings-title {
@@ -78,7 +78,7 @@ async function onThresholdChange(e) {
 
 .divider {
   height: 1rpx;
-  background: $c-border-light;
+  background: $gradient-divider;
   margin: $sp-24 0;
 }
 
@@ -96,7 +96,8 @@ async function onThresholdChange(e) {
 }
 
 .setting-icon {
-  font-size: $fs-title;
+  width: 40rpx;
+  height: 40rpx;
 }
 
 .setting-label {
@@ -112,6 +113,8 @@ async function onThresholdChange(e) {
   padding: $sp-8 $sp-16;
   background: $c-primary-bg;
   border-radius: $r-full;
+  box-shadow: 0 2rpx 8rpx rgba(196, 116, 92, 0.1);
+  transition: all $duration-normal $ease-out;
 }
 
 .picker-value {
