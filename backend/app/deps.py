@@ -50,4 +50,10 @@ async def get_current_worker(
     worker = result.scalar_one_or_none()
     if not worker:
         raise HTTPException(status_code=401, detail="社区工作人员不存在")
+
+    current_community_id = payload.get("current_community_id")
+    if current_community_id:
+        from uuid import UUID
+        worker.community_id = UUID(current_community_id)
+
     return worker

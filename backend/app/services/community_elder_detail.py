@@ -10,6 +10,7 @@ from app.models.care_moment import CareMoment
 from app.models.view_event import ViewEvent
 from app.models.care_relation import CareRelation
 from app.models.alert import Alert
+from app.services.timeline import get_elder_timeline, get_activity_summary
 
 WEEKDAY_LABELS = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
 
@@ -53,9 +54,11 @@ async def get_elder_full_detail(
         },
     }
 
-    # 3. Today active + last active
+    # 3. Today active（多源：ViewEvent + 食堂 + 社区活动）+ last active
     now = datetime.now(timezone.utc)
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    today_active = False
 
     active_stmt = (
         select(ViewEvent.id)
@@ -63,7 +66,34 @@ async def get_elder_full_detail(
         .limit(1)
     )
     active_result = await db.execute(active_stmt)
-    today_active = active_result.scalar_one_or_none() is not None
+    if active_result.scalar_one_or_none() is not None:
+        today_active = True
+
+    if not today_active:
+        from app.models.community_event import CommunityEvent as CE
+        event_stmt = select(CE.id).where(
+            CE.elder_id == user.id, CE.created_at >= today_start
+        ).limit(1)
+        if (await db.execute(event_stmt)).scalar_one_or_none():
+            today_active = True
+
+    if not today_active:
+        from app.models.canteen import CanteenRecord
+        canteen_recs = (await db.execute(
+            select(CanteenRecord).where(
+                CanteenRecord.community_id == community_id,
+                CanteenRecord.parse_status == "success",
+                CanteenRecord.created_at >= today_start,
+            )
+        )).scalars().all()
+        elder_id_str = str(user.id)
+        for rec in canteen_recs:
+            for att in (rec.parsed_data or {}).get("attendees", []):
+                if att.get("elder_id") == elder_id_str and att.get("present") is True:
+                    today_active = True
+                    break
+            if today_active:
+                break
 
     last_stmt = (
         select(ViewEvent.viewed_at)
@@ -167,6 +197,29 @@ async def get_elder_full_detail(
                 "status": rel.status,
             })
 
+    # 9. 时间线和活跃度（异步聚合）
+    recent_timeline = await get_elder_timeline(db, user.id, community_id, days=7, limit=10)
+    activity_summary = await get_activity_summary(db, user.id, community_id, days=30)
+
+    # 10. 社区侧告警
+    community_alerts_stmt = (
+        select(Alert)
+        .where(Alert.elder_id == user.id, Alert.community_id == community_id)
+        .order_by(Alert.created_at.desc())
+    )
+    community_alerts_result = await db.execute(community_alerts_stmt)
+    for a in community_alerts_result.scalars().all():
+        alerts_list.append({
+            "id": str(a.id),
+            "alert_type": a.alert_type,
+            "alert_level": a.alert_level,
+            "message": a.message,
+            "is_resolved": a.is_resolved,
+            "created_at": a.created_at.isoformat(),
+            "escalation_level": a.escalation_level,
+            "trigger_rule": a.trigger_rule,
+        })
+
     return {
         "elder": elder_info,
         "today_active": today_active,
@@ -175,4 +228,12 @@ async def get_elder_full_detail(
         "activity_calendar": activity_calendar,
         "alerts": alerts_list,
         "family_relations": family_relations,
+        "recent_timeline": recent_timeline.get("items", []),
+        "activity_summary": activity_summary,
+        "risk": {
+            "score": elder_record.risk_score,
+            "level": elder_record.risk_level,
+            "calculated_at": elder_record.risk_calculated_at.isoformat() if elder_record.risk_calculated_at else None,
+            "details": elder_record.risk_details,
+        },
     }
