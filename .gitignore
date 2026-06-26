@@ -13,3 +13,4 @@ frontend/unpackage/
 .claude/
 .superpowers/
 backend/venv/
+backend/static/uploads/
