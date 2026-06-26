@@ -48,6 +48,7 @@
             <th class="text-left px-6 py-4 text-xs font-bold text-on-surface-variant tracking-wider uppercase">分级</th>
             <th class="text-left px-6 py-4 text-xs font-bold text-on-surface-variant tracking-wider uppercase">楼栋/门牌</th>
             <th class="text-left px-6 py-4 text-xs font-bold text-on-surface-variant tracking-wider uppercase">今日状态</th>
+            <th class="text-left px-6 py-4 text-xs font-bold text-on-surface-variant tracking-wider uppercase">风险</th>
             <th class="text-left px-6 py-4 text-xs font-bold text-on-surface-variant tracking-wider uppercase">健康备注</th>
           </tr>
         </thead>
@@ -92,6 +93,22 @@
                 ></span>
                 {{ row.today_active ? '活跃' : '未活跃' }}
               </div>
+            </td>
+            <td class="px-6 py-4">
+              <span
+                v-if="row.risk_level"
+                :class="[
+                  'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold',
+                  row.risk_level === 'critical' ? 'bg-primary/10 text-primary' :
+                  row.risk_level === 'warning' ? 'bg-[#E67E22]/10 text-[#E67E22]' :
+                  row.risk_level === 'attention' ? 'bg-accent/10 text-accent' :
+                  'bg-secondary/10 text-secondary'
+                ]"
+              >
+                {{ { normal: '正常', attention: '关注', warning: '预警', critical: '高危' }[row.risk_level] || '—' }}
+                <template v-if="row.risk_score != null"> · {{ row.risk_score }}</template>
+              </span>
+              <span v-else class="text-xs text-inactive-gray">—</span>
             </td>
             <td class="px-6 py-4 text-sm text-on-surface-variant">{{ row.health_notes || '—' }}</td>
           </tr>

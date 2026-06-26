@@ -39,6 +39,19 @@
     <header class="h-16 fixed top-0 right-0 w-[calc(100%-240px)] bg-surface/80 backdrop-blur-md flex justify-between items-center px-8 z-40 border-b border-outline-variant/30">
       <div class="flex items-center gap-4">
         <h2 class="font-headline font-semibold text-lg text-on-surface">{{ currentPageName }}</h2>
+        <div v-if="userStore.communities.length > 1" class="community-switcher">
+          <select
+            :value="userStore.currentCommunityId"
+            class="bg-surface-container border border-outline-variant/30 rounded-lg px-3 py-1.5 text-sm text-on-surface focus:ring-1 focus:ring-primary/30 focus:outline-none cursor-pointer transition-all"
+            @change="handleSwitchCommunity($event.target.value)"
+          >
+            <option
+              v-for="c in userStore.communities"
+              :key="c.community_id"
+              :value="c.community_id"
+            >{{ c.community_name }}</option>
+          </select>
+        </div>
       </div>
       <div class="flex items-center gap-6">
         <div class="relative flex items-center">
@@ -77,18 +90,42 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
+import { useDashboardStore } from '@/stores/dashboard'
+import { useEldersStore } from '@/stores/elders'
 
 const route = useRoute()
+const router = useRouter()
 const userStore = useUserStore()
+const dashboardStore = useDashboardStore()
+const eldersStore = useEldersStore()
+
+onMounted(() => {
+  userStore.loadCommunities()
+})
+
+async function handleSwitchCommunity(communityId) {
+  if (communityId === userStore.currentCommunityId) return
+  try {
+    await userStore.switchCommunity(communityId)
+    dashboardStore.load()
+    eldersStore.load()
+    if (route.path !== '/dashboard') {
+      router.push('/dashboard')
+    }
+  } catch (e) {
+    // handled by request interceptor
+  }
+}
 
 const navItems = [
   { path: '/dashboard', label: '看板', icon: 'dashboard' },
   { path: '/elders', label: '老人档案', icon: 'groups' },
   { path: '/canteen', label: '食堂管理', icon: 'restaurant' },
   { path: '/events', label: '事件中心', icon: 'notifications_active' },
+  { path: '/agent', label: 'AI 助手', icon: 'smart_toy' },
 ]
 
 const pageNameMap = {
@@ -96,6 +133,7 @@ const pageNameMap = {
   '/elders': '老人档案',
   '/canteen': '食堂管理',
   '/events': '事件中心',
+  '/agent': 'AI 助手',
 }
 
 const currentPageName = computed(() => {

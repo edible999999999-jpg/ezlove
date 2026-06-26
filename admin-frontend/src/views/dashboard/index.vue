@@ -2,7 +2,6 @@
   <div>
     <!-- 1. Top Stat Row: 6 cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
-      <!-- Total -->
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-outline-variant/20 hover:shadow-md transition-shadow">
         <div class="flex justify-between items-start mb-2">
           <span class="text-xs font-bold text-inactive-gray tracking-wider uppercase">总人数</span>
@@ -10,7 +9,6 @@
         </div>
         <div class="serif-num text-3xl font-bold text-on-surface">{{ animatedValues.total ?? 0 }}</div>
       </div>
-      <!-- A-Level -->
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-outline-variant/20 hover:shadow-md transition-shadow border-l-4 border-l-primary">
         <div class="flex justify-between items-start mb-2">
           <span class="text-xs font-bold text-primary tracking-wider uppercase">A级</span>
@@ -18,7 +16,6 @@
         </div>
         <div class="serif-num text-3xl font-bold text-on-surface">{{ animatedValues.a ?? 0 }}</div>
       </div>
-      <!-- B-Level -->
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-outline-variant/20 hover:shadow-md transition-shadow border-l-4 border-l-accent">
         <div class="flex justify-between items-start mb-2">
           <span class="text-xs font-bold text-accent tracking-wider uppercase">B级</span>
@@ -26,7 +23,6 @@
         </div>
         <div class="serif-num text-3xl font-bold text-on-surface">{{ animatedValues.b ?? 0 }}</div>
       </div>
-      <!-- C-Level -->
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-outline-variant/20 hover:shadow-md transition-shadow border-l-4 border-l-secondary">
         <div class="flex justify-between items-start mb-2">
           <span class="text-xs font-bold text-secondary tracking-wider uppercase">C级</span>
@@ -34,90 +30,91 @@
         </div>
         <div class="serif-num text-3xl font-bold text-on-surface">{{ animatedValues.c ?? 0 }}</div>
       </div>
-      <!-- Today Active -->
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-outline-variant/20 hover:shadow-md transition-shadow">
         <div class="flex justify-between items-start mb-2">
           <span class="text-xs font-bold text-on-surface-variant tracking-wider uppercase">今日活跃</span>
           <span class="material-symbols-outlined text-on-surface-variant">bolt</span>
         </div>
         <div class="serif-num text-3xl font-bold text-on-surface">{{ animatedValues.active ?? 0 }}</div>
+        <SparkLine v-if="dailyActiveCounts.length > 1" :data="dailyActiveCounts" :width="100" :height="20" color="#6B8F71" class="mt-1" />
       </div>
-      <!-- Active Rate -->
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-outline-variant/20 hover:shadow-md transition-shadow">
         <div class="flex justify-between items-start mb-2">
           <span class="text-xs font-bold text-on-surface-variant tracking-wider uppercase">活跃率</span>
           <span class="material-symbols-outlined text-on-surface-variant">analytics</span>
         </div>
         <div class="serif-num text-3xl font-bold text-on-surface">{{ animatedValues.rate ?? 0 }}%</div>
+        <SparkLine v-if="dailyActiveRates.length > 1" :data="dailyActiveRates" :width="100" :height="20" color="#6B8F71" class="mt-1" />
       </div>
     </div>
 
-    <!-- Main Layout: Heatmap + Sidebar -->
+    <!-- Main Layout -->
     <div class="flex flex-col lg:flex-row gap-8">
-      <!-- 2. Main Heatmap Section -->
+      <!-- Left: WorkStation + Buildings -->
       <div class="flex-1 space-y-8">
+        <!-- WorkStation -->
+        <WorkStation
+          :workstation="store.data?.workstation"
+          @confirm="handleConfirm"
+        />
+
+        <!-- Building Overview -->
         <div class="bg-white p-8 rounded-3xl shadow-sm border border-outline-variant/20">
-          <div class="flex justify-between items-center mb-8">
+          <div class="flex justify-between items-center mb-6">
             <div>
-              <h3 class="font-headline text-2xl font-bold text-on-surface">老人活跃热力图</h3>
-              <p class="text-on-surface-variant text-sm mt-1">实时监测各楼栋长者活动状态</p>
+              <h3 class="font-headline text-2xl font-bold text-on-surface">楼栋总览</h3>
+              <p class="text-on-surface-variant text-sm mt-1">点击楼栋查看老人详情</p>
             </div>
-            <div class="flex items-center gap-4 text-xs font-medium">
-              <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-secondary"></span> 活跃</div>
-              <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-primary"></span> A级异常</div>
-              <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-inactive-gray"></span> 离线</div>
+            <div class="flex items-center gap-3 text-[10px] font-medium text-inactive-gray">
+              <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-secondary"></span> 正常</div>
+              <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#D4A24E]"></span> 关注</div>
+              <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-primary"></span> 异常</div>
             </div>
           </div>
 
-          <div v-if="heatmapGroups.length">
-            <div v-for="(group, gi) in heatmapGroups" :key="group.address" :class="{ 'mb-10': gi < heatmapGroups.length - 1 }">
-              <div class="flex items-end justify-between mb-4 px-1">
-                <div>
-                  <h4 class="font-headline text-lg font-semibold flex items-center gap-2">
-                    {{ group.address }}
-                    <span class="text-xs font-normal bg-surface-container px-2 py-0.5 rounded text-on-surface-variant">{{ group.elders.length }} 人</span>
-                  </h4>
-                </div>
-                <div class="text-right">
-                  <span class="text-xs font-bold text-on-surface-variant uppercase">活跃 {{ group.activeRate }}%</span>
-                  <div class="w-32 h-1.5 bg-surface-container rounded-full mt-1 overflow-hidden">
-                    <div class="h-full bg-secondary rounded-full transition-all duration-700" :style="{ width: group.activeRate + '%' }"></div>
-                  </div>
-                </div>
-              </div>
-              <div class="flex flex-wrap gap-4">
-                <div
-                  v-for="e in group.elders"
-                  :key="e.elder_id"
-                  :class="[
-                    'w-12 h-12 text-white flex items-center justify-center rounded-xl font-headline text-lg shadow-sm hover:scale-105 transition-transform cursor-pointer',
-                    e.today_active ? 'bg-secondary' : (e.care_level === 'A' ? 'bg-primary ring-4 ring-primary/20' : 'bg-inactive-gray opacity-80')
-                  ]"
-                  @click="$router.push(`/elders/${findElderRecordId(e.elder_id)}`)"
-                >
-                  {{ e.name?.charAt(0) || '?' }}
-                </div>
-              </div>
-            </div>
+          <!-- Area tabs -->
+          <div class="flex gap-2 mb-6">
+            <button
+              v-for="area in areas"
+              :key="area.name"
+              :class="[
+                'px-4 py-2 rounded-xl text-sm font-bold transition-all',
+                store.activeArea === area.name
+                  ? 'bg-on-surface text-white shadow-md'
+                  : 'bg-surface-container text-on-surface-variant hover:bg-outline-variant/20',
+              ]"
+              @click="store.activeArea = area.name"
+            >
+              {{ area.name }}
+              <span class="text-xs font-normal opacity-70 ml-1">{{ areaElderCount(area) }}人</span>
+            </button>
           </div>
-          <div v-else class="text-center py-16 flex flex-col items-center gap-3">
-            <span class="material-symbols-outlined text-5xl text-inactive-gray">sentiment_dissatisfied</span>
-            <p class="text-inactive-gray text-sm">还没有老人数据</p>
-            <button class="text-primary text-sm font-semibold hover:underline" @click="$router.push('/elders')">去添加第一位老人</button>
-          </div>
-        </div>
 
-        <!-- Decorative/Atmospheric Element -->
-        <div class="relative h-48 rounded-3xl overflow-hidden group bg-gradient-to-br from-[#2C2825] to-[#6B8F71]">
-          <div class="absolute inset-0 bg-gradient-to-t from-on-surface/60 to-transparent"></div>
-          <div class="absolute bottom-6 left-8">
-            <h5 class="text-white font-headline text-xl font-bold">社区康养中心</h5>
-            <p class="text-white/80 text-sm">静时已开始，夜班值班中</p>
+          <!-- Building cards for active area -->
+          <div v-if="currentArea" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            <BuildingCard
+              v-for="b in currentArea.buildings"
+              :key="b.name"
+              :building="b"
+              :trends="buildingTrends[b.name]"
+              :expanded="store.expandedBuilding === b.name"
+              @toggle="store.loadBuildingElders(b.name)"
+            />
           </div>
+
+          <!-- Expanded building tile grid -->
+          <ElderTileGrid
+            v-if="store.expandedBuilding"
+            :building="store.expandedBuilding"
+            :elders="store.buildingElders"
+            :loading="store.buildingLoading"
+            class="mt-6"
+            @close="store.expandedBuilding = null"
+          />
         </div>
       </div>
 
-      <!-- 3. Right Sidebar/Panel -->
+      <!-- Right Sidebar -->
       <div class="w-full lg:w-80 space-y-6">
         <!-- Care Distribution Donut -->
         <div class="bg-white p-6 rounded-3xl shadow-sm border border-outline-variant/20">
@@ -141,52 +138,137 @@
           </div>
           <div class="space-y-3">
             <div class="flex justify-between items-center text-sm">
-              <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-primary"></span> A级（紧急关爱）</div>
+              <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-primary"></span> A级</div>
               <span class="serif-num font-bold">{{ totalElders > 0 ? ((levelA / totalElders) * 100).toFixed(1) : '0.0' }}%</span>
             </div>
             <div class="flex justify-between items-center text-sm">
-              <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-accent"></span> B级（医疗关注）</div>
+              <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-accent"></span> B级</div>
               <span class="serif-num font-bold">{{ totalElders > 0 ? ((levelB / totalElders) * 100).toFixed(1) : '0.0' }}%</span>
             </div>
             <div class="flex justify-between items-center text-sm">
-              <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-secondary"></span> C级（日常关爱）</div>
+              <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-secondary"></span> C级</div>
               <span class="serif-num font-bold">{{ totalElders > 0 ? ((levelC / totalElders) * 100).toFixed(1) : '0.0' }}%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Risk Overview -->
+        <div v-if="riskDistribution" class="bg-white p-6 rounded-3xl shadow-sm border border-outline-variant/20">
+          <h3 class="font-headline text-lg font-bold text-on-surface mb-4">风险概况</h3>
+          <div class="space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+                <span class="text-sm text-on-surface">高危</span>
+              </div>
+              <span class="serif-num text-sm font-bold text-on-surface">{{ riskDistribution.critical || 0 }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#E67E22]"></span>
+                <span class="text-sm text-on-surface">预警</span>
+              </div>
+              <span class="serif-num text-sm font-bold text-on-surface">{{ riskDistribution.warning || 0 }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-accent"></span>
+                <span class="text-sm text-on-surface">关注</span>
+              </div>
+              <span class="serif-num text-sm font-bold text-on-surface">{{ riskDistribution.attention || 0 }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+                <span class="text-sm text-on-surface">正常</span>
+              </div>
+              <span class="serif-num text-sm font-bold text-on-surface">{{ riskDistribution.normal || 0 }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7-Day Trend Chart -->
+        <div v-if="dailyActiveRates.length > 1" class="bg-white p-6 rounded-3xl shadow-sm border border-outline-variant/20">
+          <h3 class="font-headline text-lg font-bold text-on-surface mb-4">7 天趋势</h3>
+          <svg viewBox="0 0 240 120" class="w-full">
+            <defs>
+              <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#6B8F71" stop-opacity="0.2" />
+                <stop offset="100%" stop-color="#6B8F71" stop-opacity="0" />
+              </linearGradient>
+            </defs>
+            <!-- Grid lines -->
+            <line v-for="i in 3" :key="'g'+i" x1="30" :y1="10 + (i-1)*40" x2="235" :y2="10 + (i-1)*40" stroke="#E5DED5" stroke-width="0.5" stroke-dasharray="3,3" />
+            <!-- Y labels -->
+            <text v-for="(val, i) in trendYLabels" :key="'yl'+i" x="26" :y="14 + i*40" text-anchor="end" fill="#9A8E82" font-size="8">{{ val }}%</text>
+            <!-- Fill polygon -->
+            <polygon :points="trendFillPoints" fill="url(#trendFill)" />
+            <!-- Line -->
+            <polyline :points="trendLinePoints" fill="none" stroke="#6B8F71" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <!-- Dots -->
+            <circle
+              v-for="(pt, i) in trendPoints"
+              :key="'d'+i"
+              :cx="pt[0]" :cy="pt[1]"
+              r="3" fill="#6B8F71" stroke="white" stroke-width="1.5"
+            />
+            <!-- X labels -->
+            <text
+              v-for="(label, i) in trendXLabels"
+              :key="'xl'+i"
+              :x="30 + i * (205 / (trendXLabels.length > 1 ? trendXLabels.length - 1 : 1))"
+              y="115"
+              text-anchor="middle"
+              fill="#9A8E82"
+              font-size="8"
+            >{{ label }}</text>
+          </svg>
+          <!-- Alert mini bars -->
+          <div v-if="dailyAlertNew.length" class="mt-3 pt-3 border-t border-outline-variant/10">
+            <div class="flex items-center justify-between text-[10px] text-inactive-gray mb-1.5">
+              <span>告警趋势</span>
+              <span>最高 {{ maxAlert }}</span>
+            </div>
+            <div class="flex items-end gap-1 h-6">
+              <div
+                v-for="(v, i) in dailyAlertNew"
+                :key="'ab'+i"
+                class="flex-1 bg-primary/20 rounded-sm transition-all"
+                :style="{ height: maxAlert > 0 ? (v / maxAlert * 100) + '%' : '0%' }"
+              ></div>
             </div>
           </div>
         </div>
 
         <!-- Today Quick View -->
         <div class="bg-white p-6 rounded-3xl shadow-sm border border-outline-variant/20">
-          <h3 class="font-headline text-lg font-bold text-on-surface mb-6">今日速览</h3>
-          <div class="space-y-4">
-            <!-- Emergency Call -->
-            <div class="flex gap-4 p-4 rounded-2xl bg-primary/5 border border-primary/10 hover:bg-primary/10 transition-colors">
-              <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined text-white">ring_volume</span>
+          <h3 class="font-headline text-lg font-bold text-on-surface mb-4">今日速览</h3>
+          <div class="space-y-3">
+            <div class="flex gap-3 p-3 rounded-xl bg-primary/5">
+              <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-white text-sm">ring_volume</span>
               </div>
               <div>
-                <p class="text-sm font-bold text-on-surface">{{ aLevelInactive }} 位A级未活跃</p>
-                <p class="text-xs text-on-surface-variant mt-1">需重点关注老人今日状态</p>
+                <p class="text-sm font-bold text-on-surface">{{ pendingConfirmCount }} 人待确认</p>
+                <p class="text-[10px] text-inactive-gray">A/B级今日未活跃</p>
               </div>
             </div>
-            <!-- Medication Reminders -->
-            <div class="flex gap-4 p-4 rounded-2xl bg-accent/5 border border-accent/10 hover:bg-accent/10 transition-colors">
-              <div class="w-10 h-10 rounded-xl bg-accent flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined text-white">medication</span>
+            <div class="flex gap-3 p-3 rounded-xl bg-accent/5">
+              <div class="w-8 h-8 rounded-lg bg-accent flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-white text-sm">warning</span>
               </div>
               <div>
-                <p class="text-sm font-bold text-on-surface">今日活跃 {{ todayActiveCount }} 人</p>
-                <p class="text-xs text-on-surface-variant mt-1">社区老人活动参与情况</p>
+                <p class="text-sm font-bold text-on-surface">{{ store.data?.pending_events || 0 }} 条告警</p>
+                <p class="text-[10px] text-inactive-gray">待处理事件</p>
               </div>
             </div>
-            <!-- Meal Requests -->
-            <div class="flex gap-4 p-4 rounded-2xl bg-secondary/5 border border-secondary/10 hover:bg-secondary/10 transition-colors">
-              <div class="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined text-white">lunch_dining</span>
+            <div class="flex gap-3 p-3 rounded-xl bg-secondary/5">
+              <div class="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-white text-sm">bolt</span>
               </div>
               <div>
-                <p class="text-sm font-bold text-on-surface">食堂就餐</p>
-                <p class="text-xs text-on-surface-variant mt-1">今日暂无就餐记录</p>
+                <p class="text-sm font-bold text-on-surface">活跃 {{ store.data?.today_active_count || 0 }} 人</p>
+                <p class="text-[10px] text-inactive-gray">{{ store.data?.today_active_rate || 0 }}% 活跃率</p>
               </div>
             </div>
           </div>
@@ -206,16 +288,14 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useDashboardStore } from '@/stores/dashboard'
-import { useEldersStore } from '@/stores/elders'
+import WorkStation from './components/WorkStation.vue'
+import BuildingCard from './components/BuildingCard.vue'
+import ElderTileGrid from './components/ElderTileGrid.vue'
+import SparkLine from './components/SparkLine.vue'
 
 const store = useDashboardStore()
-const eldersStore = useEldersStore()
-onMounted(() => {
-  store.load()
-  eldersStore.load()
-})
+onMounted(() => store.load())
 
-// Time display
 const currentTime = ref(new Date().toLocaleTimeString('zh-CN', { hour12: true }))
 let timeInterval
 onMounted(() => {
@@ -243,7 +323,6 @@ watch(() => store.data, (newData) => {
 }, { immediate: true })
 
 function animateValue(key, target) {
-  const duration = 800
   const steps = 30
   const increment = target / steps
   let current = 0
@@ -257,42 +336,69 @@ function animateValue(key, target) {
       ...animatedValues.value,
       [key]: Number.isInteger(target) ? Math.round(current) : Number(current.toFixed(1))
     }
-  }, duration / steps)
+  }, 800 / steps)
 }
 
-// Heatmap
-const heatmapGroups = computed(() => {
-  if (!store.data?.heatmap) return []
-  const map = {}
-  store.data.heatmap.forEach(e => {
-    if (!map[e.address]) map[e.address] = []
-    map[e.address].push(e)
-  })
-  return Object.entries(map).map(([address, elders]) => {
-    const activeCount = elders.filter(e => e.today_active).length
-    return {
-      address,
-      elders,
-      activeRate: elders.length > 0 ? Math.round((activeCount / elders.length) * 100) : 0,
-    }
-  })
-})
+const areas = computed(() => store.data?.areas || [])
+const currentArea = computed(() => areas.value.find(a => a.name === store.activeArea))
 
-const aLevelInactive = computed(() => {
-  if (!store.data?.heatmap) return 0
-  return store.data.heatmap.filter(e => e.care_level === 'A' && !e.today_active).length
-})
+function areaElderCount(area) {
+  return area.buildings.reduce((sum, b) => sum + b.elder_count, 0)
+}
 
-const todayActiveCount = computed(() => store.data?.today_active_count || 0)
-
-// Donut chart data
 const totalElders = computed(() => store.data?.total_elders || 0)
 const levelA = computed(() => store.data?.level_a || 0)
 const levelB = computed(() => store.data?.level_b || 0)
 const levelC = computed(() => store.data?.level_c || 0)
+const riskDistribution = computed(() => store.data?.risk_distribution || null)
+const trends = computed(() => store.data?.trends || {})
+const dailyActiveRates = computed(() => (trends.value.daily_active || []).map(d => d.rate))
+const dailyActiveCounts = computed(() => (trends.value.daily_active || []).map(d => d.count))
+const dailyAlertNew = computed(() => (trends.value.daily_alerts || []).map(d => d.new))
+const buildingTrends = computed(() => trends.value.building_trends || {})
 
-function findElderRecordId(elderUserId) {
-  const elder = eldersStore.elders.find(e => e.elder_id === elderUserId)
-  return elder?.id || ''
+const pendingConfirmCount = computed(() =>
+  store.data?.workstation?.pending_confirmations?.length || 0
+)
+
+const maxAlert = computed(() => Math.max(...dailyAlertNew.value, 1))
+
+const trendPoints = computed(() => {
+  const data = dailyActiveRates.value
+  if (data.length < 2) return []
+  const min = Math.min(...data) - 5
+  const max = Math.max(...data) + 5
+  const range = max - min || 1
+  return data.map((v, i) => [
+    30 + (i / (data.length - 1)) * 205,
+    10 + (1 - (v - min) / range) * 80,
+  ])
+})
+
+const trendLinePoints = computed(() => trendPoints.value.map(p => p.join(',')).join(' '))
+
+const trendFillPoints = computed(() => {
+  const pts = trendPoints.value
+  if (pts.length < 2) return ''
+  return `${pts[0][0]},90 ${trendLinePoints.value} ${pts[pts.length - 1][0]},90`
+})
+
+const trendXLabels = computed(() => (trends.value.daily_active || []).map(d => d.date))
+
+const trendYLabels = computed(() => {
+  const data = dailyActiveRates.value
+  if (data.length < 2) return []
+  const max = Math.max(...data) + 5
+  const min = Math.min(...data) - 5
+  const mid = Math.round((max + min) / 2)
+  return [Math.round(max), mid, Math.round(min)]
+})
+
+async function handleConfirm(elderId) {
+  try {
+    await store.confirmActive(elderId)
+  } catch (e) {
+    console.error('确认失败', e)
+  }
 }
 </script>
