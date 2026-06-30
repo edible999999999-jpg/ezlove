@@ -36,7 +36,10 @@
         :key="elder.id"
         class="flex items-center justify-between p-3 rounded-xl bg-surface-container/50 hover:bg-surface-container transition-colors"
       >
-        <div class="flex items-center gap-3 min-w-0">
+        <div
+          class="flex items-center gap-3 min-w-0 cursor-pointer"
+          @click="$router.push(`/elders/${elder.id}`)"
+        >
           <div
             :class="[
               'w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold shrink-0',
@@ -44,7 +47,7 @@
             ]"
           >{{ elder.name?.charAt(0) }}</div>
           <div class="min-w-0">
-            <p class="text-sm font-bold text-on-surface truncate">{{ elder.name }}</p>
+            <p class="text-sm font-bold text-on-surface truncate hover:text-primary transition-colors">{{ elder.name }}</p>
             <p class="text-[10px] text-inactive-gray truncate">{{ elder.care_level }}级 · {{ elder.address }}</p>
           </div>
         </div>
@@ -64,6 +67,7 @@
         v-for="alert in alerts"
         :key="alert.id"
         class="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-container/50 transition-colors cursor-pointer"
+        @click="alert.elder_id && $router.push(`/elders/${alert.elder_id}`)"
       >
         <span
           :class="[
@@ -87,7 +91,8 @@
       <div
         v-for="alert in timedOut"
         :key="alert.id"
-        class="flex items-center gap-3 p-3 rounded-xl bg-primary/5 border border-primary/10"
+        class="flex items-center gap-3 p-3 rounded-xl bg-primary/5 border border-primary/10 cursor-pointer hover:bg-primary/10 transition-colors"
+        @click="alert.elder_id && $router.push(`/elders/${alert.elder_id}`)"
       >
         <span class="material-symbols-outlined text-primary text-lg animate-pulse">crisis_alert</span>
         <div class="min-w-0 flex-1">
