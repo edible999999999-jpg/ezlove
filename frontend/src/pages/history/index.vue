@@ -69,7 +69,7 @@
 
           <!-- Footer: Dashed Divider + Action -->
           <view class="card-footer">
-            <view v-if="!m.is_read" class="footer-action" @tap="goSend">
+            <view v-if="!m.is_read" class="footer-action" @tap="goViewDetail(m)">
               <text class="action-text action-primary">查看详情</text>
               <text class="action-arrow">›</text>
             </view>
@@ -93,17 +93,7 @@ import { onShow } from "@dcloudio/uni-app";
 import { useMomentStore } from "@/stores/moment";
 import { useUserStore } from "@/stores/user";
 import { formatRelativeTime } from "@/utils/date";
-
-const BASE_URL =
-  process.env.NODE_ENV === "development"
-    ? "http://localhost:8001"
-    : "https://yuxilab.cn/ezlove";
-
-function getFullUrl(url) {
-  if (!url) return "";
-  if (url.startsWith("http")) return url;
-  return `${BASE_URL}${url}`;
-}
+import { getFullUrl } from "@/api/config";
 
 const momentStore = useMomentStore();
 const userStore = useUserStore();
@@ -118,6 +108,10 @@ onShow(() => {
 
 function goSend() {
   uni.navigateTo({ url: "/pages/send/index" });
+}
+
+function goViewDetail(m) {
+  uni.navigateTo({ url: `/pages/view/detail?id=${m.id}` });
 }
 </script>
 

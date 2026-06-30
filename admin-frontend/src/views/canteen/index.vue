@@ -250,7 +250,13 @@
               </tr>
             </tbody>
           </table>
-          <div v-if="!store.records.length && !store.loading" class="text-center py-12">
+          <div v-if="store.loading" class="text-center py-12">
+            <div class="inline-flex items-center gap-2 text-on-surface-variant">
+              <svg class="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
+              <span class="text-sm">加载中...</span>
+            </div>
+          </div>
+          <div v-else-if="!store.records.length" class="text-center py-12">
             <span class="material-symbols-outlined text-4xl text-inactive-gray">restaurant</span>
             <p class="text-inactive-gray text-sm mt-2">暂无就餐记录</p>
           </div>

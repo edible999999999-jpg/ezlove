@@ -102,11 +102,7 @@
 import { ref, computed } from "vue";
 import { onLoad } from "@dcloudio/uni-app";
 import { getMomentDetail, recordView } from "@/api/moment";
-
-const BASE_URL =
-  process.env.NODE_ENV === "development"
-    ? "http://localhost:8001"
-    : "https://yuxilab.cn/ezlove";
+import { getFullUrl } from "@/api/config";
 
 const moment = ref({});
 const momentId = ref("");
@@ -125,12 +121,6 @@ const timeText = computed(() => {
   const day = d.getDate().toString().padStart(2, "0");
   return `${month}-${day}`;
 });
-
-function getFullUrl(url) {
-  if (!url) return "";
-  if (url.startsWith("http")) return url;
-  return `${BASE_URL}${url}`;
-}
 
 onLoad((query) => {
   momentId.value = query.id;
@@ -163,7 +153,7 @@ async function sendReaction(type) {
     await recordView(momentId.value);
     uni.showToast({ title: "已发送", icon: "success" });
   } catch {
-    uni.showToast({ title: "已发送", icon: "success" });
+    uni.showToast({ title: "发送失败", icon: "none" });
   }
 }
 </script>
@@ -292,14 +282,14 @@ async function sendReaction(type) {
 }
 
 .sender-name {
-  font-size: $fs-body-sm;
+  font-size: $fs-elder-body;
   font-weight: $fw-medium;
   color: $c-text-sub;
   display: block;
 }
 
 .sender-time {
-  font-size: $fs-caption;
+  font-size: $fs-body;
   color: $c-text-hint;
   opacity: 0.75;
   display: block;
@@ -313,7 +303,7 @@ async function sendReaction(type) {
 }
 
 .family-badge-text {
-  font-size: $fs-caption;
+  font-size: $fs-body;
   font-weight: $fw-bold;
   color: $c-primary;
 }
@@ -349,7 +339,7 @@ async function sendReaction(type) {
 .image-caption {
   display: block;
   text-align: center;
-  font-size: $fs-caption;
+  font-size: $fs-body;
   color: $c-text-hint;
   opacity: 0.6;
   font-style: italic;
@@ -379,7 +369,7 @@ async function sendReaction(type) {
 }
 
 .divider-text {
-  font-size: $fs-body-sm;
+  font-size: $fs-elder-body;
   font-weight: $fw-medium;
   color: $c-text-sub;
   white-space: nowrap;
@@ -426,7 +416,7 @@ async function sendReaction(type) {
 }
 
 .reaction-label {
-  font-size: $fs-caption;
+  font-size: $fs-body;
   font-weight: $fw-medium;
   color: $c-text-sub;
 }

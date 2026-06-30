@@ -66,11 +66,7 @@ import { ref, computed } from "vue";
 import { onLoad } from "@dcloudio/uni-app";
 import { generatePoster, renderSinglePoster } from "@/api/poster";
 import { useMomentStore } from "@/stores/moment";
-
-const BASE_URL =
-  process.env.NODE_ENV === "development"
-    ? "http://localhost:8001"
-    : "https://yuxilab.cn/ezlove";
+import { getFullUrl } from "@/api/config";
 
 const momentStore = useMomentStore();
 
@@ -84,12 +80,6 @@ const scrollLeft = ref(0);
 const params = ref({});
 
 const captionChanged = computed(() => editCaption.value !== originalCaption.value);
-
-function getFullUrl(url) {
-  if (!url) return "";
-  if (url.startsWith("http")) return url;
-  return `${BASE_URL}${url}`;
-}
 
 onLoad(() => {
   params.value = uni.getStorageSync("poster_params") || {};

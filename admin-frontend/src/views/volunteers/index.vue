@@ -144,7 +144,13 @@
             </tr>
           </tbody>
         </table>
-        <div v-if="!store.tasks.length && !store.loading" class="text-center py-16">
+        <div v-if="store.loading" class="text-center py-16">
+          <div class="inline-flex items-center gap-2 text-on-surface-variant">
+            <svg class="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
+            <span class="text-sm">加载中...</span>
+          </div>
+        </div>
+        <div v-else-if="!store.tasks.length" class="text-center py-16">
           <span class="material-symbols-outlined text-5xl text-inactive-gray">assignment</span>
           <p class="text-inactive-gray text-sm mt-3">暂无任务记录</p>
         </div>
@@ -188,7 +194,13 @@
             </tr>
           </tbody>
         </table>
-        <div v-if="!store.volunteers.length && !store.loading" class="text-center py-16">
+        <div v-if="store.loading" class="text-center py-16">
+          <div class="inline-flex items-center gap-2 text-on-surface-variant">
+            <svg class="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
+            <span class="text-sm">加载中...</span>
+          </div>
+        </div>
+        <div v-else-if="!store.volunteers.length" class="text-center py-16">
           <span class="material-symbols-outlined text-5xl text-inactive-gray">group</span>
           <p class="text-inactive-gray text-sm mt-3">暂无志愿者</p>
         </div>
@@ -231,7 +243,13 @@
             </div>
           </div>
         </div>
-        <div v-if="!store.leaderboard.length && !store.loading" class="text-center py-16">
+        <div v-if="store.loading" class="text-center py-16">
+          <div class="inline-flex items-center gap-2 text-on-surface-variant">
+            <svg class="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
+            <span class="text-sm">加载中...</span>
+          </div>
+        </div>
+        <div v-else-if="!store.leaderboard.length" class="text-center py-16">
           <span class="material-symbols-outlined text-5xl text-inactive-gray">leaderboard</span>
           <p class="text-inactive-gray text-sm mt-3">暂无排行数据</p>
         </div>

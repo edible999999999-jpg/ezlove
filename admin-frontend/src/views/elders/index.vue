@@ -40,7 +40,7 @@
         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">search</span>
         <input
           v-model="filters.search"
-          @input="store.load(filters)"
+          @input="debouncedSearch"
           class="bg-white border border-outline-variant rounded-xl pl-10 pr-4 py-2.5 text-sm text-on-surface placeholder:text-outline-variant/60 focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-56"
           placeholder="搜索姓名..."
           type="text"
@@ -123,7 +123,13 @@
           </tr>
         </tbody>
       </table>
-      <div v-if="!store.elders.length && !store.loading" class="text-center py-16">
+      <div v-if="store.loading" class="text-center py-16">
+        <div class="inline-flex items-center gap-2 text-on-surface-variant">
+          <svg class="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
+          <span class="text-sm">加载中...</span>
+        </div>
+      </div>
+      <div v-else-if="!store.elders.length" class="text-center py-16">
         <span class="material-symbols-outlined text-5xl text-inactive-gray">groups</span>
         <p class="text-inactive-gray text-sm mt-3">暂无老人数据</p>
       </div>
@@ -179,6 +185,7 @@
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
+import { ElMessage } from 'element-plus'
 import { useEldersStore } from '@/stores/elders'
 import { downloadExport } from '@/api/export'
 
@@ -186,7 +193,11 @@ const store = useEldersStore()
 const showDialog = ref(false)
 const filters = reactive({ care_level: '', search: '' })
 const form = reactive({ elder_id: '', care_level: 'B', address: '', health_notes: '' })
-const toastMsg = ref('')
+let searchTimer = null
+function debouncedSearch() {
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => store.load(filters), 300)
+}
 
 onMounted(() => store.load())
 
@@ -196,8 +207,7 @@ function handleExport() {
 
 async function handleCreate() {
   if (!form.elder_id || !form.care_level) {
-    toastMsg.value = '请填写必填项'
-    setTimeout(() => toastMsg.value = '', 2000)
+    ElMessage.warning('请填写必填项')
     return
   }
   try {

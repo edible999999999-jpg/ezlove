@@ -207,17 +207,7 @@ import { useMomentStore } from "@/stores/moment";
 import { useAlertStore } from "@/stores/alert";
 import { selfCheckIn, getTodayCheckIn } from "@/api/user";
 import { getTodayMenu } from "@/api/canteen";
-
-const BASE_URL =
-  process.env.NODE_ENV === "development"
-    ? "http://localhost:8001"
-    : "https://yuxilab.cn/ezlove";
-
-function getFullUrl(url) {
-  if (!url) return "";
-  if (url.startsWith("http")) return url;
-  return `${BASE_URL}${url}`;
-}
+import { getFullUrl } from "@/api/config";
 
 const userStore = useUserStore();
 const relationStore = useRelationStore();
@@ -309,7 +299,7 @@ function goViewDetail(m) {
 }
 
 function goAlerts() {
-  uni.navigateTo({ url: "/pages/alerts/index" });
+  uni.switchTab({ url: "/pages/alerts/index" });
 }
 
 function goVolunteer() {
@@ -372,7 +362,8 @@ function goVolunteer() {
   }
 
   &__bell {
-    padding: $sp-8;
+    width: 96rpx;
+    height: 96rpx;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -380,8 +371,8 @@ function goVolunteer() {
   }
 
   &__bell-icon {
-    width: 44rpx;
-    height: 44rpx;
+    width: 48rpx;
+    height: 48rpx;
   }
 
   &__badge {

@@ -11,7 +11,7 @@ onLaunch(async () => {
     uni.reLaunch({ url: "/pages/login/index" });
     // #endif
     // #ifdef H5
-    uni.navigateTo({ url: "/pages/login/index" });
+    uni.reLaunch({ url: "/pages/login/index" });
     // #endif
     return;
   }

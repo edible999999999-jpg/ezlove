@@ -49,10 +49,9 @@ async def get_available_tasks(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    profile = await vol_service.get_volunteer_profile(db, user.id)
-    if not profile:
-        raise HTTPException(status_code=404, detail="未注册为志愿者")
     vp = await vol_service.get_volunteer_profile_obj(db, user.id)
+    if not vp:
+        raise HTTPException(status_code=404, detail="未注册为志愿者")
     return await vol_service.list_tasks(db, vp.community_id, status="pending")
 
 
@@ -93,6 +92,9 @@ async def get_my_points(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    vp = await vol_service.get_volunteer_profile_obj(db, user.id)
+    if not vp:
+        raise HTTPException(status_code=404, detail="未注册为志愿者")
     return await vol_service.get_points_history(db, user.id)
 
 

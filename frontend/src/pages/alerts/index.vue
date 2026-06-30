@@ -87,8 +87,12 @@ function levelText(level) {
 }
 
 async function handleResolve(id) {
-  await alertStore.resolve(id);
-  uni.showToast({ title: "已标记", icon: "success" });
+  try {
+    await alertStore.resolve(id);
+    uni.showToast({ title: "已标记", icon: "success" });
+  } catch {
+    uni.showToast({ title: "操作失败", icon: "none" });
+  }
 }
 </script>
 
