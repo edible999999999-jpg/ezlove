@@ -33,6 +33,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 开发命令
 
 ```bash
+# 基础设施（端口避开 ezpr：PG=5433, Redis=6380, Backend=8001）
+docker-compose up -d db redis  # 仅启动数据库和缓存
+docker-compose up -d           # 启动全部（含 backend + admin-frontend）
+
+# 后端（先确保 backend/.env 存在，参照 backend/.env.example）
+cd backend
+uvicorn app.main:app --reload  # 开发模式 (localhost:8001)
+alembic upgrade head           # 执行数据库迁移
+alembic revision --autogenerate -m "desc"  # 生成迁移脚本
+
+# 数据初始化（需 PYTHONPATH=. 且在 backend/ 目录下执行）
+PYTHONPATH=. python seed_community.py --password <密码>  # 创建社区 + 管理员（幂等，已存在则跳过）
+PYTHONPATH=. python seed_elders.py          # 溪东社区 2101 老人 + 15 工作人员（默认密码 admin123）
+PYTHONPATH=. python seed_activity.py        # 30 天历史活动数据（牵挂、已读、食堂、事件、告警）
+PYTHONPATH=. python seed_all.py             # 按顺序执行 seed_elders + seed_activity
+PYTHONPATH=. python seed_elders.py --clean  # 清空重建老人数据
+
 # 小程序前端
 cd frontend
 npm run dev:h5                 # H5 开发模式 (localhost:5173)
@@ -45,24 +62,14 @@ cd admin-frontend
 npm run dev                    # 开发模式 (localhost:5174，API 代理到 localhost:8001)
 npm run build                  # 生产构建
 
-# 后端（先确保 backend/.env 存在，参照 backend/.env.example）
-cd backend
-uvicorn app.main:app --reload  # 开发模式 (localhost:8001)
-alembic upgrade head           # 执行数据库迁移
-alembic revision --autogenerate -m "desc"  # 生成迁移脚本
-python seed_community.py       # 初始化社区 + 管理员账号
-python seed_elders.py          # 初始化老人数据
-
-# 基础设施（端口避开 ezpr：PG=5433, Redis=6380, Backend=8001）
-docker-compose up -d db redis  # 仅启动数据库和缓存
-docker-compose up -d           # 启动全部（含 backend + admin-frontend）
-
 # 健康检查
 curl http://localhost:8001/health
 
 # Swagger 文档（仅 DEBUG=true 时可用）
 # http://localhost:8001/docs
 ```
+
+**注意：** 项目无测试框架、无 lint/format 配置。
 
 ---
 
@@ -96,6 +103,30 @@ curl http://localhost:8001/health
                   ↓
 定时检测（APScheduler） → 未读超时 → alerts 表 → 通知子女
 ```
+
+### 定时任务（APScheduler）
+
+调度器在 FastAPI lifespan 中启动/停止，定义在 `tasks/alert_checker.py`：
+
+| 任务 | 频率 | 说明 |
+|---|---|---|
+| `run_alert_rules` | 每 5 分钟 | 社区侧规则引擎：按 AlertRule 配置检测 unread_timeout / canteen_absence / no_signal |
+| `check_unread_alerts` | 每 5 分钟 | 家属侧：检测今日牵挂未读是否超过关系设定的告警阈值 |
+| `sync_all_communities` | 每 30 分钟 | 将家属侧告警同步为社区事件 |
+| `check_escalations` | 每 15 分钟 | 超时未处理告警自动升级（最多 2 级） |
+| `recalculate_risk_scores` | 每 1 小时 | 全量重算所有老人风险评分 |
+| `morning_silence_check` | 每天 8:00 | 晨间静默检测：A 级 18h / B 级 24h 无活动信号则告警 |
+
+### AI 集成
+
+使用 Anthropic Claude API（`claude-haiku-4-5-20251001`），四处调用点：
+
+1. **`services/ai_content.py`** — 牵挂文案建议（3 条，时段感知）+ 照片分析生成标题
+2. **`utils/llm_parser.py`** — 食堂签到文本解析为结构化 JSON
+3. **`services/risk_scoring.py`** — 风险评分 AI 分析（趋势判断 + 关注点 + 建议）
+4. **`api/v1/agent.py` + `services/agent.py`** — "小溪" 智能助手，SSE 流式响应，7 个工具函数（查询不活跃老人、楼栋统计、老人状态、今日告警、未确认名单、确认活跃、周趋势），其中 `confirm_elder_active` 是唯一有写入的工具
+
+所有 AI 调用在 `ANTHROPIC_API_KEY` 未配置时自动降级为预设回复，系统不依赖 AI 也能正常运行。
 
 ### API 路由前缀映射
 
@@ -162,10 +193,11 @@ curl http://localhost:8001/health
 
 ## 数据库
 
-- 使用 SQLAlchemy 2.0 async + asyncpg 驱动
-- Alembic 异步迁移，`env.py` 从 `settings.DATABASE_URL` 读取连接串（不从 `alembic.ini`）
-- 迁移文件在 `backend/alembic/versions/`
+- 使用 SQLAlchemy 2.0 async（`Mapped`/`mapped_column` 风格） + asyncpg 驱动
+- Alembic 异步迁移，`env.py` 从 `settings.DATABASE_URL` 读取连接串（`alembic.ini` 中 `sqlalchemy.url` 留空）
+- 迁移文件在 `backend/alembic/versions/`（当前 5 个版本）
 - 静态文件上传到 `backend/static/`，通过 `/static` 路径访问
+- 14 个模型，`User` 表三角色共用（老人/子女/工作人员），`CommunityWorker` 单独存密码哈希
 
 ---
 
@@ -212,3 +244,15 @@ curl http://localhost:8001/health
 - 辅助色：`#6B8F71`（sage 灰绿）
 - 强调色：`#D4A853`（amber 琥珀）
 - 使用 Tailwind 配置中的 `terracotta`/`sage`/`amber`/`warm` 色阶
+
+---
+
+## 需要注意的非显而易见行为
+
+1. **`get_current_worker` 会在内存中修改 ORM 对象** — 如果 JWT 包含 `current_community_id`，依赖注入会将 worker 的 `community_id` 改为该值（支持多社区切换），但不写入数据库。同一请求中如果 session flush 可能造成意外。
+2. **风险评分对有无家属绑定使用不同权重** — 无家属时 `view_frequency` 权重降为 0，`canteen_attendance` 和 `last_active` 权重显著提高（见 `services/risk_scoring.py`）。
+3. **`AccessLogMiddleware` 用 `verify_exp: False` 解码 JWT** — 仅为日志提取 uid，不做鉴权。
+4. **Redis 已在 docker-compose 和 settings 中声明但代码中无任何使用**。
+5. **生产 API 地址未配置** — 小程序 `api/config.js` 的 `PROD_API_BASE` 和管理后台 `.env.production` 的 `VITE_API_BASE_URL` 均为空，部署前必须设置。
+6. **小程序 HTTP 客户端无自动 token 刷新** — 401 时直接跳转登录页；管理后台有 refresh token 轮换机制。
+7. **海报生成依赖系统 CJK 字体** — `services/poster_generator.py` 按 macOS → Linux 顺序查找字体，服务器上需确保 CJK 字体可用。

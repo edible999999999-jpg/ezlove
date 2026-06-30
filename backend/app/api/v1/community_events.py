@@ -18,6 +18,10 @@ class EventCreate(BaseModel):
     severity: str = "info"
 
 
+class EventResolveRequest(BaseModel):
+    resolution_note: str | None = None
+
+
 @router.get("")
 async def list_events(
     severity: str | None = None,
@@ -39,6 +43,8 @@ async def list_events(
             "description": e.description,
             "severity": e.severity,
             "is_resolved": e.is_resolved,
+            "resolved_at": e.resolved_at.isoformat() if e.resolved_at else None,
+            "resolution_note": e.resolution_note,
             "created_at": e.created_at.isoformat(),
         }
         for e in events
@@ -61,11 +67,13 @@ async def create_event(
 @router.put("/{event_id}/resolve")
 async def resolve_event(
     event_id: UUID,
+    body: EventResolveRequest | None = None,
     worker: CommunityWorker = Depends(get_current_worker),
     db: AsyncSession = Depends(get_db),
 ):
     try:
-        event = await event_service.resolve_event(db, event_id, worker.id, worker.community_id)
+        note = body.resolution_note if body else None
+        event = await event_service.resolve_event(db, event_id, worker.id, worker.community_id, resolution_note=note)
         return {"ok": True}
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

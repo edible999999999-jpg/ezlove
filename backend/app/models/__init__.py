@@ -8,9 +8,11 @@ from app.models.alert_rule import AlertRule
 from app.models.community_contact import CommunityContact
 from app.models.community import Community, CommunityWorker, CommunityElder
 from app.models.canteen import CanteenRecord
+from app.models.canteen_menu import CanteenMenu
 from app.models.community_event import CommunityEvent
 from app.models.community_worker_assignment import CommunityWorkerAssignment
 from app.models.risk_snapshot import RiskScoreSnapshot
+from app.models.volunteer import VolunteerProfile, HelpTask, PointTransaction
 
 __all__ = [
     "User",
@@ -25,7 +27,11 @@ __all__ = [
     "CommunityWorker",
     "CommunityElder",
     "CanteenRecord",
+    "CanteenMenu",
     "CommunityEvent",
     "CommunityWorkerAssignment",
     "RiskScoreSnapshot",
+    "VolunteerProfile",
+    "HelpTask",
+    "PointTransaction",
 ]

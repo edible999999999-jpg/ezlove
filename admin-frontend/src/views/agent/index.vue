@@ -111,10 +111,7 @@
 
 <script setup>
 import { ref, nextTick, onMounted } from 'vue'
-import { useUserStore } from '@/stores/user'
 import { streamAgentChat } from '@/api/agent'
-
-const userStore = useUserStore()
 const messagesContainer = ref(null)
 const inputEl = ref(null)
 const inputText = ref('')
@@ -172,7 +169,7 @@ async function sendMessage(text) {
     .map(m => ({ role: m.role, content: m.content }))
 
   try {
-    for await (const event of streamAgentChat(chatMessages, userStore.token)) {
+    for await (const event of streamAgentChat(chatMessages)) {
       if (event.type === 'text_delta') {
         streamBuffer.value += event.content
         scrollToBottom()

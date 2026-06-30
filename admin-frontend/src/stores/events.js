@@ -30,10 +30,10 @@ export const useEventsStore = defineStore('events', () => {
     }
   }
 
-  async function resolve(id) {
+  async function resolve(id, data) {
     error.value = null
     try {
-      await resolveEvent(id)
+      await resolveEvent(id, data)
       await load()
     } catch (e) {
       error.value = e.response?.data?.detail || e.message || '处理失败'

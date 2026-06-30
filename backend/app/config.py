@@ -19,8 +19,14 @@ class Settings(BaseSettings):
 
     WECHAT_APP_ID: str = ""
     WECHAT_APP_SECRET: str = ""
+    WECHAT_UNREAD_TEMPLATE_ID: str = ""
+    WECHAT_ALERT_TEMPLATE_ID: str = ""
 
     ANTHROPIC_API_KEY: str = ""
+
+    LLM_API_KEY: str = ""
+    LLM_BASE_URL: str = ""
+    LLM_MODEL: str = "qwen-plus"
 
     class Config:
         env_file = ".env"

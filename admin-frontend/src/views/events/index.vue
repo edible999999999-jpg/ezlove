@@ -6,13 +6,22 @@
         <h2 class="font-headline text-2xl font-bold text-on-surface">事件中心</h2>
         <p class="text-on-surface-variant text-sm mt-1">查看和处理社区老人相关事件</p>
       </div>
-      <button
-        class="flex items-center gap-2 bg-primary text-white rounded-full px-6 py-2.5 font-semibold text-sm shadow-lg shadow-primary/20 hover:bg-terracotta hover:shadow-xl hover:-translate-y-0.5 active:scale-95 transition-all duration-200"
-        @click="showDialog = true"
-      >
-        <span class="material-symbols-outlined text-lg">add</span>
-        手动新增
-      </button>
+      <div class="flex items-center gap-3">
+        <button
+          class="flex items-center gap-2 bg-surface-container text-on-surface rounded-full px-5 py-2.5 font-semibold text-sm hover:bg-outline-variant/30 transition-all duration-200"
+          @click="handleExport"
+        >
+          <span class="material-symbols-outlined text-lg">download</span>
+          导出 Excel
+        </button>
+        <button
+          class="flex items-center gap-2 bg-primary text-white rounded-full px-6 py-2.5 font-semibold text-sm shadow-lg shadow-primary/20 hover:bg-terracotta hover:shadow-xl hover:-translate-y-0.5 active:scale-95 transition-all duration-200"
+          @click="showDialog = true"
+        >
+          <span class="material-symbols-outlined text-lg">add</span>
+          手动新增
+        </button>
+      </div>
     </div>
 
     <!-- Filters -->
@@ -90,10 +99,13 @@
               <button
                 v-if="!row.is_resolved"
                 class="px-4 py-1.5 rounded-xl text-xs font-semibold bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                @click.stop="handleResolve(row.id)"
+                @click.stop="openResolve(row)"
               >
                 处理
               </button>
+              <span v-else-if="row.resolution_note" class="text-xs text-on-surface-variant" :title="row.resolution_note">
+                {{ row.resolution_note.length > 12 ? row.resolution_note.slice(0, 12) + '…' : row.resolution_note }}
+              </span>
             </td>
           </tr>
         </tbody>
@@ -101,6 +113,29 @@
       <div v-if="!store.events.length && !store.loading" class="text-center py-16">
         <span class="material-symbols-outlined text-5xl text-inactive-gray">notifications_active</span>
         <p class="text-inactive-gray text-sm mt-3">暂无事件记录</p>
+      </div>
+    </div>
+
+    <!-- Resolve Dialog -->
+    <div v-if="showResolveDialog" class="fixed inset-0 z-[200] flex items-center justify-center">
+      <div class="absolute inset-0 bg-on-surface/40 backdrop-blur-sm" @click="showResolveDialog = false"></div>
+      <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg p-0 overflow-hidden animate-fade-in-up">
+        <div class="px-6 py-5 border-b border-outline-variant/20">
+          <h3 class="font-headline text-lg font-bold text-on-surface">处理事件</h3>
+        </div>
+        <div class="px-6 py-5 space-y-4">
+          <div class="bg-surface-container rounded-xl p-4">
+            <p class="text-sm text-on-surface-variant">{{ resolveTarget?.description || '无描述' }}</p>
+          </div>
+          <div>
+            <label class="text-sm font-semibold text-charcoal ml-1 block mb-1.5">处理备注</label>
+            <textarea v-model="resolveNote" rows="3" class="w-full px-4 py-3 bg-white border border-outline-variant rounded-xl text-charcoal placeholder:text-outline-variant/60 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30 transition-all resize-none" placeholder="例：已电话联系家属确认安全 / 已上门探访"></textarea>
+          </div>
+        </div>
+        <div class="px-6 py-4 border-t border-outline-variant/20 flex justify-end gap-3">
+          <button class="px-6 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-container transition-colors" @click="showResolveDialog = false">取消</button>
+          <button class="px-6 py-2.5 rounded-xl text-sm font-semibold bg-primary text-white shadow-sm hover:bg-terracotta transition-colors" @click="handleResolve">确认处理</button>
+        </div>
       </div>
     </div>
 
@@ -153,13 +188,21 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
 import { useEventsStore } from '@/stores/events'
+import { downloadExport } from '@/api/export'
 
 const store = useEventsStore()
 const showDialog = ref(false)
+const showResolveDialog = ref(false)
+const resolveTarget = ref(null)
+const resolveNote = ref('')
 const filters = reactive({ severity: '', event_type: '', is_resolved: null })
 const form = reactive({ elder_id: '', event_type: 'other', severity: 'info', description: '' })
 
 onMounted(() => store.load())
+
+function handleExport() {
+  downloadExport('/community/export/events')
+}
 
 function severityLabel(s) {
   return { urgent: '紧急', warning: '警告', info: '信息' }[s] || s
@@ -185,9 +228,18 @@ function formatTime(t) {
   return new Date(t).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
 }
 
-async function handleResolve(id) {
+function openResolve(row) {
+  resolveTarget.value = row
+  resolveNote.value = ''
+  showResolveDialog.value = true
+}
+
+async function handleResolve() {
+  if (!resolveTarget.value) return
   try {
-    await store.resolve(id)
+    await store.resolve(resolveTarget.value.id, { resolution_note: resolveNote.value || null })
+    showResolveDialog.value = false
+    resolveTarget.value = null
   } catch (e) {
     // handled by interceptor
   }

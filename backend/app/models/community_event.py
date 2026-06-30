@@ -20,4 +20,5 @@ class CommunityEvent(Base):
         ForeignKey("community_workers.id"), nullable=True
     )
     resolved_at: Mapped[datetime | None] = mapped_column(nullable=True)
+    resolution_note: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())

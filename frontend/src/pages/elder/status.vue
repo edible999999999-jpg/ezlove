@@ -29,7 +29,7 @@
             <text class="pause-icon">🔕</text>
             <view class="pause-info">
               <text class="pause-title">暂停提醒</text>
-              <text class="pause-desc">{{ pausedUntil ? '提醒已暂停至 ' + pausedUntil : '老人有事时可暂停几天' }}</text>
+              <text class="pause-desc">{{ pausedUntil ? '提醒已暂停至 ' + formatDate(pausedUntil) : '老人有事时可暂停几天' }}</text>
             </view>
           </view>
         </view>
@@ -125,6 +125,12 @@ async function pauseAlert(days) {
   } catch (e) {
     uni.showToast({ title: "操作失败", icon: "none" });
   }
+}
+
+function formatDate(isoStr) {
+  if (!isoStr) return "";
+  const d = new Date(isoStr);
+  return `${d.getMonth() + 1}月${d.getDate()}日`;
 }
 
 async function resumeAlert() {

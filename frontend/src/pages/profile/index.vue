@@ -26,6 +26,13 @@
           </view>
           <text class="menu-arrow">›</text>
         </view>
+        <view class="menu-card" @tap="goVolunteer">
+          <view class="menu-left">
+            <image class="menu-icon-img" src="/static/icons/heart-send.svg" mode="aspectFit" />
+            <text class="menu-text">邻里帮</text>
+          </view>
+          <text class="menu-arrow">›</text>
+        </view>
       </view>
 
       <view class="logout-section fade-in stagger-2">
@@ -39,8 +46,10 @@
 
 <script setup>
 import { useUserStore } from "@/stores/user";
+import { computed } from "vue";
 
 const userStore = useUserStore();
+const isElder = computed(() => userStore.isElder);
 
 function goBindList() {
   uni.navigateTo({ url: "/pages/bind/list" });
@@ -48,6 +57,10 @@ function goBindList() {
 
 function goInvite() {
   uni.navigateTo({ url: "/pages/bind/invite" });
+}
+
+function goVolunteer() {
+  uni.navigateTo({ url: "/pages/volunteer/index" });
 }
 
 function handleLogout() {
@@ -120,7 +133,7 @@ function handleLogout() {
 .menu-card {
   background: $c-surface;
   border-radius: $r-lg;
-  padding: $sp-24 $sp-32;
+  padding: $sp-32;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -142,12 +155,12 @@ function handleLogout() {
 }
 
 .menu-icon-img {
-  width: 40rpx;
-  height: 40rpx;
+  width: 48rpx;
+  height: 48rpx;
 }
 
 .menu-text {
-  font-size: $fs-body;
+  font-size: $fs-title;
   font-weight: $fw-medium;
   color: $c-text;
 }

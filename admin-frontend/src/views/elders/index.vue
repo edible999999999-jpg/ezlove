@@ -6,13 +6,22 @@
         <h2 class="font-headline text-2xl font-bold text-on-surface">老人档案</h2>
         <p class="text-on-surface-variant text-sm mt-1">管理社区老人信息，设置关爱分级</p>
       </div>
-      <button
-        class="flex items-center gap-2 bg-primary text-white rounded-full px-6 py-2.5 font-semibold text-sm shadow-lg shadow-primary/20 hover:bg-terracotta hover:shadow-xl hover:-translate-y-0.5 active:scale-95 transition-all duration-200"
-        @click="showDialog = true"
-      >
-        <span class="material-symbols-outlined text-lg">add</span>
-        新增老人
-      </button>
+      <div class="flex items-center gap-3">
+        <button
+          class="flex items-center gap-2 bg-surface-container text-on-surface rounded-full px-5 py-2.5 font-semibold text-sm hover:bg-outline-variant/30 transition-all duration-200"
+          @click="handleExport"
+        >
+          <span class="material-symbols-outlined text-lg">download</span>
+          导出 Excel
+        </button>
+        <button
+          class="flex items-center gap-2 bg-primary text-white rounded-full px-6 py-2.5 font-semibold text-sm shadow-lg shadow-primary/20 hover:bg-terracotta hover:shadow-xl hover:-translate-y-0.5 active:scale-95 transition-all duration-200"
+          @click="showDialog = true"
+        >
+          <span class="material-symbols-outlined text-lg">add</span>
+          新增老人
+        </button>
+      </div>
     </div>
 
     <!-- Filters -->
@@ -171,6 +180,7 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
 import { useEldersStore } from '@/stores/elders'
+import { downloadExport } from '@/api/export'
 
 const store = useEldersStore()
 const showDialog = ref(false)
@@ -179,6 +189,10 @@ const form = reactive({ elder_id: '', care_level: 'B', address: '', health_notes
 const toastMsg = ref('')
 
 onMounted(() => store.load())
+
+function handleExport() {
+  downloadExport('/community/export/elders')
+}
 
 async function handleCreate() {
   if (!form.elder_id || !form.care_level) {

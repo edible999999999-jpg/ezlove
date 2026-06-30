@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- SideNavBar -->
-    <aside class="w-60 h-screen fixed left-0 top-0 bg-[#2C2825] text-white flex flex-col py-6 gap-2 z-50">
+    <aside v-show="!dashboardStore.presentationMode" class="w-60 h-screen fixed left-0 top-0 bg-[#2C2825] text-white flex flex-col py-6 gap-2 z-50">
       <div class="px-6 mb-8">
         <h1 class="font-headline font-bold text-2xl text-white">易挂念</h1>
         <p class="text-xs opacity-60 tracking-widest mt-1">社区康养管理系统</p>
@@ -36,7 +36,7 @@
     </aside>
 
     <!-- TopNavBar -->
-    <header class="h-16 fixed top-0 right-0 w-[calc(100%-240px)] bg-surface/80 backdrop-blur-md flex justify-between items-center px-8 z-40 border-b border-outline-variant/30">
+    <header v-show="!dashboardStore.presentationMode" class="h-16 fixed top-0 right-0 w-[calc(100%-240px)] bg-surface/80 backdrop-blur-md flex justify-between items-center px-8 z-40 border-b border-outline-variant/30">
       <div class="flex items-center gap-4">
         <h2 class="font-headline font-semibold text-lg text-on-surface">{{ currentPageName }}</h2>
         <div v-if="userStore.communities.length > 1" class="community-switcher">
@@ -77,8 +77,11 @@
     </header>
 
     <!-- Main Content -->
-    <main class="ml-60 pt-16 h-screen overflow-y-auto custom-scrollbar bg-surface">
-      <div class="p-8 max-w-[1400px] mx-auto">
+    <main :class="[
+      'h-screen overflow-y-auto custom-scrollbar bg-surface transition-all duration-300',
+      dashboardStore.presentationMode ? 'ml-0 pt-0' : 'ml-60 pt-16'
+    ]">
+      <div :class="dashboardStore.presentationMode ? 'p-6' : 'p-8 max-w-[1400px] mx-auto'">
         <router-view v-slot="{ Component }">
           <transition name="page-fade" mode="out-in">
             <component :is="Component" />
@@ -126,6 +129,7 @@ const navItems = [
   { path: '/canteen', label: '食堂管理', icon: 'restaurant' },
   { path: '/events', label: '事件中心', icon: 'notifications_active' },
   { path: '/agent', label: 'AI 助手', icon: 'smart_toy' },
+  { path: '/volunteers', label: '邻里帮', icon: 'volunteer_activism' },
 ]
 
 const pageNameMap = {
@@ -134,6 +138,7 @@ const pageNameMap = {
   '/canteen': '食堂管理',
   '/events': '事件中心',
   '/agent': 'AI 助手',
+  '/volunteers': '邻里帮',
 }
 
 const currentPageName = computed(() => {

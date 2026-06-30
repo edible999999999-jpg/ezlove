@@ -28,8 +28,8 @@
       </button>
 
       <!-- #ifdef H5 -->
-      <button class="dev-login-btn" @tap="handleLogin('dev_test_elder')">
-        <text class="dev-btn-text">老人端测试入口</text>
+      <button class="dev-login-btn" @tap="handleLogin('demo_elder_7fdf991f')">
+        <text class="dev-btn-text">H5 测试入口</text>
       </button>
       <!-- #endif -->
 

@@ -319,7 +319,10 @@ async def get_ai_analysis(
 请用 JSON 格式回复：
 {{"summary": "一句话总结", "trend": "improving/stable/deteriorating", "concern_points": ["关注点1"], "suggested_action": "建议行动", "confidence": 0.0-1.0}}"""
 
-    if not settings.ANTHROPIC_API_KEY:
+    from app.utils.llm import get_client, get_model
+
+    client = get_client()
+    if not client:
         return {
             "summary": f"{elder_name}的风险分数为{risk_score}分，请关注其日常活动状况。",
             "trend": "stable",
@@ -329,16 +332,14 @@ async def get_ai_analysis(
         }
 
     try:
-        import anthropic
         import re
 
-        client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
-        response = await client.messages.create(
-            model="claude-haiku-4-5-20251001",
+        response = await client.chat.completions.create(
+            model=get_model(),
             max_tokens=512,
             messages=[{"role": "user", "content": prompt}],
         )
-        text = response.content[0].text
+        text = response.choices[0].message.content
         match = re.search(r'\{.*\}', text, re.DOTALL)
         if match:
             return json.loads(match.group())

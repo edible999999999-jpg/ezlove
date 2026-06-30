@@ -15,6 +15,8 @@ from app.api.v1.canteen import router as canteen_router
 from app.api.v1.community_events import router as events_router
 from app.api.v1.poster import router as poster_router
 from app.api.v1.agent import router as agent_router
+from app.api.v1.export import router as export_router
+from app.api.v1.volunteer import router as volunteer_router
 
 api_router = APIRouter()
 api_router.include_router(auth_router)
@@ -32,3 +34,5 @@ api_router.include_router(canteen_router)
 api_router.include_router(events_router)
 api_router.include_router(poster_router)
 api_router.include_router(agent_router)
+api_router.include_router(export_router)
+api_router.include_router(volunteer_router)

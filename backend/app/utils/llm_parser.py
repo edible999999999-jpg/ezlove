@@ -1,6 +1,7 @@
 import json
 import re
-from app.config import settings
+
+from app.utils.llm import get_client, get_model
 
 
 async def parse_canteen_text(
@@ -11,7 +12,8 @@ async def parse_canteen_text(
     调用 LLM 将非结构化食堂文本解析为结构化 JSON。
     失败时返回 {"error": "原因", "fallback": True}。
     """
-    if not settings.ANTHROPIC_API_KEY:
+    client = get_client()
+    if not client:
         return {"error": "LLM API 未配置", "fallback": True}
 
     elder_context = "\n".join(
@@ -40,15 +42,15 @@ async def parse_canteen_text(
 4. 名单外的老人单独列出，elder_id 设为 null"""
 
     try:
-        import anthropic
-        client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
-        response = await client.messages.create(
-            model="claude-haiku-4-5-20251001",
+        response = await client.chat.completions.create(
+            model=get_model(),
             max_tokens=2048,
-            system=system_prompt,
-            messages=[{"role": "user", "content": raw_text}],
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": raw_text},
+            ],
         )
-        text = response.content[0].text
+        text = response.choices[0].message.content
         match = re.search(r'```(?:json)?\s*(.*?)```', text, re.DOTALL)
         if match:
             text = match.group(1)

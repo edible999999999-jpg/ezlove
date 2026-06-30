@@ -1,11 +1,12 @@
 <template>
   <view class="page">
-    <view class="invite-section fade-in">
+    <!-- 子女端：生成邀请码发给老人 -->
+    <view v-if="!userStore.isElder" class="invite-section fade-in">
       <view class="section-icon-wrap">
         <image class="section-icon-img" src="/static/icons/invite.svg" mode="aspectFit" />
       </view>
       <text class="section-title">邀请家人加入</text>
-      <text class="section-desc">把邀请码发给你的家人，帮Ta完成绑定</text>
+      <text class="section-desc">生成邀请码，让老人或其他家人输入即可绑定</text>
 
       <view v-if="inviteCode" class="code-display">
         <text class="code-value">{{ inviteCode }}</text>
@@ -16,13 +17,21 @@
       </view>
     </view>
 
-    <view class="bind-section fade-in stagger-1">
+    <!-- 双方都能输入邀请码绑定 -->
+    <view class="bind-section fade-in" :class="userStore.isElder ? '' : 'stagger-1'">
       <view class="section-icon-wrap small">
         <image class="section-icon-img" src="/static/icons/key.svg" mode="aspectFit" />
       </view>
-      <text class="section-title">我有邀请码</text>
+      <text class="section-title">{{ userStore.isElder ? '绑定家人' : '我有邀请码' }}</text>
+      <text v-if="userStore.isElder" class="section-desc">输入子女发给你的邀请码</text>
       <view class="input-wrap">
-        <input v-model="inputCode" placeholder="输入邀请码" class="code-input" />
+        <input
+          v-model="inputCode"
+          type="text"
+          placeholder="输入邀请码"
+          class="code-input"
+          :adjust-position="true"
+        />
       </view>
       <view class="btn-primary bind-btn" @tap="handleBind">绑定</view>
     </view>
@@ -31,8 +40,10 @@
 
 <script setup>
 import { ref } from "vue";
+import { useUserStore } from "@/stores/user";
 import { useRelationStore } from "@/stores/relation";
 
+const userStore = useUserStore();
 const relationStore = useRelationStore();
 const inviteCode = ref("");
 const inputCode = ref("");
@@ -145,6 +156,9 @@ async function handleBind() {
 }
 
 .code-input {
+  width: 100%;
+  height: 88rpx;
+  box-sizing: border-box;
   text-align: center;
   font-size: $fs-title;
   letter-spacing: 8rpx;

@@ -84,6 +84,13 @@ async def run_alert_rules():
                         response_deadline=now + timedelta(minutes=30),
                     )
                     db.add(alert)
+                    await db.flush()
+
+                    try:
+                        from app.services.notification import notify_worker_alert
+                        await notify_worker_alert(db, alert.id)
+                    except Exception:
+                        logger.exception("发送网格员告警通知失败")
 
         await db.commit()
     logger.info("社区侧规则引擎检测完成")
@@ -271,6 +278,14 @@ async def check_unread_alerts():
                 trigger_rule="unread_timeout",
             )
             db.add(alert)
+            await db.flush()
+
+            try:
+                from app.services.notification import notify_family_unread
+                elder_name = await _get_elder_name(db, rel.elder_user_id)
+                await notify_family_unread(db, rel.id, elder_name, int(hours_since))
+            except Exception:
+                logger.exception("发送未读通知失败")
 
         await db.commit()
     logger.info("家属侧告警检测完成")

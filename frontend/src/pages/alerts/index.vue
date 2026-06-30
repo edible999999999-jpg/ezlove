@@ -5,8 +5,17 @@
       <text class="section-subtitle">实时关注家人动态</text>
     </view>
 
+    <!-- Loading -->
+    <view v-if="alertStore.loading" class="loading-state fade-in">
+      <view class="loading-dots">
+        <view class="ldot" />
+        <view class="ldot" />
+        <view class="ldot" />
+      </view>
+    </view>
+
     <!-- Alert Cards -->
-    <view v-if="alertStore.alerts.length > 0" class="alert-list">
+    <view v-else-if="alertStore.alerts.length > 0" class="alert-list">
       <view
         v-for="(a, index) in alertStore.alerts"
         :key="a.id"
@@ -46,7 +55,7 @@
     </view>
 
     <!-- Empty State -->
-    <view class="empty-state fade-in">
+    <view v-else class="empty-state fade-in">
       <view class="empty-icon-circle">
         <image class="empty-icon-img" src="/static/icons/checkmark.svg" mode="aspectFit" />
       </view>
@@ -59,11 +68,17 @@
 <script setup>
 import { onShow } from "@dcloudio/uni-app";
 import { useAlertStore } from "@/stores/alert";
+import { requestSubscribe } from "@/utils/subscribe";
 
 const alertStore = useAlertStore();
+let subscribeRequested = false;
 
 onShow(() => {
   alertStore.loadAlerts();
+  if (!subscribeRequested) {
+    subscribeRequested = true;
+    requestSubscribe(['unread', 'alert']);
+  }
 });
 
 function levelText(level) {
@@ -247,6 +262,32 @@ $c-info-gray: #717171;
   color: rgba($c-text, 0.5);
   font-weight: $fw-medium;
   display: block;
+}
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  padding-top: 200rpx;
+}
+
+.loading-dots {
+  display: flex;
+  gap: $sp-12;
+}
+
+.ldot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background: $c-primary;
+  animation: dotPulse 1.2s ease-in-out infinite;
+  &:nth-child(2) { animation-delay: 200ms; }
+  &:nth-child(3) { animation-delay: 400ms; }
+}
+
+@keyframes dotPulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1.2); }
 }
 
 .empty-divider {

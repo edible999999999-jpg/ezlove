@@ -1,13 +1,18 @@
+from datetime import date
+
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from uuid import UUID
 
 from app.database import get_db
-from app.deps import get_current_worker
-from app.models.community import CommunityWorker
+from app.deps import get_current_worker, get_current_user
+from app.models.community import CommunityWorker, CommunityElder
 from app.models.canteen import CanteenRecord
+from app.models.user import User
 from app.services.canteen import submit_canteen_record
+from app.services import canteen_menu as menu_service
 
 router = APIRouter(prefix="/community/canteen", tags=["canteen"])
 
@@ -109,3 +114,98 @@ async def correct_record(
     await db.commit()
     await db.refresh(record)
     return {"ok": True}
+
+
+# ── 菜单管理 ──
+
+class MenuDishesUpdate(BaseModel):
+    dishes: dict
+
+
+@router.post("/menu/generate")
+async def generate_menu(
+    menu_date: str = Form(None),
+    meal_type: str = Form("lunch"),
+    worker: CommunityWorker = Depends(get_current_worker),
+    db: AsyncSession = Depends(get_db),
+):
+    d = date.fromisoformat(menu_date) if menu_date else date.today()
+    menu = await menu_service.generate_menu(db, worker.community_id, d, meal_type)
+    return _menu_response(menu)
+
+
+@router.get("/menus")
+async def list_menus(
+    worker: CommunityWorker = Depends(get_current_worker),
+    db: AsyncSession = Depends(get_db),
+):
+    menus = await menu_service.list_menus(db, worker.community_id)
+    return [_menu_response(m) for m in menus]
+
+
+@router.put("/menu/{menu_id}")
+async def update_menu(
+    menu_id: UUID,
+    body: MenuDishesUpdate,
+    worker: CommunityWorker = Depends(get_current_worker),
+    db: AsyncSession = Depends(get_db),
+):
+    menu = await menu_service.update_menu_dishes(db, menu_id, worker.community_id, body.dishes)
+    if not menu:
+        raise HTTPException(status_code=404, detail="菜单不存在")
+    return _menu_response(menu)
+
+
+@router.post("/menu/{menu_id}/publish")
+async def publish_menu(
+    menu_id: UUID,
+    worker: CommunityWorker = Depends(get_current_worker),
+    db: AsyncSession = Depends(get_db),
+):
+    menu = await menu_service.publish_menu(db, menu_id, worker.community_id, worker.id)
+    if not menu:
+        raise HTTPException(status_code=404, detail="菜单不存在")
+    return _menu_response(menu)
+
+
+@router.delete("/menu/{menu_id}")
+async def delete_menu(
+    menu_id: UUID,
+    worker: CommunityWorker = Depends(get_current_worker),
+    db: AsyncSession = Depends(get_db),
+):
+    ok = await menu_service.delete_menu(db, menu_id, worker.community_id)
+    if not ok:
+        raise HTTPException(status_code=404, detail="菜单不存在")
+    return {"ok": True}
+
+
+@router.get("/menu/today")
+async def get_today_menu(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(CommunityElder.community_id).where(
+            CommunityElder.elder_id == user.id
+        ).limit(1)
+    )
+    community_id = result.scalar_one_or_none()
+    if not community_id:
+        return {"menus": []}
+
+    menus = await menu_service.get_today_menu(db, community_id)
+    return {"menus": [_menu_response(m) for m in menus]}
+
+
+def _menu_response(m):
+    return {
+        "id": str(m.id),
+        "menu_date": m.menu_date.isoformat(),
+        "meal_type": m.meal_type,
+        "dishes": m.dishes,
+        "status": m.status,
+        "generated_by": m.generated_by,
+        "published_at": m.published_at.isoformat() if m.published_at else None,
+        "created_at": m.created_at.isoformat() if m.created_at else None,
+    }

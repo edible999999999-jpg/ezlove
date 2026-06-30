@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-from app.config import settings
+from app.utils.llm import get_client, get_model
 
 
 PHOTO_ANALYSIS_PROMPT = """你是一个温暖的家庭关怀助手。一位子女拍了一张日常生活照片想分享给独居的老人。
@@ -63,18 +63,17 @@ async def generate_suggestions() -> list[dict]:
         date=now.strftime("%Y年%m月%d日"),
     )
 
-    if not settings.ANTHROPIC_API_KEY:
+    client = get_client()
+    if not client:
         return _fallback_suggestions()
 
     try:
-        import anthropic
-        client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
-        message = await client.messages.create(
-            model="claude-haiku-4-5-20251001",
+        response = await client.chat.completions.create(
+            model=get_model(),
             max_tokens=512,
             messages=[{"role": "user", "content": prompt}],
         )
-        text = message.content[0].text
+        text = response.choices[0].message.content
         return json.loads(text)
     except Exception:
         return _fallback_suggestions()
@@ -92,12 +91,11 @@ async def analyze_photo_and_suggest(image_path: str, user_text: str | None = Non
     user_text_hint = f"用户附带的文字：「{user_text}」\n请在配文中自然融入用户想表达的内容。" if user_text else "用户没有附带文字。"
     prompt = PHOTO_ANALYSIS_PROMPT.format(user_text_hint=user_text_hint)
 
-    if not settings.ANTHROPIC_API_KEY:
+    client = get_client()
+    if not client:
         return _fallback_photo_analysis(user_text)
 
     try:
-        import anthropic
-
         img_path = Path(image_path)
         if not img_path.exists():
             return _fallback_photo_analysis(user_text)
@@ -108,19 +106,18 @@ async def analyze_photo_and_suggest(image_path: str, user_text: str | None = Non
         suffix = img_path.suffix.lower()
         media_type = {"jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png", "gif": "image/gif", "webp": "image/webp"}.get(suffix.lstrip("."), "image/jpeg")
 
-        client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
-        message = await client.messages.create(
-            model="claude-haiku-4-5-20251001",
+        response = await client.chat.completions.create(
+            model=get_model(),
             max_tokens=512,
             messages=[{
                 "role": "user",
                 "content": [
-                    {"type": "image", "source": {"type": "base64", "media_type": media_type, "data": img_data}},
+                    {"type": "image_url", "image_url": {"url": f"data:{media_type};base64,{img_data}"}},
                     {"type": "text", "text": prompt},
                 ],
             }],
         )
-        text = message.content[0].text
+        text = response.choices[0].message.content
         return json.loads(text)
     except Exception:
         return _fallback_photo_analysis(user_text)

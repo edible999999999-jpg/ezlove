@@ -14,6 +14,7 @@ const routes = [
       { path: 'canteen', name: 'Canteen', component: () => import('@/views/canteen/index.vue') },
       { path: 'events', name: 'Events', component: () => import('@/views/events/index.vue') },
       { path: 'agent', name: 'Agent', component: () => import('@/views/agent/index.vue') },
+      { path: 'volunteers', name: 'Volunteers', component: () => import('@/views/volunteers/index.vue') },
     ]
   }
 ]

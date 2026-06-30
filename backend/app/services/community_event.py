@@ -43,6 +43,7 @@ async def resolve_event(
     event_id: uuid.UUID,
     worker_id: uuid.UUID,
     community_id: uuid.UUID,
+    resolution_note: str | None = None,
 ) -> CommunityEvent:
     stmt = select(CommunityEvent).where(
         CommunityEvent.id == event_id,
@@ -55,6 +56,8 @@ async def resolve_event(
     event.is_resolved = True
     event.resolved_by = worker_id
     event.resolved_at = datetime.now(timezone.utc)
+    if resolution_note:
+        event.resolution_note = resolution_note
     await db.commit()
     await db.refresh(event)
     return event

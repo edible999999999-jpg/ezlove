@@ -80,15 +80,15 @@
         <view class="bento-card bento-card--amber">
           <image class="bento-card__icon" src="/static/icons/sun.svg" mode="aspectFit" />
           <view class="bento-card__body">
-            <text class="bento-card__hint">老家今日晴朗</text>
-            <text class="bento-card__value">适合出门晒太阳</text>
+            <text class="bento-card__hint">{{ timeOfDayHint }}</text>
+            <text class="bento-card__value">{{ timeOfDayValue }}</text>
           </view>
         </view>
         <view class="bento-card bento-card--sage">
           <image class="bento-card__icon" src="/static/icons/clock.svg" mode="aspectFit" />
           <view class="bento-card__body">
-            <text class="bento-card__hint">最佳发送时间</text>
-            <text class="bento-card__value">预计 10:30 送达</text>
+            <text class="bento-card__hint">发送小贴士</text>
+            <text class="bento-card__value">{{ sendTip }}</text>
           </view>
         </view>
       </view>
@@ -100,7 +100,7 @@
         <!-- AI Assist Button -->
         <view
           class="action-btn action-btn--outline"
-          @tap="uni.navigateTo({ url: '/pages/send/ai-suggest' })"
+          @tap="uni.navigateTo({ url: `/pages/send/ai-suggest?elderId=${selectedElderId}` })"
         >
           <text class="action-btn__sparkle">✦</text>
           <text class="action-btn__text">AI 帮我写</text>
@@ -120,8 +120,10 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import { onShow } from "@dcloudio/uni-app";
 import { useRelationStore } from "@/stores/relation";
 import { uploadImage } from "@/api/upload";
+import { requestSubscribe } from "@/utils/subscribe";
 
 const relationStore = useRelationStore();
 
@@ -133,10 +135,42 @@ const uploading = ref(false);
 
 const canGenerate = computed(() => !!uploadedUrl.value && !!selectedElderId.value && !uploading.value);
 
+const timeOfDayHint = computed(() => {
+  const h = new Date().getHours();
+  if (h < 9) return "早晨好";
+  if (h < 12) return "上午好";
+  if (h < 14) return "中午好";
+  if (h < 18) return "下午好";
+  return "晚上好";
+});
+
+const timeOfDayValue = computed(() => {
+  const h = new Date().getHours();
+  if (h < 9) return "分享一张早餐照片吧";
+  if (h < 12) return "拍张照片问候长辈";
+  if (h < 14) return "午后正好发一条牵挂";
+  if (h < 18) return "今天过得怎么样？";
+  return "晚间适合发温馨问候";
+});
+
+const sendTip = computed(() => {
+  const tips = ["照片比文字更有温度", "一张生活照就是最好的问候", "长辈最爱看日常小事"];
+  const idx = new Date().getDate() % tips.length;
+  return tips[idx];
+});
+
 onMounted(async () => {
   await relationStore.loadRelations();
   if (relationStore.relations.length > 0) {
     selectedElderId.value = relationStore.relations[0].elder_user_id;
+  }
+});
+
+onShow(() => {
+  const aiText = uni.getStorageSync("ai_suggest_text");
+  if (aiText) {
+    textContent.value = aiText;
+    uni.removeStorageSync("ai_suggest_text");
   }
 });
 
@@ -175,6 +209,8 @@ function handleGenerate() {
     user_text: textContent.value || null,
     elder_id: selectedElderId.value,
   });
+
+  requestSubscribe(['unread']);
   uni.navigateTo({ url: "/pages/send/poster-preview" });
 }
 </script>

@@ -10,6 +10,9 @@
       </view>
       <view class="top-bar__bell" @tap="goAlerts">
         <image class="top-bar__bell-icon" src="/static/icons/notification.svg" mode="aspectFit" />
+        <view v-if="alertStore.unresolvedCount > 0" class="top-bar__badge">
+          <text class="top-bar__badge-text">{{ alertStore.unresolvedCount > 99 ? '99+' : alertStore.unresolvedCount }}</text>
+        </view>
       </view>
     </view>
 
@@ -27,7 +30,14 @@
 
       <!-- 子女端：绑定家人列表 -->
       <view v-if="userStore.isFamily" class="elder-section">
-        <view v-if="relationStore.relations.length === 0" class="empty-state fade-in stagger-1">
+        <view v-if="relationStore.loading" class="loading-center fade-in">
+          <view class="loading-dot-wrap">
+            <view class="loading-dot" />
+            <view class="loading-dot" />
+            <view class="loading-dot" />
+          </view>
+        </view>
+        <view v-else-if="relationStore.relations.length === 0" class="empty-state fade-in stagger-1">
           <view class="empty-icon-wrap">
             <image class="empty-icon" src="/static/icons/link.svg" mode="aspectFit" />
           </view>
@@ -73,6 +83,64 @@
 
       <!-- 老人端：查看子女发来的牵挂 -->
       <view v-else class="elder-home">
+        <!-- 报平安按钮 -->
+        <view class="checkin-section fade-in stagger-1">
+          <view
+            class="checkin-btn"
+            :class="checkedInToday ? 'checkin-btn--done' : 'checkin-btn--active'"
+            @tap="handleCheckIn"
+          >
+            <text class="checkin-btn__icon">{{ checkedInToday ? '✓' : '☀' }}</text>
+            <view class="checkin-btn__text-wrap">
+              <text class="checkin-btn__title">{{ checkedInToday ? '今天已报平安' : '我今天很好' }}</text>
+              <text class="checkin-btn__sub">{{ checkedInToday ? checkinTimeText : '点一下，让关心你的人放心' }}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 今日菜单 -->
+        <view v-if="todayMenuDishes.length" class="menu-section fade-in stagger-2">
+          <view class="menu-card">
+            <view class="menu-card__header">
+              <text class="menu-card__icon">🍽</text>
+              <text class="menu-card__title">今日菜单</text>
+              <text class="menu-card__meal">{{ menuMealLabel }}</text>
+            </view>
+            <view class="menu-card__dishes">
+              <view v-for="(dish, i) in todayMenuDishes" :key="i" class="menu-dish">
+                <view
+                  class="menu-dish__dot"
+                  :class="dish.category === '荤菜' ? 'menu-dish__dot--meat' : 'menu-dish__dot--veg'"
+                />
+                <view class="menu-dish__info">
+                  <text class="menu-dish__name">{{ dish.name }}</text>
+                  <text class="menu-dish__desc">{{ dish.description }}</text>
+                </view>
+              </view>
+            </view>
+            <view v-if="todayMenuData.soup" class="menu-card__extra">
+              <text class="menu-card__extra-label">汤品</text>
+              <text class="menu-card__extra-text">{{ todayMenuData.soup }}</text>
+            </view>
+            <view v-if="todayMenuData.staple" class="menu-card__extra">
+              <text class="menu-card__extra-label">主食</text>
+              <text class="menu-card__extra-text">{{ todayMenuData.staple }}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 邻里帮入口 -->
+        <view class="volunteer-entry fade-in stagger-2" @tap="goVolunteer">
+          <view class="volunteer-entry__left">
+            <text class="volunteer-entry__icon">🤝</text>
+            <view class="volunteer-entry__info">
+              <text class="volunteer-entry__title">邻里帮</text>
+              <text class="volunteer-entry__desc">帮助邻居，赚取积分</text>
+            </view>
+          </view>
+          <text class="volunteer-entry__arrow">›</text>
+        </view>
+
         <view v-if="momentStore.loading" class="loading-center fade-in">
           <view class="loading-dot-wrap">
             <view class="loading-dot" />
@@ -131,11 +199,14 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { ref, computed } from "vue";
 import { onShow } from "@dcloudio/uni-app";
 import { useUserStore } from "@/stores/user";
 import { useRelationStore } from "@/stores/relation";
 import { useMomentStore } from "@/stores/moment";
+import { useAlertStore } from "@/stores/alert";
+import { selfCheckIn, getTodayCheckIn } from "@/api/user";
+import { getTodayMenu } from "@/api/canteen";
 
 const BASE_URL =
   process.env.NODE_ENV === "development"
@@ -151,6 +222,18 @@ function getFullUrl(url) {
 const userStore = useUserStore();
 const relationStore = useRelationStore();
 const momentStore = useMomentStore();
+const alertStore = useAlertStore();
+
+const checkedInToday = ref(false);
+const checkinTimeText = ref("");
+const todayMenus = ref([]);
+
+const todayMenuData = computed(() => todayMenus.value[0]?.dishes || {});
+const todayMenuDishes = computed(() => todayMenuData.value.items || []);
+const menuMealLabel = computed(() => {
+  const type = todayMenus.value[0]?.meal_type;
+  return type === "dinner" ? "晚餐" : "午餐";
+});
 
 const greeting = computed(() => {
   const hour = new Date().getHours();
@@ -159,13 +242,55 @@ const greeting = computed(() => {
   return "晚上好";
 });
 
+function formatCheckinTime(isoStr) {
+  if (!isoStr) return "";
+  const d = new Date(isoStr);
+  const h = d.getHours().toString().padStart(2, "0");
+  const m = d.getMinutes().toString().padStart(2, "0");
+  return `${h}:${m} 已报平安`;
+}
+
+async function loadCheckinStatus() {
+  try {
+    const res = await getTodayCheckIn();
+    checkedInToday.value = res.checked_in;
+    checkinTimeText.value = formatCheckinTime(res.checked_in_at);
+  } catch (e) {
+    // 静默处理
+  }
+}
+
+async function handleCheckIn() {
+  if (checkedInToday.value) return;
+  try {
+    const res = await selfCheckIn();
+    checkedInToday.value = true;
+    checkinTimeText.value = formatCheckinTime(res.checked_in_at);
+    uni.showToast({ title: "已报平安，家人们安心了", icon: "none" });
+  } catch (e) {
+    uni.showToast({ title: "报平安失败，请稍后再试", icon: "none" });
+  }
+}
+
 onShow(() => {
+  alertStore.loadAlerts();
   if (userStore.isFamily) {
     relationStore.loadRelations();
   } else {
     momentStore.loadMoments();
+    loadCheckinStatus();
+    loadTodayMenu();
   }
 });
+
+async function loadTodayMenu() {
+  try {
+    const res = await getTodayMenu();
+    todayMenus.value = res.menus || [];
+  } catch (e) {
+    // 静默处理
+  }
+}
 
 function goSend() {
   uni.navigateTo({ url: "/pages/send/index" });
@@ -185,6 +310,10 @@ function goViewDetail(m) {
 
 function goAlerts() {
   uni.navigateTo({ url: "/pages/alerts/index" });
+}
+
+function goVolunteer() {
+  uni.navigateTo({ url: "/pages/volunteer/index" });
 }
 </script>
 
@@ -247,11 +376,34 @@ function goAlerts() {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
   }
 
   &__bell-icon {
     width: 44rpx;
     height: 44rpx;
+  }
+
+  &__badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 32rpx;
+    height: 32rpx;
+    background: $c-warn;
+    border-radius: $r-full;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8rpx;
+    border: 3rpx solid #FFFFFF;
+  }
+
+  &__badge-text {
+    font-size: 20rpx;
+    color: $c-text-inverse;
+    font-weight: $fw-bold;
+    line-height: 1;
   }
 }
 
@@ -471,6 +623,211 @@ function goAlerts() {
 
 .text--read {
   color: $c-safe;
+}
+
+// ── 老人端：报平安按钮 ──
+.checkin-section {
+  margin-bottom: $sp-32;
+}
+
+.checkin-btn {
+  display: flex;
+  align-items: center;
+  gap: $sp-20;
+  padding: $sp-24 $sp-24;
+  border-radius: $r-xl;
+  transition: all $duration-normal $ease-out;
+
+  &--active {
+    background: linear-gradient(135deg, $c-primary 0%, darken($c-primary, 8%) 100%);
+    box-shadow: 0 8rpx 32rpx rgba(196, 116, 92, 0.35);
+
+    &:active {
+      transform: scale(0.97);
+      box-shadow: 0 4rpx 16rpx rgba(196, 116, 92, 0.25);
+    }
+  }
+
+  &--done {
+    background: $c-safe-bg;
+    border: 2rpx solid $c-safe;
+  }
+
+  &__icon {
+    font-size: 64rpx;
+    line-height: 1;
+  }
+
+  &__text-wrap {
+    flex: 1;
+  }
+
+  &__title {
+    display: block;
+    font-size: $fs-elder-title;
+    font-weight: $fw-bold;
+    .checkin-btn--active & { color: $c-text-inverse; }
+    .checkin-btn--done & { color: $c-safe; }
+  }
+
+  &__sub {
+    display: block;
+    font-size: $fs-elder-body;
+    margin-top: $sp-4;
+    .checkin-btn--active & { color: rgba(255, 255, 255, 0.85); }
+    .checkin-btn--done & { color: $c-text-sub; }
+  }
+}
+
+// ── 老人端：今日菜单 ──
+.menu-section {
+  margin-bottom: $sp-32;
+}
+
+.menu-card {
+  background: $c-surface;
+  border-radius: $r-lg;
+  padding: $sp-24;
+  box-shadow: $shadow-sm;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $sp-12;
+    margin-bottom: $sp-20;
+    padding-bottom: $sp-16;
+    border-bottom: 2rpx solid $c-border-light;
+  }
+
+  &__icon {
+    font-size: 56rpx;
+    line-height: 1;
+  }
+
+  &__title {
+    font-size: $fs-elder-title;
+    font-weight: $fw-bold;
+    color: $c-text;
+    flex: 1;
+  }
+
+  &__meal {
+    font-size: $fs-body;
+    color: $c-primary;
+    font-weight: $fw-semibold;
+    background: $c-primary-bg;
+    padding: $sp-4 $sp-12;
+    border-radius: $r-full;
+  }
+
+  &__dishes {
+    margin-bottom: $sp-16;
+  }
+
+  &__extra {
+    display: flex;
+    align-items: flex-start;
+    gap: $sp-12;
+    padding: $sp-12 0;
+    border-top: 2rpx solid $c-border-light;
+  }
+
+  &__extra-label {
+    font-size: $fs-body;
+    color: $c-primary;
+    font-weight: $fw-semibold;
+    flex-shrink: 0;
+  }
+
+  &__extra-text {
+    font-size: $fs-elder-body;
+    color: $c-text;
+    flex: 1;
+  }
+}
+
+.menu-dish {
+  display: flex;
+  align-items: flex-start;
+  gap: $sp-12;
+  padding: $sp-12 0;
+
+  &__dot {
+    width: 16rpx;
+    height: 16rpx;
+    border-radius: $r-full;
+    margin-top: 20rpx;
+    flex-shrink: 0;
+
+    &--meat { background: $c-primary; }
+    &--veg { background: $c-safe; }
+  }
+
+  &__info {
+    flex: 1;
+  }
+
+  &__name {
+    display: block;
+    font-size: $fs-elder-body;
+    font-weight: $fw-semibold;
+    color: $c-text;
+  }
+
+  &__desc {
+    display: block;
+    font-size: $fs-body;
+    color: $c-text-sub;
+    margin-top: $sp-4;
+  }
+}
+
+// ── 老人端：邻里帮入口 ──
+.volunteer-entry {
+  background: $c-surface;
+  border-radius: $r-lg;
+  padding: $sp-24;
+  box-shadow: $shadow-sm;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $sp-32;
+  transition: all $duration-normal $ease-out;
+
+  &:active {
+    transform: scale(0.98);
+    background: $c-surface-warm;
+  }
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: $sp-16;
+  }
+
+  &__icon {
+    font-size: 56rpx;
+    line-height: 1;
+  }
+
+  &__title {
+    display: block;
+    font-size: $fs-elder-body;
+    font-weight: $fw-bold;
+    color: $c-text;
+  }
+
+  &__desc {
+    display: block;
+    font-size: $fs-body;
+    color: $c-text-sub;
+    margin-top: $sp-4;
+  }
+
+  &__arrow {
+    font-size: $fs-elder-title;
+    color: $c-text-hint;
+  }
 }
 
 // ── 老人端样式（大字体）──

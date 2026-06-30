@@ -6,6 +6,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const data = ref(null)
   const loading = ref(false)
   const error = ref(null)
+  const presentationMode = ref(false)
 
   const activeArea = ref(null)
   const expandedBuilding = ref(null)
@@ -60,5 +61,6 @@ export const useDashboardStore = defineStore('dashboard', () => {
     data, loading, error, load,
     activeArea, expandedBuilding, buildingElders, buildingLoading,
     loadBuildingElders, confirmActive,
+    presentationMode,
   }
 })

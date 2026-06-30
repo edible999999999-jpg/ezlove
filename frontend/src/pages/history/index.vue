@@ -14,17 +14,17 @@
       <view class="empty-icon-wrap">
         <image class="empty-icon" src="/static/icons/edit-note.svg" mode="aspectFit" />
       </view>
-      <text class="empty-title">第一份牵挂从这里开始</text>
-      <text class="empty-desc">一句简单的问候，也能让家人感到温暖</text>
-      <view class="btn-primary empty-btn" @tap="goSend">发送第一条</view>
+      <text class="empty-title">{{ userStore.isElder ? '还没有收到牵挂' : '第一份牵挂从这里开始' }}</text>
+      <text class="empty-desc">{{ userStore.isElder ? '家人正在想你呢，耐心等等~' : '一句简单的问候，也能让家人感到温暖' }}</text>
+      <view v-if="!userStore.isElder" class="btn-primary empty-btn" @tap="goSend">发送第一条</view>
     </view>
 
     <!-- History List -->
     <view v-else class="history-content">
       <!-- Section Header -->
       <view class="section-header">
-        <text class="section-title">记录</text>
-        <text class="section-subtitle">珍惜每一次跨越距离的叮嘱</text>
+        <text class="section-title">{{ userStore.isElder ? '收到的牵挂' : '记录' }}</text>
+        <text class="section-subtitle">{{ userStore.isElder ? '家人们的每一份心意' : '珍惜每一次跨越距离的叮嘱' }}</text>
       </view>
 
       <!-- Cards -->
@@ -91,6 +91,7 @@
 <script setup>
 import { onShow } from "@dcloudio/uni-app";
 import { useMomentStore } from "@/stores/moment";
+import { useUserStore } from "@/stores/user";
 import { formatRelativeTime } from "@/utils/date";
 
 const BASE_URL =
@@ -105,6 +106,7 @@ function getFullUrl(url) {
 }
 
 const momentStore = useMomentStore();
+const userStore = useUserStore();
 
 function formatTime(isoStr) {
   return formatRelativeTime(isoStr);

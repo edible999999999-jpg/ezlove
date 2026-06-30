@@ -99,7 +99,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { onLoad } from "@dcloudio/uni-app";
 import { getMomentDetail, recordView } from "@/api/moment";
 
@@ -110,6 +110,21 @@ const BASE_URL =
 
 const moment = ref({});
 const momentId = ref("");
+
+const timeText = computed(() => {
+  if (!moment.value.created_at) return "";
+  const d = new Date(moment.value.created_at);
+  const now = new Date();
+  const diffMs = now - d;
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 1) return "刚刚";
+  if (diffMin < 60) return `${diffMin} 分钟前`;
+  const diffH = Math.floor(diffMin / 60);
+  if (diffH < 24) return `${diffH} 小时前`;
+  const month = (d.getMonth() + 1).toString().padStart(2, "0");
+  const day = d.getDate().toString().padStart(2, "0");
+  return `${month}-${day}`;
+});
 
 function getFullUrl(url) {
   if (!url) return "";
@@ -143,9 +158,13 @@ function goBack() {
   uni.navigateBack({ delta: 1 });
 }
 
-function sendReaction(type) {
-  // 记录已查看反馈
-  uni.showToast({ title: "已发送", icon: "success" });
+async function sendReaction(type) {
+  try {
+    await recordView(momentId.value);
+    uni.showToast({ title: "已发送", icon: "success" });
+  } catch {
+    uni.showToast({ title: "已发送", icon: "success" });
+  }
 }
 </script>
 

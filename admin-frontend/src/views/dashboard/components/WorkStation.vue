@@ -104,13 +104,18 @@ import { ref, computed } from 'vue'
 
 const props = defineProps({
   workstation: { type: Object, default: () => ({}) },
+  activeArea: { type: String, default: '' },
 })
 
 defineEmits(['confirm'])
 
 const activeTab = ref('confirm')
 
-const confirmations = computed(() => props.workstation?.pending_confirmations || [])
+const confirmations = computed(() => {
+  const all = props.workstation?.pending_confirmations || []
+  if (!props.activeArea) return all
+  return all.filter(e => e.address?.includes(props.activeArea))
+})
 const alerts = computed(() => props.workstation?.pending_alerts || [])
 const timedOut = computed(() => props.workstation?.timed_out || [])
 

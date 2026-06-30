@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db, async_session
 from app.deps import get_current_worker
 from app.models.community import CommunityWorker
-from app.config import settings
+from app.utils.llm import get_client, get_model
 
 logger = logging.getLogger("ezlove.agent")
 
@@ -37,14 +37,29 @@ class ChatRequest(BaseModel):
     messages: list[ChatMessage]
 
 
+def _convert_tools_to_openai(tools):
+    return [
+        {
+            "type": "function",
+            "function": {
+                "name": t["name"],
+                "description": t["description"],
+                "parameters": t["input_schema"],
+            },
+        }
+        for t in tools
+    ]
+
+
 @router.post("/agent/chat")
 async def agent_chat(
     data: ChatRequest,
     worker: CommunityWorker = Depends(get_current_worker),
 ):
-    if not settings.ANTHROPIC_API_KEY:
+    client = get_client()
+    if not client:
         async def no_key():
-            yield f"data: {json.dumps({'type': 'text_delta', 'content': 'AI 功能未配置，请联系管理员设置 ANTHROPIC_API_KEY。'})}\n\n"
+            yield f"data: {json.dumps({'type': 'text_delta', 'content': 'AI 功能未配置，请联系管理员设置 LLM_API_KEY。'})}\n\n"
             yield f"data: {json.dumps({'type': 'done'})}\n\n"
         return StreamingResponse(no_key(), media_type="text/event-stream")
 
@@ -58,56 +73,60 @@ async def _stream_response(
     messages: list[ChatMessage],
     worker: CommunityWorker,
 ) -> AsyncGenerator[str, None]:
-    import anthropic
     from app.services.agent import TOOLS, execute_tool
 
-    client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
+    client = get_client()
+    openai_tools = _convert_tools_to_openai(TOOLS)
 
-    api_messages = [{"role": m.role, "content": m.content} for m in messages]
+    api_messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+    ] + [{"role": m.role, "content": m.content} for m in messages]
 
     try:
-        response = await client.messages.create(
-            model="claude-haiku-4-5-20251001",
+        response = await client.chat.completions.create(
+            model=get_model(),
             max_tokens=1024,
-            system=SYSTEM_PROMPT,
-            tools=TOOLS,
+            tools=openai_tools,
             messages=api_messages,
         )
 
-        while response.stop_reason == "tool_use":
-            tool_blocks = [b for b in response.content if b.type == "tool_use"]
+        max_rounds = 5
+        round_count = 0
 
-            for text_block in response.content:
-                if text_block.type == "text" and text_block.text:
-                    yield f"data: {json.dumps({'type': 'text_delta', 'content': text_block.text}, ensure_ascii=False)}\n\n"
+        while response.choices[0].finish_reason == "tool_calls" and round_count < max_rounds:
+            round_count += 1
+            assistant_msg = response.choices[0].message
 
-            tool_results = []
-            for tb in tool_blocks:
-                yield f"data: {json.dumps({'type': 'tool_use', 'name': tb.name}, ensure_ascii=False)}\n\n"
+            if assistant_msg.content:
+                yield f"data: {json.dumps({'type': 'text_delta', 'content': assistant_msg.content}, ensure_ascii=False)}\n\n"
+
+            api_messages.append(assistant_msg.model_dump(exclude_none=True))
+
+            for tc in assistant_msg.tool_calls:
+                func_name = tc.function.name
+                func_args = json.loads(tc.function.arguments) if tc.function.arguments else {}
+
+                yield f"data: {json.dumps({'type': 'tool_use', 'name': func_name}, ensure_ascii=False)}\n\n"
 
                 async with async_session() as db:
-                    result_str = await execute_tool(db, worker.community_id, tb.name, tb.input, worker_id=worker.id)
+                    result_str = await execute_tool(db, worker.community_id, func_name, func_args, worker_id=worker.id)
 
-                tool_results.append({
-                    "type": "tool_result",
-                    "tool_use_id": tb.id,
+                api_messages.append({
+                    "role": "tool",
+                    "tool_call_id": tc.id,
                     "content": result_str,
                 })
 
-            api_messages.append({"role": "assistant", "content": [b.model_dump() for b in response.content]})
-            api_messages.append({"role": "user", "content": tool_results})
-
-            response = await client.messages.create(
-                model="claude-haiku-4-5-20251001",
+            response = await client.chat.completions.create(
+                model=get_model(),
                 max_tokens=1024,
-                system=SYSTEM_PROMPT,
-                tools=TOOLS,
+                tools=openai_tools,
                 messages=api_messages,
             )
 
-        for block in response.content:
-            if block.type == "text":
-                yield f"data: {json.dumps({'type': 'text_delta', 'content': block.text}, ensure_ascii=False)}\n\n"
+        final_content = response.choices[0].message.content
+        if final_content:
+            yield f"data: {json.dumps({'type': 'text_delta', 'content': final_content}, ensure_ascii=False)}\n\n"
 
     except Exception as e:
         logger.exception("Agent chat error")

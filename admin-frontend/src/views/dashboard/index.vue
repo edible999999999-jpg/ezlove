@@ -1,7 +1,50 @@
 <template>
   <div>
-    <!-- 1. Top Stat Row: 6 cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
+    <!-- Presentation Mode: Floating Exit Button -->
+    <button
+      v-if="store.presentationMode"
+      class="fixed top-4 right-4 z-50 bg-on-surface/80 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-on-surface transition-colors shadow-lg backdrop-blur-md"
+      @click="exitPresentation"
+    >
+      <span class="material-symbols-outlined text-sm">fullscreen_exit</span>
+      退出全屏
+    </button>
+
+    <!-- Presentation Mode: Community Banner -->
+    <div v-if="store.presentationMode" class="bg-gradient-to-r from-[#2C2825] to-[#3D3632] text-white rounded-2xl p-6 mb-6 flex items-center justify-between">
+      <div class="flex items-center gap-6">
+        <div>
+          <h1 class="font-headline text-3xl font-bold">易挂念</h1>
+          <p class="text-white/60 text-sm mt-1">{{ store.data?.community_name || '社区康养管理系统' }}</p>
+        </div>
+        <div class="h-12 w-px bg-white/20"></div>
+        <div class="flex gap-8">
+          <div class="text-center">
+            <div class="serif-num text-3xl font-bold">{{ store.data?.total_elders || 0 }}</div>
+            <div class="text-xs text-white/50 mt-1">总人数</div>
+          </div>
+          <div class="text-center">
+            <div class="serif-num text-3xl font-bold text-green-400">{{ store.data?.today_active_count || 0 }}</div>
+            <div class="text-xs text-white/50 mt-1">今日活跃</div>
+          </div>
+          <div class="text-center">
+            <div class="serif-num text-3xl font-bold" :class="(store.data?.today_active_rate || 0) >= 70 ? 'text-green-400' : 'text-amber-400'">{{ store.data?.today_active_rate || 0 }}%</div>
+            <div class="text-xs text-white/50 mt-1">活跃率</div>
+          </div>
+          <div class="text-center">
+            <div class="serif-num text-3xl font-bold" :class="(store.data?.pending_events || 0) > 0 ? 'text-red-400' : 'text-green-400'">{{ store.data?.pending_events || 0 }}</div>
+            <div class="text-xs text-white/50 mt-1">待处理告警</div>
+          </div>
+        </div>
+      </div>
+      <div class="text-right">
+        <div class="serif-num text-2xl font-bold tabular-nums">{{ currentTime }}</div>
+        <div class="text-xs text-white/40 mt-1">{{ currentDate }}</div>
+      </div>
+    </div>
+
+    <!-- 1. Top Stat Row: 6 cards (hidden in presentation mode) -->
+    <div v-if="!store.presentationMode" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-outline-variant/20 hover:shadow-md transition-shadow">
         <div class="flex justify-between items-start mb-2">
           <span class="text-xs font-bold text-inactive-gray tracking-wider uppercase">总人数</span>
@@ -49,12 +92,14 @@
     </div>
 
     <!-- Main Layout -->
-    <div class="flex flex-col lg:flex-row gap-8">
+    <div :class="store.presentationMode ? 'flex flex-col gap-6' : 'flex flex-col lg:flex-row gap-8'">
       <!-- Left: WorkStation + Buildings -->
       <div class="flex-1 space-y-8">
-        <!-- WorkStation -->
+        <!-- WorkStation (hidden in presentation) -->
         <WorkStation
+          v-if="!store.presentationMode"
           :workstation="store.data?.workstation"
+          :active-area="store.activeArea"
           @confirm="handleConfirm"
         />
 
@@ -63,12 +108,22 @@
           <div class="flex justify-between items-center mb-6">
             <div>
               <h3 class="font-headline text-2xl font-bold text-on-surface">楼栋总览</h3>
-              <p class="text-on-surface-variant text-sm mt-1">点击楼栋查看老人详情</p>
+              <p class="text-on-surface-variant text-sm mt-1">{{ store.presentationMode ? '颜色深浅表示活跃率' : '点击楼栋查看老人详情' }}</p>
             </div>
-            <div class="flex items-center gap-3 text-[10px] font-medium text-inactive-gray">
-              <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-secondary"></span> 正常</div>
-              <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#D4A24E]"></span> 关注</div>
-              <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-primary"></span> 异常</div>
+            <div class="flex items-center gap-4">
+              <button
+                v-if="!store.presentationMode"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-on-surface-variant hover:bg-surface-container transition-colors"
+                @click="enterPresentation"
+              >
+                <span class="material-symbols-outlined text-base">fullscreen</span>
+                全屏展示
+              </button>
+              <div class="flex items-center gap-3 text-[10px] font-medium text-inactive-gray">
+                <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-secondary"></span> 正常</div>
+                <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#D4A24E]"></span> 关注</div>
+                <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-primary"></span> 异常</div>
+              </div>
             </div>
           </div>
 
@@ -90,16 +145,39 @@
             </button>
           </div>
 
-          <!-- Building cards for active area -->
-          <div v-if="currentArea" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            <BuildingCard
-              v-for="b in currentArea.buildings"
-              :key="b.name"
-              :building="b"
-              :trends="buildingTrends[b.name]"
-              :expanded="store.expandedBuilding === b.name"
-              @toggle="store.loadBuildingElders(b.name)"
-            />
+          <!-- Building cards / heatmap -->
+          <div v-if="currentArea" :class="[
+            'grid gap-4',
+            store.presentationMode
+              ? 'grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8'
+              : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'
+          ]">
+            <template v-if="store.presentationMode">
+              <div
+                v-for="b in currentArea.buildings"
+                :key="b.name"
+                class="relative p-3 rounded-xl text-center cursor-pointer transition-all hover:scale-105 hover:shadow-md"
+                :style="{ backgroundColor: heatColor(b.active_rate) }"
+                @click="store.loadBuildingElders(b.name)"
+              >
+                <div class="text-sm font-bold text-white drop-shadow">{{ shortBuildingName(b.name) }}</div>
+                <div class="serif-num text-lg font-bold text-white drop-shadow">{{ b.active_rate }}%</div>
+                <div class="text-[10px] text-white/80">{{ b.elder_count }}人</div>
+                <div v-if="b.alert_count > 0" class="absolute top-1 right-1 w-4 h-4 bg-white rounded-full flex items-center justify-center">
+                  <span class="text-[9px] font-bold text-red-500">{{ b.alert_count }}</span>
+                </div>
+              </div>
+            </template>
+            <template v-else>
+              <BuildingCard
+                v-for="b in currentArea.buildings"
+                :key="b.name"
+                :building="b"
+                :trends="buildingTrends[b.name]"
+                :expanded="store.expandedBuilding === b.name"
+                @toggle="store.loadBuildingElders(b.name)"
+              />
+            </template>
           </div>
 
           <!-- Expanded building tile grid -->
@@ -114,8 +192,8 @@
         </div>
       </div>
 
-      <!-- Right Sidebar -->
-      <div class="w-full lg:w-80 space-y-6">
+      <!-- Right Sidebar / Bottom Row in presentation -->
+      <div :class="store.presentationMode ? 'grid grid-cols-2 lg:grid-cols-4 gap-6' : 'w-full lg:w-80 space-y-6'">
         <!-- Care Distribution Donut -->
         <div class="bg-white p-6 rounded-3xl shadow-sm border border-outline-variant/20">
           <h3 class="font-headline text-lg font-bold text-on-surface mb-6">分级分布</h3>
@@ -189,8 +267,8 @@
 
         <!-- 7-Day Trend Chart -->
         <div v-if="dailyActiveRates.length > 1" class="bg-white p-6 rounded-3xl shadow-sm border border-outline-variant/20">
-          <h3 class="font-headline text-lg font-bold text-on-surface mb-4">7 天趋势</h3>
-          <svg viewBox="0 0 240 120" class="w-full">
+          <h3 :class="store.presentationMode ? 'font-headline text-xl font-bold text-on-surface mb-4' : 'font-headline text-lg font-bold text-on-surface mb-4'">7 天趋势</h3>
+          <svg viewBox="0 0 240 120" :class="store.presentationMode ? 'w-full min-h-[240px]' : 'w-full'">
             <defs>
               <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="#6B8F71" stop-opacity="0.2" />
@@ -240,8 +318,8 @@
           </div>
         </div>
 
-        <!-- Today Quick View -->
-        <div class="bg-white p-6 rounded-3xl shadow-sm border border-outline-variant/20">
+        <!-- Today Quick View (hidden in presentation — banner has the data) -->
+        <div v-if="!store.presentationMode" class="bg-white p-6 rounded-3xl shadow-sm border border-outline-variant/20">
           <h3 class="font-headline text-lg font-bold text-on-surface mb-4">今日速览</h3>
           <div class="space-y-3">
             <div class="flex gap-3 p-3 rounded-xl bg-primary/5">
@@ -274,8 +352,8 @@
           </div>
         </div>
 
-        <!-- System Status -->
-        <div class="p-6 bg-surface-container rounded-3xl border border-outline-variant/30 text-center">
+        <!-- System Status (hidden in presentation) -->
+        <div v-if="!store.presentationMode" class="p-6 bg-surface-container rounded-3xl border border-outline-variant/30 text-center">
           <span class="inline-block w-2 h-2 rounded-full bg-secondary mb-2 animate-pulse"></span>
           <p class="text-xs font-bold text-on-surface tracking-wider uppercase">系统正常</p>
           <p class="text-[10px] text-on-surface-variant mt-1">上次同步: {{ currentTime }}</p>
@@ -297,6 +375,7 @@ const store = useDashboardStore()
 onMounted(() => store.load())
 
 const currentTime = ref(new Date().toLocaleTimeString('zh-CN', { hour12: true }))
+const currentDate = ref(new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }))
 let timeInterval
 onMounted(() => {
   timeInterval = setInterval(() => {
@@ -304,6 +383,35 @@ onMounted(() => {
   }, 1000)
 })
 onUnmounted(() => clearInterval(timeInterval))
+
+function enterPresentation() {
+  store.presentationMode = true
+  document.addEventListener('keydown', handleEsc)
+}
+
+function exitPresentation() {
+  store.presentationMode = false
+  document.removeEventListener('keydown', handleEsc)
+}
+
+function handleEsc(e) {
+  if (e.key === 'Escape') exitPresentation()
+}
+
+onUnmounted(() => document.removeEventListener('keydown', handleEsc))
+
+function heatColor(rate) {
+  if (rate >= 80) return '#2D8A4E'
+  if (rate >= 60) return '#6B8F71'
+  if (rate >= 40) return '#D4A24E'
+  if (rate >= 20) return '#E67E22'
+  return '#C44D3E'
+}
+
+function shortBuildingName(name) {
+  const match = name.match(/\d+号楼/)
+  return match ? match[0] : name
+}
 
 // Animated counters
 const animatedValues = ref({})
