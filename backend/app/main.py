@@ -86,6 +86,20 @@ static_dir.mkdir(parents=True, exist_ok=True)
 app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 
+_start_time = time.time()
+
+
 @app.get("/health")
 async def health_check():
-    return {"status": "ok"}
+    uptime_s = int(time.time() - _start_time)
+    h, rem = divmod(uptime_s, 3600)
+    m, s = divmod(rem, 60)
+    return {
+        "status": "ok",
+        "version": "1.0.0",
+        "uptime": f"{h}h{m}m{s}s",
+        "features": {
+            "ai": bool(settings.ANTHROPIC_API_KEY),
+            "wechat": bool(settings.WECHAT_APP_ID),
+        },
+    }

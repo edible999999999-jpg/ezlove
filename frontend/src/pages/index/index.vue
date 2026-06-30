@@ -213,7 +213,7 @@
 
 <script setup>
 import { ref, computed } from "vue";
-import { onShow } from "@dcloudio/uni-app";
+import { onShow, onPullDownRefresh } from "@dcloudio/uni-app";
 import { useUserStore } from "@/stores/user";
 import { useRelationStore } from "@/stores/relation";
 import { useMomentStore } from "@/stores/moment";
@@ -291,6 +291,22 @@ onShow(() => {
     momentStore.loadMoments();
     loadCheckinStatus();
     loadTodayMenu();
+  }
+});
+
+onPullDownRefresh(async () => {
+  try {
+    alertStore.loadAlerts();
+    if (userStore.isFamily) {
+      await relationStore.loadRelations();
+      await loadTodaySentCount();
+    } else {
+      await momentStore.loadMoments();
+      await loadCheckinStatus();
+      await loadTodayMenu();
+    }
+  } finally {
+    uni.stopPullDownRefresh();
   }
 });
 

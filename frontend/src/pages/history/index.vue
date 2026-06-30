@@ -89,7 +89,7 @@
 </template>
 
 <script setup>
-import { onShow } from "@dcloudio/uni-app";
+import { onShow, onPullDownRefresh } from "@dcloudio/uni-app";
 import { useMomentStore } from "@/stores/moment";
 import { useUserStore } from "@/stores/user";
 import { formatRelativeTime } from "@/utils/date";
@@ -104,6 +104,14 @@ function formatTime(isoStr) {
 
 onShow(() => {
   momentStore.loadMoments();
+});
+
+onPullDownRefresh(async () => {
+  try {
+    await momentStore.loadMoments();
+  } finally {
+    uni.stopPullDownRefresh();
+  }
 });
 
 function goSend() {

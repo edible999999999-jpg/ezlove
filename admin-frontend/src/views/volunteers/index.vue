@@ -347,8 +347,8 @@ function statusLabel(s) {
 function statusColor(s) {
   return {
     pending: 'text-on-surface-variant',
-    accepted: 'text-blue-600',
-    completed: 'text-accent',
+    accepted: 'text-accent',
+    completed: 'text-warning',
     verified: 'text-secondary',
   }[s] || ''
 }
@@ -356,8 +356,8 @@ function statusColor(s) {
 function statusDot(s) {
   return {
     pending: 'bg-inactive-gray',
-    accepted: 'bg-blue-500',
-    completed: 'bg-accent',
+    accepted: 'bg-accent',
+    completed: 'bg-warning',
     verified: 'bg-secondary',
   }[s] || ''
 }

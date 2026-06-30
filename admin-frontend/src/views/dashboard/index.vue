@@ -32,15 +32,15 @@
             <div class="text-xs text-white/50 mt-1">总人数</div>
           </div>
           <div class="text-center">
-            <div class="serif-num text-3xl font-bold text-green-400">{{ store.data?.today_active_count || 0 }}</div>
+            <div class="serif-num text-3xl font-bold text-secondary">{{ store.data?.today_active_count || 0 }}</div>
             <div class="text-xs text-white/50 mt-1">今日活跃</div>
           </div>
           <div class="text-center">
-            <div class="serif-num text-3xl font-bold" :class="(store.data?.today_active_rate || 0) >= 70 ? 'text-green-400' : 'text-amber-400'">{{ store.data?.today_active_rate || 0 }}%</div>
+            <div class="serif-num text-3xl font-bold" :class="(store.data?.today_active_rate || 0) >= 70 ? 'text-secondary' : 'text-accent'">{{ store.data?.today_active_rate || 0 }}%</div>
             <div class="text-xs text-white/50 mt-1">活跃率</div>
           </div>
           <div class="text-center">
-            <div class="serif-num text-3xl font-bold" :class="(store.data?.pending_events || 0) > 0 ? 'text-red-400' : 'text-green-400'">{{ store.data?.pending_events || 0 }}</div>
+            <div class="serif-num text-3xl font-bold" :class="(store.data?.pending_events || 0) > 0 ? 'text-primary' : 'text-secondary'">{{ store.data?.pending_events || 0 }}</div>
             <div class="text-xs text-white/50 mt-1">待处理告警</div>
           </div>
         </div>
@@ -191,7 +191,7 @@
                 <div class="serif-num text-lg font-bold text-white drop-shadow">{{ b.active_rate }}%</div>
                 <div class="text-[10px] text-white/80">{{ b.elder_count }}人</div>
                 <div v-if="b.alert_count > 0" class="absolute top-1 right-1 w-4 h-4 bg-white rounded-full flex items-center justify-center">
-                  <span class="text-[9px] font-bold text-red-500">{{ b.alert_count }}</span>
+                  <span class="text-[9px] font-bold text-primary">{{ b.alert_count }}</span>
                 </div>
               </div>
             </template>

@@ -66,7 +66,7 @@
 </template>
 
 <script setup>
-import { onShow } from "@dcloudio/uni-app";
+import { onShow, onPullDownRefresh } from "@dcloudio/uni-app";
 import { useAlertStore } from "@/stores/alert";
 import { requestSubscribe } from "@/utils/subscribe";
 
@@ -78,6 +78,14 @@ onShow(() => {
   if (!subscribeRequested) {
     subscribeRequested = true;
     requestSubscribe(['unread', 'alert']);
+  }
+});
+
+onPullDownRefresh(async () => {
+  try {
+    await alertStore.loadAlerts();
+  } finally {
+    uni.stopPullDownRefresh();
   }
 });
 

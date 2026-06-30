@@ -93,7 +93,7 @@
               <input class="w-4 h-4 rounded border-outline-variant text-primary focus:ring-primary/20" type="checkbox" />
               <span class="text-sm text-on-surface-variant group-hover:text-charcoal transition-colors">记住账号</span>
             </label>
-            <a class="text-sm text-primary hover:underline font-medium transition-all" href="#">短信验证码登录</a>
+            <a class="text-sm text-primary hover:underline font-medium transition-all cursor-not-allowed opacity-50" title="暂未开放">短信验证码登录</a>
           </div>
 
           <!-- Submit Button -->
@@ -112,7 +112,7 @@
             忘记密码？<a class="text-on-surface-variant hover:text-charcoal hover:underline font-medium transition-colors" href="#">联系系统管理员</a>
           </p>
           <div class="mt-12 flex justify-center space-x-6">
-            <span class="text-[10px] text-outline-variant uppercase tracking-widest">&copy; 2024 EZLove Technology</span>
+            <span class="text-[10px] text-outline-variant uppercase tracking-widest">&copy; 2026 EZLove Technology</span>
           </div>
         </footer>
       </div>
