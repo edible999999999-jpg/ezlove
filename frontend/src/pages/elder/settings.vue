@@ -113,7 +113,7 @@ async function onThresholdChange(e) {
   padding: $sp-8 $sp-16;
   background: $c-primary-bg;
   border-radius: $r-full;
-  box-shadow: 0 2rpx 8rpx rgba(196, 116, 92, 0.1);
+  box-shadow: 0 2rpx 8rpx rgba($c-primary, 0.1);
   transition: all $duration-normal $ease-out;
 }
 

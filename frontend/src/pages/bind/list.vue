@@ -181,7 +181,7 @@ function confirmRemove(id) {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 0 0 4rpx rgba(196, 116, 92, 0.08);
+  box-shadow: 0 0 0 4rpx rgba($c-primary, 0.08);
 }
 
 .relation-initial {

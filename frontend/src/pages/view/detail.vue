@@ -118,6 +118,7 @@ import { getFullUrl } from "@/api/config";
 const moment = ref({});
 const momentId = ref("");
 const loading = ref(true);
+const reacting = ref(false);
 
 const timeText = computed(() => {
   if (!moment.value.created_at) return "";
@@ -168,11 +169,15 @@ function goBack() {
 }
 
 async function sendReaction(type) {
+  if (reacting.value) return;
+  reacting.value = true;
   try {
     await sendResponse(momentId.value, { response_type: type });
     uni.showToast({ title: "已发送", icon: "success" });
   } catch {
     uni.showToast({ title: "发送失败", icon: "none" });
+  } finally {
+    reacting.value = false;
   }
 }
 </script>
@@ -200,7 +205,7 @@ async function sendReaction(type) {
   padding: 0 $sp-24;
   padding-top: var(--status-bar-height, 50rpx);
   height: calc(var(--status-bar-height, 50rpx) + 112rpx);
-  background: rgba(250, 246, 241, 0.9);
+  background: rgba($c-bg, 0.9);
   backdrop-filter: blur(24rpx);
   -webkit-backdrop-filter: blur(24rpx);
 }
@@ -417,7 +422,7 @@ async function sendReaction(type) {
 }
 
 .family-badge-text {
-  font-size: $fs-body;
+  font-size: $fs-title;
   font-weight: $fw-bold;
   color: $c-primary;
 }
@@ -453,7 +458,7 @@ async function sendReaction(type) {
 .image-caption {
   display: block;
   text-align: center;
-  font-size: $fs-body;
+  font-size: $fs-title;
   color: $c-text-hint;
   opacity: 0.6;
   font-style: italic;
@@ -508,7 +513,7 @@ async function sendReaction(type) {
     transform: scale(0.85);
     background: $c-primary-bg;
     border-color: $c-primary;
-    box-shadow: 0 0 0 8rpx rgba(196, 116, 92, 0.1);
+    box-shadow: 0 0 0 8rpx rgba($c-primary, 0.1);
   }
 }
 

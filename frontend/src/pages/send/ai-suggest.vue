@@ -68,6 +68,7 @@ async function loadSuggestions() {
 }
 
 function regenerate() {
+  if (loading.value) return;
   loadSuggestions();
 }
 

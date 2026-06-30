@@ -47,13 +47,19 @@ const userStore = useUserStore();
 const relationStore = useRelationStore();
 const inviteCode = ref("");
 const inputCode = ref("");
+const generating = ref(false);
+const binding = ref(false);
 
 async function generate() {
+  if (generating.value) return;
+  generating.value = true;
   try {
     const res = await relationStore.generateInvite();
     inviteCode.value = res.invite_code;
   } catch (e) {
     uni.showToast({ title: "生成失败", icon: "none" });
+  } finally {
+    generating.value = false;
   }
 }
 
@@ -66,12 +72,16 @@ async function handleBind() {
     uni.showToast({ title: "请输入邀请码", icon: "none" });
     return;
   }
+  if (binding.value) return;
+  binding.value = true;
   try {
     await relationStore.bind(inputCode.value);
     uni.showToast({ title: "绑定成功", icon: "success" });
     setTimeout(() => uni.navigateBack(), 1500);
   } catch (e) {
     uni.showToast({ title: e.message || "绑定失败，请检查邀请码", icon: "none" });
+  } finally {
+    binding.value = false;
   }
 }
 </script>

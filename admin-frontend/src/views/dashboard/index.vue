@@ -430,10 +430,12 @@ onUnmounted(() => clearInterval(timeInterval))
 
 function enterPresentation() {
   store.presentationMode = true
+  document.documentElement.requestFullscreen?.()
 }
 
 function exitPresentation() {
   store.presentationMode = false
+  if (document.fullscreenElement) document.exitFullscreen?.()
 }
 
 function handleKeyboard(e) {
@@ -445,8 +447,20 @@ function handleKeyboard(e) {
   }
 }
 
-onMounted(() => document.addEventListener('keydown', handleKeyboard))
-onUnmounted(() => document.removeEventListener('keydown', handleKeyboard))
+function handleFullscreenChange() {
+  if (!document.fullscreenElement && store.presentationMode) {
+    store.presentationMode = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('keydown', handleKeyboard)
+  document.addEventListener('fullscreenchange', handleFullscreenChange)
+})
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeyboard)
+  document.removeEventListener('fullscreenchange', handleFullscreenChange)
+})
 
 function heatColor(rate) {
   if (rate >= 80) return '#2D8A4E'
