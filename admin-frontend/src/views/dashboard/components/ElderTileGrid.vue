@@ -36,8 +36,8 @@
     <!-- Legend -->
     <div class="flex items-center gap-4 mt-4 pt-3 border-t border-outline-variant/10 text-[10px] font-medium text-inactive-gray">
       <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-secondary"></span> 正常</div>
-      <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-[#D4A24E]"></span> 关注</div>
-      <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-[#E67E22]"></span> 预警</div>
+      <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-accent"></span> 关注</div>
+      <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-warning"></span> 预警</div>
       <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-primary"></span> 高危</div>
       <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-inactive-gray"></span> 离线</div>
     </div>
@@ -55,8 +55,8 @@ defineEmits(['close'])
 
 function tileColor(e) {
   if (e.risk_level === 'critical') return 'bg-primary ring-4 ring-primary/20 animate-pulse'
-  if (e.risk_level === 'warning') return 'bg-[#E67E22]'
-  if (e.risk_level === 'attention') return 'bg-[#D4A24E]'
+  if (e.risk_level === 'warning') return 'bg-warning'
+  if (e.risk_level === 'attention') return 'bg-accent'
   if (e.today_active) return 'bg-secondary'
   return 'bg-inactive-gray opacity-80'
 }

@@ -68,7 +68,7 @@
         <span
           :class="[
             'material-symbols-outlined text-lg',
-            alert.alert_level === 'critical' ? 'text-primary' : alert.alert_level === 'warning' ? 'text-[#E67E22]' : 'text-accent',
+            alert.alert_level === 'critical' ? 'text-primary' : alert.alert_level === 'warning' ? 'text-warning' : 'text-accent',
           ]"
         >{{ alert.alert_level === 'critical' ? 'emergency' : 'warning' }}</span>
         <div class="min-w-0 flex-1">

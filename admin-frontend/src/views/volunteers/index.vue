@@ -299,6 +299,7 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useVolunteerStore } from '@/stores/volunteer'
 
 const store = useVolunteerStore()
@@ -367,16 +368,28 @@ function formatTime(t) {
 }
 
 async function handleVerify(task) {
-  if (!confirm(`确认审核通过「${task.title}」？将发放 ${task.point_value} 积分给志愿者。`)) return
+  try {
+    await ElMessageBox.confirm(
+      `将发放 ${task.point_value} 积分给志愿者`,
+      `确认审核通过「${task.title}」？`,
+      { confirmButtonText: '确认通过', cancelButtonText: '取消', type: 'success' }
+    )
+  } catch {
+    return
+  }
   try {
     await store.verify(task.id)
+    ElMessage.success('审核通过，积分已发放')
   } catch (e) {
     // handled by interceptor
   }
 }
 
 async function handleCreate() {
-  if (!form.title) return
+  if (!form.title) {
+    ElMessage.warning('请填写任务标题')
+    return
+  }
   try {
     await store.create(form)
     showDialog.value = false
@@ -384,6 +397,7 @@ async function handleCreate() {
     form.task_type = 'visit'
     form.point_value = 10
     form.notes = ''
+    ElMessage.success('任务已发布')
   } catch (e) {
     // handled by interceptor
   }

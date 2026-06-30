@@ -19,7 +19,7 @@
     </button>
 
     <!-- Presentation Mode: Community Banner -->
-    <div v-if="store.presentationMode" class="bg-gradient-to-r from-[#2C2825] to-[#3D3632] text-white rounded-2xl p-6 mb-6 flex items-center justify-between">
+    <div v-if="store.presentationMode" class="bg-gradient-to-r from-charcoal to-charcoal/90 text-white rounded-2xl p-6 mb-6 flex items-center justify-between">
       <div class="flex items-center gap-6">
         <div>
           <h1 class="font-headline text-3xl font-bold">易挂念</h1>
@@ -147,7 +147,7 @@
               </button>
               <div class="flex items-center gap-3 text-[10px] font-medium text-inactive-gray">
                 <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-secondary"></span> 正常</div>
-                <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#D4A24E]"></span> 关注</div>
+                <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-accent"></span> 关注</div>
                 <div class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-primary"></span> 异常</div>
               </div>
             </div>
@@ -269,7 +269,7 @@
             </div>
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-[#E67E22]"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-warning"></span>
                 <span class="text-sm text-on-surface">预警</span>
               </div>
               <span class="serif-num text-sm font-bold text-on-surface">{{ riskDistribution.warning || 0 }}</span>
@@ -391,6 +391,7 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { ElMessage } from 'element-plus'
 import { useDashboardStore } from '@/stores/dashboard'
 import WorkStation from './components/WorkStation.vue'
 import BuildingCard from './components/BuildingCard.vue'
@@ -428,19 +429,23 @@ onUnmounted(() => clearInterval(timeInterval))
 
 function enterPresentation() {
   store.presentationMode = true
-  document.addEventListener('keydown', handleEsc)
 }
 
 function exitPresentation() {
   store.presentationMode = false
-  document.removeEventListener('keydown', handleEsc)
 }
 
-function handleEsc(e) {
+function handleKeyboard(e) {
   if (e.key === 'Escape') exitPresentation()
+  if (e.key === 'F11') {
+    e.preventDefault()
+    if (store.presentationMode) exitPresentation()
+    else enterPresentation()
+  }
 }
 
-onUnmounted(() => document.removeEventListener('keydown', handleEsc))
+onMounted(() => document.addEventListener('keydown', handleKeyboard))
+onUnmounted(() => document.removeEventListener('keydown', handleKeyboard))
 
 function heatColor(rate) {
   if (rate >= 80) return '#2D8A4E'
@@ -547,8 +552,9 @@ const trendYLabels = computed(() => {
 async function handleConfirm(elderId) {
   try {
     await store.confirmActive(elderId)
-  } catch (e) {
-    console.error('确认失败', e)
+    ElMessage.success('已确认活跃')
+  } catch {
+    ElMessage.error('确认失败，请重试')
   }
 }
 </script>

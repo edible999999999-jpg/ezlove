@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- SideNavBar -->
-    <aside v-show="!dashboardStore.presentationMode" class="w-60 h-screen fixed left-0 top-0 bg-[#2C2825] text-white flex flex-col py-6 gap-2 z-50">
+    <aside v-show="!dashboardStore.presentationMode" class="w-60 h-screen fixed left-0 top-0 bg-charcoal text-white flex flex-col py-6 gap-2 z-50">
       <div class="px-6 mb-8">
         <h1 class="font-headline font-bold text-2xl text-white">易挂念</h1>
         <p class="text-xs opacity-60 tracking-widest mt-1">社区康养管理系统</p>
@@ -14,7 +14,7 @@
           :class="[
             'flex items-center gap-3 px-4 py-3 rounded-lg mx-3 transition-colors',
             route.path === item.path || (item.path !== '/dashboard' && route.path.startsWith(item.path))
-              ? 'bg-[#C44D3E] text-white'
+              ? 'bg-primary text-white'
               : 'text-white/60 hover:bg-white/10'
           ]"
         >

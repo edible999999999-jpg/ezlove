@@ -109,7 +109,7 @@
                 :class="[
                   'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold',
                   row.risk_level === 'critical' ? 'bg-primary/10 text-primary' :
-                  row.risk_level === 'warning' ? 'bg-[#E67E22]/10 text-[#E67E22]' :
+                  row.risk_level === 'warning' ? 'bg-warning/10 text-warning' :
                   row.risk_level === 'attention' ? 'bg-accent/10 text-accent' :
                   'bg-secondary/10 text-secondary'
                 ]"
@@ -217,6 +217,7 @@ async function handleCreate() {
     form.care_level = 'B'
     form.address = ''
     form.health_notes = ''
+    ElMessage.success('老人档案已创建')
   } catch (e) {
     // handled by interceptor
   }

@@ -268,6 +268,7 @@
 
 <script setup>
 import { onMounted, ref, computed } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useCanteenStore } from '@/stores/canteen'
 import { downloadExport } from '@/api/export'
 
@@ -314,9 +315,18 @@ async function handlePublish(id) {
 }
 
 async function handleDeleteMenu(id) {
-  if (!confirm('确定删除此菜单？')) return
+  try {
+    await ElMessageBox.confirm('确定删除此菜单？', '删除确认', {
+      confirmButtonText: '删除',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+  } catch {
+    return
+  }
   try {
     await store.remove(id)
+    ElMessage.success('菜单已删除')
   } catch (e) {
     // handled by store
   }
@@ -341,6 +351,7 @@ function formatTime(t) {
 
 async function handleSubmit() {
   if (!rawText.value && !fileBytes.value) {
+    ElMessage.warning('请输入就餐描述或上传 Excel 文件')
     return
   }
   const formData = new FormData()

@@ -193,6 +193,7 @@
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
+import { ElMessage } from 'element-plus'
 import { useEventsStore } from '@/stores/events'
 import { downloadExport } from '@/api/export'
 
@@ -246,13 +247,17 @@ async function handleResolve() {
     await store.resolve(resolveTarget.value.id, { resolution_note: resolveNote.value || null })
     showResolveDialog.value = false
     resolveTarget.value = null
+    ElMessage.success('事件已处理')
   } catch (e) {
     // handled by interceptor
   }
 }
 
 async function handleCreate() {
-  if (!form.elder_id) return
+  if (!form.elder_id) {
+    ElMessage.warning('请填写老人ID')
+    return
+  }
   try {
     await store.create(form)
     showDialog.value = false
@@ -260,6 +265,7 @@ async function handleCreate() {
     form.event_type = 'other'
     form.severity = 'info'
     form.description = ''
+    ElMessage.success('事件已创建')
   } catch (e) {
     // handled by interceptor
   }

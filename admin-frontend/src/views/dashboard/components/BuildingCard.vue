@@ -12,7 +12,7 @@
         :class="[
           'w-2.5 h-2.5 rounded-full',
           building.status === 'red' ? 'bg-primary animate-pulse' :
-          building.status === 'yellow' ? 'bg-[#D4A24E]' : 'bg-secondary',
+          building.status === 'yellow' ? 'bg-accent' : 'bg-secondary',
         ]"
       ></span>
     </div>
@@ -67,7 +67,7 @@ const shortName = computed(() => {
 const rateColor = computed(() => {
   const r = props.building.active_rate
   if (r >= 70) return 'text-secondary'
-  if (r >= 50) return 'text-[#D4A24E]'
+  if (r >= 50) return 'text-accent'
   return 'text-primary'
 })
 

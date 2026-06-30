@@ -174,7 +174,7 @@ const riskBgClass = computed(() => {
   const level = riskData.value?.level
   return {
     normal: 'bg-secondary', attention: 'bg-accent',
-    warning: 'bg-[#E67E22]', critical: 'bg-primary',
+    warning: 'bg-warning', critical: 'bg-primary',
   }[level] || 'bg-inactive-gray'
 })
 

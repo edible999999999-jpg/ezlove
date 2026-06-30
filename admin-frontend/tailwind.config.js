@@ -17,6 +17,7 @@ export default {
         'surface-container': '#F5EFE7',
         'outline-variant': '#E5DED5',
         'inactive-gray': '#C4BAB0',
+        warning: '#E67E22',
         charcoal: '#2C2825',
         terracotta: '#A04828',
         outline: '#85736E',
