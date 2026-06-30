@@ -228,13 +228,16 @@
             <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
               <circle cx="18" cy="18" fill="transparent" r="15.9" stroke="#E5DED5" stroke-width="3"></circle>
               <circle v-if="totalElders > 0" cx="18" cy="18" fill="transparent" r="15.9" stroke="#C44D3E"
-                :stroke-dasharray="`${(levelA / totalElders) * 100} 100`" stroke-width="3"></circle>
+                :stroke-dasharray="`${(levelA / totalElders) * 100} 100`" stroke-width="3"
+                style="transition: stroke-dasharray 1s ease-out"></circle>
               <circle v-if="totalElders > 0" cx="18" cy="18" fill="transparent" r="15.9" stroke="#D4A24E"
                 :stroke-dasharray="`${(levelB / totalElders) * 100} 100`"
-                :stroke-dashoffset="`-${(levelA / totalElders) * 100}`" stroke-width="3"></circle>
+                :stroke-dashoffset="`-${(levelA / totalElders) * 100}`" stroke-width="3"
+                style="transition: stroke-dasharray 1s ease-out 0.2s, stroke-dashoffset 1s ease-out 0.2s"></circle>
               <circle v-if="totalElders > 0" cx="18" cy="18" fill="transparent" r="15.9" stroke="#6B8F71"
                 :stroke-dasharray="`${(levelC / totalElders) * 100} 100`"
-                :stroke-dashoffset="`-${((levelA + levelB) / totalElders) * 100}`" stroke-width="3"></circle>
+                :stroke-dashoffset="`-${((levelA + levelB) / totalElders) * 100}`" stroke-width="3"
+                style="transition: stroke-dasharray 1s ease-out 0.4s, stroke-dashoffset 1s ease-out 0.4s"></circle>
             </svg>
             <div class="absolute text-center">
               <span class="serif-num text-2xl font-bold block">{{ totalElders }}</span>

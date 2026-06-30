@@ -1,10 +1,19 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { ref, computed, watch } from "vue";
 import { getMoments, sendMoment, deleteMoment } from "@/api/moment";
 
 export const useMomentStore = defineStore("moment", () => {
   const moments = ref([]);
   const loading = ref(false);
+  const unreadCount = computed(() => moments.value.filter((m) => !m.is_read).length);
+
+  watch(unreadCount, (count) => {
+    if (count > 0) {
+      uni.setTabBarBadge({ index: 1, text: String(count > 99 ? "99+" : count) });
+    } else {
+      uni.removeTabBarBadge({ index: 1 });
+    }
+  });
 
   async function loadMoments(params = {}) {
     loading.value = true;
@@ -26,5 +35,5 @@ export const useMomentStore = defineStore("moment", () => {
     moments.value = moments.value.filter((m) => m.id !== id);
   }
 
-  return { moments, loading, loadMoments, send, remove };
+  return { moments, loading, unreadCount, loadMoments, send, remove };
 });
