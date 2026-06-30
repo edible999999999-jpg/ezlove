@@ -512,7 +512,7 @@ onShow(() => {
 
   &:active {
     transform: scale(0.95);
-    background: darken(#7BAE8E, 5%);
+    background: darken($c-safe, 5%);
   }
 
   &__text {
