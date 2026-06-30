@@ -5,7 +5,7 @@
       <view class="top-app-bar__status-spacer" />
       <view class="top-app-bar__content">
         <view class="top-app-bar__nav" @tap="uni.navigateBack()">
-          <text class="nav-icon">&lt;</text>
+          <text class="nav-icon">‹</text>
         </view>
         <text class="top-app-bar__title">发送牵挂</text>
         <view class="top-app-bar__right" />

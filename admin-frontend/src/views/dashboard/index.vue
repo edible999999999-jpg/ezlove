@@ -29,25 +29,25 @@
         <div class="flex gap-8">
           <div class="text-center">
             <div class="serif-num text-3xl font-bold">{{ store.data?.total_elders || 0 }}</div>
-            <div class="text-xs text-white/50 mt-1">总人数</div>
+            <div class="text-xs text-white/70 mt-1">总人数</div>
           </div>
           <div class="text-center">
             <div class="serif-num text-3xl font-bold text-secondary">{{ store.data?.today_active_count || 0 }}</div>
-            <div class="text-xs text-white/50 mt-1">今日活跃</div>
+            <div class="text-xs text-white/70 mt-1">今日活跃</div>
           </div>
           <div class="text-center">
             <div class="serif-num text-3xl font-bold" :class="(store.data?.today_active_rate || 0) >= 70 ? 'text-secondary' : 'text-accent'">{{ store.data?.today_active_rate || 0 }}%</div>
-            <div class="text-xs text-white/50 mt-1">活跃率</div>
+            <div class="text-xs text-white/70 mt-1">活跃率</div>
           </div>
           <div class="text-center">
             <div class="serif-num text-3xl font-bold" :class="(store.data?.pending_events || 0) > 0 ? 'text-primary' : 'text-secondary'">{{ store.data?.pending_events || 0 }}</div>
-            <div class="text-xs text-white/50 mt-1">待处理告警</div>
+            <div class="text-xs text-white/70 mt-1">待处理告警</div>
           </div>
         </div>
       </div>
       <div class="text-right">
         <div class="serif-num text-2xl font-bold tabular-nums">{{ currentTime }}</div>
-        <div class="text-xs text-white/40 mt-1">{{ currentDate }}</div>
+        <div class="text-xs text-white/60 mt-1">{{ currentDate }}</div>
       </div>
     </div>
 
@@ -106,7 +106,7 @@
           <span class="material-symbols-outlined text-on-surface-variant">bolt</span>
         </div>
         <div class="serif-num text-3xl font-bold text-on-surface">{{ animatedValues.active ?? 0 }}</div>
-        <SparkLine v-if="dailyActiveCounts.length > 1" :data="dailyActiveCounts" :width="100" :height="20" color="#6B8F71" class="mt-1" />
+        <SparkLine v-if="dailyActiveCounts.length > 1" :data="dailyActiveCounts" :width="100" :height="32" color="#6B8F71" class="mt-1" />
       </div>
       <div class="bg-surface p-5 rounded-2xl shadow-sm border border-outline-variant/20 hover:shadow-md transition-shadow">
         <div class="flex justify-between items-start mb-2">
@@ -114,7 +114,7 @@
           <span class="material-symbols-outlined text-on-surface-variant">analytics</span>
         </div>
         <div class="serif-num text-3xl font-bold text-on-surface">{{ animatedValues.rate ?? 0 }}%</div>
-        <SparkLine v-if="dailyActiveRates.length > 1" :data="dailyActiveRates" :width="100" :height="20" color="#6B8F71" class="mt-1" />
+        <SparkLine v-if="dailyActiveRates.length > 1" :data="dailyActiveRates" :width="100" :height="32" color="#6B8F71" class="mt-1" />
       </div>
     </div>
 
@@ -338,7 +338,7 @@
               <div
                 v-for="(v, i) in dailyAlertNew"
                 :key="'ab'+i"
-                class="flex-1 bg-primary/20 rounded-sm transition-all"
+                class="flex-1 bg-primary/40 rounded-sm transition-all"
                 :style="{ height: maxAlert > 0 ? (v / maxAlert * 100) + '%' : '0%' }"
               ></div>
             </div>
