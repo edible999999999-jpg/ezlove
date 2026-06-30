@@ -8,7 +8,7 @@
       </div>
       <div class="flex items-center gap-3">
         <button
-          class="flex items-center gap-2 bg-primary text-white rounded-full px-5 py-2.5 font-semibold text-sm hover:bg-terracotta transition-all duration-200 shadow-md shadow-primary/20"
+          class="flex items-center gap-2 bg-primary text-white rounded-full px-5 py-2.5 font-semibold text-sm hover:bg-terracotta transition-all duration-200 shadow-md shadow-primary/20 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-primary"
           :disabled="store.generating"
           @click="handleGenerateMenu"
         >
@@ -28,6 +28,12 @@
     </div>
 
     <div class="flex flex-col gap-6">
+      <!-- Menu Empty State -->
+      <div v-if="!store.menus.length" class="bg-white rounded-3xl shadow-sm border border-outline-variant/20 p-12 text-center">
+        <span class="material-symbols-outlined text-5xl text-inactive-gray">restaurant_menu</span>
+        <p class="text-inactive-gray text-sm mt-3">暂无菜单，点击上方「生成今日菜单」开始</p>
+      </div>
+
       <!-- Menu Card -->
       <div v-if="store.menus.length" class="bg-white rounded-3xl shadow-sm border border-outline-variant/20 overflow-hidden">
         <div class="px-6 py-5 border-b border-outline-variant/20 flex justify-between items-center">
