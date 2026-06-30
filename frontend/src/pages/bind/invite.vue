@@ -71,7 +71,7 @@ async function handleBind() {
     uni.showToast({ title: "绑定成功", icon: "success" });
     setTimeout(() => uni.navigateBack(), 1500);
   } catch (e) {
-    uni.showToast({ title: e.message, icon: "none" });
+    uni.showToast({ title: e.message || "绑定失败，请检查邀请码", icon: "none" });
   }
 }
 </script>

@@ -229,7 +229,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="row in store.records" :key="row.id" class="border-b border-outline-variant/10 hover:bg-surface-container/50 transition-colors cursor-pointer" @click="row.parsed_data && row.parse_status === 'success' && (lastParsed = row.parsed_data)">
+              <tr v-for="row in store.records" :key="row.id" :class="['border-b border-outline-variant/10 hover:bg-surface-container/50 transition-colors', row.parse_status === 'success' ? 'cursor-pointer' : '']" @click="row.parse_status === 'success' && row.parsed_data && (lastParsed = row.parsed_data)">
                 <td class="px-6 py-4 text-sm text-on-surface-variant whitespace-nowrap">{{ formatTime(row.created_at) }}</td>
                 <td class="px-6 py-4">
                   <span

@@ -136,7 +136,7 @@
 
 <script setup>
 import { computed } from "vue";
-import { onShow } from "@dcloudio/uni-app";
+import { onShow, onPullDownRefresh } from "@dcloudio/uni-app";
 import { useVolunteerStore } from "@/stores/volunteer";
 
 const volunteerStore = useVolunteerStore();
@@ -197,6 +197,18 @@ onShow(() => {
   volunteerStore.loadProfile();
   volunteerStore.loadTasks();
   volunteerStore.loadPoints();
+});
+
+onPullDownRefresh(async () => {
+  try {
+    await Promise.all([
+      volunteerStore.loadProfile(),
+      volunteerStore.loadTasks(),
+      volunteerStore.loadPoints(),
+    ]);
+  } finally {
+    uni.stopPullDownRefresh();
+  }
 });
 </script>
 

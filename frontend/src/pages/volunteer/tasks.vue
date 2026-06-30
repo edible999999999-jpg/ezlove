@@ -62,7 +62,7 @@
 
 <script setup>
 import { computed } from "vue";
-import { onShow } from "@dcloudio/uni-app";
+import { onShow, onPullDownRefresh } from "@dcloudio/uni-app";
 import { useVolunteerStore } from "@/stores/volunteer";
 
 const volunteerStore = useVolunteerStore();
@@ -104,6 +104,14 @@ async function handleAccept(task) {
 
 onShow(() => {
   volunteerStore.loadTasks();
+});
+
+onPullDownRefresh(async () => {
+  try {
+    await volunteerStore.loadTasks();
+  } finally {
+    uni.stopPullDownRefresh();
+  }
 });
 </script>
 
