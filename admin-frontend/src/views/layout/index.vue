@@ -12,14 +12,18 @@
           :key="item.path"
           :to="item.path"
           :class="[
-            'flex items-center gap-3 px-4 py-3 rounded-lg mx-3 transition-colors',
+            'flex items-center gap-3 px-4 py-3 rounded-lg mx-3 transition-colors relative',
             route.path === item.path || (item.path !== '/dashboard' && route.path.startsWith(item.path))
               ? 'bg-primary text-white'
               : 'text-white/60 hover:bg-white/10'
           ]"
         >
           <span class="material-symbols-outlined">{{ item.icon }}</span>
-          <span class="font-label">{{ item.label }}</span>
+          <span class="font-label flex-1">{{ item.label }}</span>
+          <span
+            v-if="item.badge > 0"
+            class="min-w-[20px] h-5 px-1.5 rounded-full bg-white/20 text-[10px] font-bold flex items-center justify-center"
+          >{{ item.badge > 99 ? '99+' : item.badge }}</span>
         </router-link>
       </nav>
       <div class="mt-auto px-6 pt-6 border-t border-white/10">
@@ -107,14 +111,14 @@ async function handleSwitchCommunity(communityId) {
   }
 }
 
-const navItems = [
+const navItems = computed(() => [
   { path: '/dashboard', label: '看板', icon: 'dashboard' },
   { path: '/elders', label: '老人档案', icon: 'groups' },
   { path: '/canteen', label: '食堂管理', icon: 'restaurant' },
-  { path: '/events', label: '事件中心', icon: 'notifications_active' },
+  { path: '/events', label: '事件中心', icon: 'notifications_active', badge: dashboardStore.data?.pending_events || 0 },
   { path: '/agent', label: 'AI 助手', icon: 'smart_toy' },
   { path: '/volunteers', label: '邻里帮', icon: 'volunteer_activism' },
-]
+])
 
 const pageNameMap = {
   '/dashboard': '看板 / 概览',
