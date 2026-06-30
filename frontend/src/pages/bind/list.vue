@@ -1,6 +1,14 @@
 <template>
   <view class="page">
-    <view v-if="relationStore.relations.length === 0" class="empty-state fade-in">
+    <view v-if="relationStore.loading" class="loading-center">
+      <view class="loading-dot-wrap">
+        <view class="loading-dot" />
+        <view class="loading-dot" />
+        <view class="loading-dot" />
+      </view>
+    </view>
+
+    <view v-else-if="relationStore.relations.length === 0" class="empty-state fade-in">
       <view class="empty-icon-wrap">
         <image class="empty-icon-img" src="/static/icons/family.svg" mode="aspectFit" />
       </view>
@@ -72,6 +80,32 @@ function confirmRemove(id) {
 </script>
 
 <style lang="scss" scoped>
+.loading-center {
+  display: flex;
+  justify-content: center;
+  padding-top: 200rpx;
+}
+
+.loading-dot-wrap {
+  display: flex;
+  gap: $sp-12;
+}
+
+.loading-dot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  background: $c-primary;
+  animation: ldPulse 1.2s ease-in-out infinite;
+  &:nth-child(2) { animation-delay: 200ms; }
+  &:nth-child(3) { animation-delay: 400ms; }
+}
+
+@keyframes ldPulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1.2); }
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;

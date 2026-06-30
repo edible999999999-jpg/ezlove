@@ -1,8 +1,17 @@
 <template>
   <view class="page-volunteer">
     <view class="volunteer-content">
+      <!-- 加载中 -->
+      <view v-if="volunteerStore.profileLoading" class="loading-center">
+        <view class="loading-dot-wrap">
+          <view class="loading-dot" />
+          <view class="loading-dot" />
+          <view class="loading-dot" />
+        </view>
+      </view>
+
       <!-- 未注册：邀请卡片 -->
-      <view v-if="!volunteerStore.profile" class="invite-section fade-in">
+      <view v-else-if="!volunteerStore.profile" class="invite-section fade-in">
         <view class="invite-card">
           <view class="invite-icon-wrap">
             <text class="invite-icon">&#x1F91D;</text>
@@ -200,6 +209,33 @@ onShow(() => {
 .volunteer-content {
   padding: $sp-24;
   padding-bottom: 200rpx;
+}
+
+// ── 加载 ──
+.loading-center {
+  display: flex;
+  justify-content: center;
+  padding-top: 200rpx;
+}
+
+.loading-dot-wrap {
+  display: flex;
+  gap: $sp-12;
+}
+
+.loading-dot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  background: $c-primary;
+  animation: ldPulse 1.2s ease-in-out infinite;
+  &:nth-child(2) { animation-delay: 200ms; }
+  &:nth-child(3) { animation-delay: 400ms; }
+}
+
+@keyframes ldPulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1.2); }
 }
 
 // ── 邀请卡片 ──

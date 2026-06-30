@@ -14,12 +14,16 @@ export const useVolunteerStore = defineStore("volunteer", () => {
   const tasks = ref([]);
   const points = ref([]);
   const loading = ref(false);
+  const profileLoading = ref(true);
 
   async function loadProfile() {
+    profileLoading.value = true;
     try {
       profile.value = await getMyProfile();
     } catch {
       profile.value = null;
+    } finally {
+      profileLoading.value = false;
     }
   }
 
@@ -58,5 +62,5 @@ export const useVolunteerStore = defineStore("volunteer", () => {
     return res;
   }
 
-  return { profile, tasks, points, loading, loadProfile, loadTasks, loadPoints, register, accept, complete };
+  return { profile, tasks, points, loading, profileLoading, loadProfile, loadTasks, loadPoints, register, accept, complete };
 });
