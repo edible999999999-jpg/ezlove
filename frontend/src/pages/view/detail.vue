@@ -22,6 +22,16 @@
       </view>
     </view>
 
+    <!-- Error State -->
+    <view v-if="!loading && !moment.id" class="error-state">
+      <text class="error-icon">😔</text>
+      <text class="error-title">内容加载失败</text>
+      <text class="error-desc">网络不太好，再试一次吧</text>
+      <view class="retry-btn" @tap="loadMoment">
+        <text class="retry-text">重新加载</text>
+      </view>
+    </view>
+
     <!-- Message Card -->
     <view v-if="!loading && moment.id" class="message-card card-enter">
       <!-- Sender Header -->
@@ -46,15 +56,7 @@
       </view>
 
       <!-- Image Content -->
-      <view v-if="moment.content_type === 'poster' && moment.media_urls?.length" class="image-area">
-        <image
-          :src="getFullUrl(moment.media_urls[0])"
-          mode="widthFix"
-          class="content-image"
-          @tap="previewPoster"
-        />
-      </view>
-      <view v-else-if="moment.media_urls?.length" class="image-area">
+      <view v-if="moment.media_urls?.length" class="image-area">
         <image
           :src="getFullUrl(moment.media_urls[0])"
           mode="widthFix"
@@ -158,7 +160,11 @@ function previewPoster() {
 }
 
 function goBack() {
-  uni.navigateBack({ delta: 1 });
+  if (getCurrentPages().length > 1) {
+    uni.navigateBack({ delta: 1 });
+  } else {
+    uni.switchTab({ url: "/pages/index/index" });
+  }
 }
 
 async function sendReaction(type) {
@@ -276,6 +282,53 @@ async function sendReaction(type) {
   40% { opacity: 1; transform: scale(1.2); }
 }
 
+/* Error State */
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 200rpx;
+}
+
+.error-icon {
+  font-size: 120rpx;
+  line-height: 1;
+  margin-bottom: $sp-24;
+}
+
+.error-title {
+  font-size: $fs-elder-headline;
+  font-weight: $fw-bold;
+  color: $c-text;
+  display: block;
+}
+
+.error-desc {
+  font-size: $fs-elder-body;
+  color: $c-text-sub;
+  margin-top: $sp-8;
+  display: block;
+}
+
+.retry-btn {
+  margin-top: $sp-32;
+  padding: $sp-16 $sp-48;
+  background: $c-primary;
+  border-radius: $r-full;
+  box-shadow: $shadow-md;
+  transition: transform $duration-normal $ease-out;
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.retry-text {
+  font-size: $fs-elder-body;
+  font-weight: $fw-bold;
+  color: $c-text-inverse;
+}
+
 /* Entrance Animations */
 .card-enter {
   animation: cardSlideUp 500ms $ease-out both;
@@ -350,7 +403,7 @@ async function sendReaction(type) {
 }
 
 .sender-time {
-  font-size: $fs-body;
+  font-size: $fs-title;
   color: $c-text-hint;
   opacity: 0.75;
   display: block;
@@ -477,7 +530,7 @@ async function sendReaction(type) {
 }
 
 .reaction-label {
-  font-size: $fs-body;
+  font-size: $fs-title;
   font-weight: $fw-medium;
   color: $c-text-sub;
 }

@@ -54,7 +54,10 @@
           <dl class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <dt class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">手机号</dt>
-              <dd class="text-sm text-on-surface">{{ store.current.elder?.phone || store.current.elder_phone || '—' }}</dd>
+              <dd class="text-sm text-on-surface">
+                <a v-if="elderPhone" :href="`tel:${elderPhone}`" class="text-primary hover:underline">{{ elderPhone }}</a>
+                <span v-else>—</span>
+              </dd>
             </div>
             <div>
               <dt class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">紧急联系人</dt>
@@ -62,7 +65,10 @@
             </div>
             <div>
               <dt class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">紧急联系电话</dt>
-              <dd class="text-sm text-on-surface">{{ store.current.elder?.emergency_contact?.phone || store.current.emergency_contact_phone || '—' }}</dd>
+              <dd class="text-sm text-on-surface">
+                <a v-if="emergencyPhone" :href="`tel:${emergencyPhone}`" class="text-primary hover:underline">{{ emergencyPhone }}</a>
+                <span v-else>—</span>
+              </dd>
             </div>
             <div>
               <dt class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">最后活跃</dt>
@@ -133,6 +139,12 @@
     <div v-else-if="pageLoading" class="flex items-center justify-center py-20">
       <div class="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
     </div>
+
+    <div v-else class="text-center py-20">
+      <span class="material-symbols-outlined text-5xl text-inactive-gray">person_off</span>
+      <p class="text-inactive-gray text-sm mt-3">老人档案不存在或已被删除</p>
+      <button class="mt-4 px-6 py-2 rounded-xl text-sm font-semibold text-primary hover:bg-primary/10 transition-colors" @click="$router.back()">返回列表</button>
+    </div>
   </div>
 </template>
 
@@ -156,6 +168,8 @@ const aiLoading = ref(false)
 
 const elderName = computed(() => store.current?.elder?.name || store.current?.elder_name || '')
 const elderAddress = computed(() => store.current?.elder?.address || store.current?.address || '未分配地址')
+const elderPhone = computed(() => store.current?.elder?.phone || store.current?.elder_phone || '')
+const emergencyPhone = computed(() => store.current?.elder?.emergency_contact?.phone || store.current?.emergency_contact_phone || '')
 const careLevel = computed(() => store.current?.elder?.care_level || store.current?.care_level)
 
 const levelClass = computed(() => ({

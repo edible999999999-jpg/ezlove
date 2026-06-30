@@ -16,7 +16,13 @@
       <!-- Recipient Selection -->
       <view class="section fade-in">
         <text class="section__label">发送给</text>
-        <scroll-view scroll-x class="chips-scroll">
+        <view v-if="!relationStore.relations.length && !relationStore.loading" class="no-relation-hint">
+          <text class="no-relation-text">还没有绑定家人</text>
+          <view class="no-relation-link" @tap="uni.navigateTo({ url: '/pages/bind/invite' })">
+            <text class="no-relation-link-text">去邀请绑定 →</text>
+          </view>
+        </view>
+        <scroll-view v-else scroll-x class="chips-scroll">
           <view class="chips-row">
             <view
               v-for="r in relationStore.relations"
@@ -298,6 +304,36 @@ function handleGenerate() {
   font-weight: $fw-medium;
   color: $c-text-sub;
   margin-bottom: $sp-16;
+}
+
+// ── 无绑定提示 ──
+.no-relation-hint {
+  display: flex;
+  align-items: center;
+  gap: $sp-12;
+  padding: $sp-16;
+  background: $c-warn-bg;
+  border-radius: $r-lg;
+  border: 2rpx solid $c-warn-soft;
+}
+
+.no-relation-text {
+  font-size: $fs-body;
+  color: $c-text-sub;
+  flex: 1;
+}
+
+.no-relation-link {
+  padding: $sp-6 $sp-16;
+  background: $c-primary;
+  border-radius: $r-full;
+}
+
+.no-relation-link-text {
+  font-size: $fs-body-sm;
+  color: $c-text-inverse;
+  font-weight: $fw-bold;
+  white-space: nowrap;
 }
 
 // ── Recipient Chips — 水平滚动选择器 ──

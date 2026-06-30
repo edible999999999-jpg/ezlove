@@ -192,7 +192,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useEventsStore } from '@/stores/events'
 import { downloadExport } from '@/api/export'
@@ -206,6 +206,15 @@ const filters = reactive({ severity: '', event_type: '', is_resolved: null })
 const form = reactive({ elder_id: '', event_type: 'other', severity: 'info', description: '' })
 
 onMounted(() => store.load())
+
+function handleEscape(e) {
+  if (e.key === 'Escape') {
+    showResolveDialog.value = false
+    showDialog.value = false
+  }
+}
+onMounted(() => document.addEventListener('keydown', handleEscape))
+onUnmounted(() => document.removeEventListener('keydown', handleEscape))
 
 function handleExport() {
   downloadExport('/community/export/events')

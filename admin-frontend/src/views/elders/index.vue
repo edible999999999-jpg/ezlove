@@ -184,7 +184,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, onUnmounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useEldersStore } from '@/stores/elders'
 import { downloadExport } from '@/api/export'
@@ -200,6 +200,12 @@ function debouncedSearch() {
 }
 
 onMounted(() => store.load())
+
+function handleEscape(e) {
+  if (e.key === 'Escape') showDialog.value = false
+}
+onMounted(() => document.addEventListener('keydown', handleEscape))
+onUnmounted(() => document.removeEventListener('keydown', handleEscape))
 
 function handleExport() {
   downloadExport('/community/export/elders')
