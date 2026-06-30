@@ -181,10 +181,10 @@
           ]">
             <template v-if="store.presentationMode">
               <div
-                v-for="b in currentArea.buildings"
+                v-for="(b, idx) in currentArea.buildings"
                 :key="b.name"
-                class="relative p-3 rounded-xl text-center cursor-pointer transition-all hover:scale-105 hover:shadow-md"
-                :style="{ backgroundColor: heatColor(b.active_rate) }"
+                class="relative p-3 rounded-xl text-center cursor-pointer transition-all hover:scale-105 hover:shadow-md heat-tile-enter"
+                :style="{ backgroundColor: heatColor(b.active_rate), animationDelay: `${idx * 40}ms` }"
                 @click="store.loadBuildingElders(b.name)"
               >
                 <div class="text-sm font-bold text-white drop-shadow">{{ shortBuildingName(b.name) }}</div>
@@ -576,3 +576,13 @@ async function handleConfirm(elderId) {
   }
 }
 </script>
+
+<style scoped>
+.heat-tile-enter {
+  animation: tilePopIn 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes tilePopIn {
+  from { opacity: 0; transform: scale(0.7) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+</style>
