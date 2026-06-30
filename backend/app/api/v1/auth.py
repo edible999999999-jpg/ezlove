@@ -42,17 +42,17 @@ async def refresh(req: RefreshRequest, db: AsyncSession = Depends(get_db)):
     try:
         payload = jwt.decode(req.refresh_token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])
         if payload.get("type") != "refresh":
-            raise HTTPException(status_code=401, detail="Invalid refresh token")
+            raise HTTPException(status_code=401, detail="刷新令牌无效")
         user_id = payload.get("sub")
     except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid refresh token")
+        raise HTTPException(status_code=401, detail="刷新令牌无效")
 
     from sqlalchemy import select
     from app.models.user import User
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
     if user is None:
-        raise HTTPException(status_code=401, detail="User not found")
+        raise HTTPException(status_code=401, detail="用户不存在")
 
     return TokenResponse(
         access_token=create_access_token(user.id),

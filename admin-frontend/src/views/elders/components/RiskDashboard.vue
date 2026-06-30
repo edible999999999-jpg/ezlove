@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/20 p-6">
+  <div class="bg-surface rounded-2xl shadow-sm border border-outline-variant/20 p-6">
     <div class="flex items-center justify-between mb-4">
       <h3 class="font-headline text-lg font-bold text-on-surface">风险评估</h3>
       <button

@@ -72,35 +72,35 @@
 
     <!-- 1. Top Stat Row: 6 cards (hidden in presentation mode) -->
     <div v-if="!store.presentationMode" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
-      <div class="bg-white p-5 rounded-2xl shadow-sm border border-outline-variant/20 hover:shadow-md transition-shadow">
+      <div class="bg-surface p-5 rounded-2xl shadow-sm border border-outline-variant/20 hover:shadow-md transition-shadow">
         <div class="flex justify-between items-start mb-2">
           <span class="text-xs font-bold text-inactive-gray tracking-wider uppercase">总人数</span>
           <span class="material-symbols-outlined text-inactive-gray">groups</span>
         </div>
         <div class="serif-num text-3xl font-bold text-on-surface">{{ animatedValues.total ?? 0 }}</div>
       </div>
-      <div class="bg-white p-5 rounded-2xl shadow-sm border border-outline-variant/20 hover:shadow-md transition-shadow border-l-4 border-l-primary">
+      <div class="bg-surface p-5 rounded-2xl shadow-sm border border-outline-variant/20 hover:shadow-md transition-shadow border-l-4 border-l-primary">
         <div class="flex justify-between items-start mb-2">
           <span class="text-xs font-bold text-primary tracking-wider uppercase">A级</span>
           <span class="material-symbols-outlined text-primary">emergency_home</span>
         </div>
         <div class="serif-num text-3xl font-bold text-on-surface">{{ animatedValues.a ?? 0 }}</div>
       </div>
-      <div class="bg-white p-5 rounded-2xl shadow-sm border border-outline-variant/20 hover:shadow-md transition-shadow border-l-4 border-l-accent">
+      <div class="bg-surface p-5 rounded-2xl shadow-sm border border-outline-variant/20 hover:shadow-md transition-shadow border-l-4 border-l-accent">
         <div class="flex justify-between items-start mb-2">
           <span class="text-xs font-bold text-accent tracking-wider uppercase">B级</span>
           <span class="material-symbols-outlined text-accent">medical_services</span>
         </div>
         <div class="serif-num text-3xl font-bold text-on-surface">{{ animatedValues.b ?? 0 }}</div>
       </div>
-      <div class="bg-white p-5 rounded-2xl shadow-sm border border-outline-variant/20 hover:shadow-md transition-shadow border-l-4 border-l-secondary">
+      <div class="bg-surface p-5 rounded-2xl shadow-sm border border-outline-variant/20 hover:shadow-md transition-shadow border-l-4 border-l-secondary">
         <div class="flex justify-between items-start mb-2">
           <span class="text-xs font-bold text-secondary tracking-wider uppercase">C级</span>
           <span class="material-symbols-outlined text-secondary">health_and_safety</span>
         </div>
         <div class="serif-num text-3xl font-bold text-on-surface">{{ animatedValues.c ?? 0 }}</div>
       </div>
-      <div class="bg-white p-5 rounded-2xl shadow-sm border border-outline-variant/20 hover:shadow-md transition-shadow">
+      <div class="bg-surface p-5 rounded-2xl shadow-sm border border-outline-variant/20 hover:shadow-md transition-shadow">
         <div class="flex justify-between items-start mb-2">
           <span class="text-xs font-bold text-on-surface-variant tracking-wider uppercase">今日活跃</span>
           <span class="material-symbols-outlined text-on-surface-variant">bolt</span>
@@ -108,7 +108,7 @@
         <div class="serif-num text-3xl font-bold text-on-surface">{{ animatedValues.active ?? 0 }}</div>
         <SparkLine v-if="dailyActiveCounts.length > 1" :data="dailyActiveCounts" :width="100" :height="20" color="#6B8F71" class="mt-1" />
       </div>
-      <div class="bg-white p-5 rounded-2xl shadow-sm border border-outline-variant/20 hover:shadow-md transition-shadow">
+      <div class="bg-surface p-5 rounded-2xl shadow-sm border border-outline-variant/20 hover:shadow-md transition-shadow">
         <div class="flex justify-between items-start mb-2">
           <span class="text-xs font-bold text-on-surface-variant tracking-wider uppercase">活跃率</span>
           <span class="material-symbols-outlined text-on-surface-variant">analytics</span>
@@ -131,7 +131,7 @@
         />
 
         <!-- Building Overview -->
-        <div class="bg-white p-8 rounded-3xl shadow-sm border border-outline-variant/20">
+        <div class="bg-surface p-8 rounded-3xl shadow-sm border border-outline-variant/20">
           <div class="flex justify-between items-center mb-6">
             <div>
               <h3 class="font-headline text-2xl font-bold text-on-surface">楼栋总览</h3>
@@ -222,7 +222,7 @@
       <!-- Right Sidebar / Bottom Row in presentation -->
       <div :class="store.presentationMode ? 'grid grid-cols-2 lg:grid-cols-4 gap-6' : 'w-full lg:w-80 space-y-6'">
         <!-- Care Distribution Donut -->
-        <div class="bg-white p-6 rounded-3xl shadow-sm border border-outline-variant/20">
+        <div class="bg-surface p-6 rounded-3xl shadow-sm border border-outline-variant/20">
           <h3 class="font-headline text-lg font-bold text-on-surface mb-6">分级分布</h3>
           <div class="relative w-48 h-48 mx-auto mb-6 flex items-center justify-center">
             <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
@@ -258,7 +258,7 @@
         </div>
 
         <!-- Risk Overview -->
-        <div v-if="riskDistribution" class="bg-white p-6 rounded-3xl shadow-sm border border-outline-variant/20">
+        <div v-if="riskDistribution" class="bg-surface p-6 rounded-3xl shadow-sm border border-outline-variant/20">
           <h3 class="font-headline text-lg font-bold text-on-surface mb-4">风险概况</h3>
           <div class="space-y-2.5">
             <div class="flex items-center justify-between">
@@ -293,7 +293,7 @@
         </div>
 
         <!-- 7-Day Trend Chart -->
-        <div v-if="dailyActiveRates.length > 1" class="bg-white p-6 rounded-3xl shadow-sm border border-outline-variant/20">
+        <div v-if="dailyActiveRates.length > 1" class="bg-surface p-6 rounded-3xl shadow-sm border border-outline-variant/20">
           <h3 :class="store.presentationMode ? 'font-headline text-xl font-bold text-on-surface mb-4' : 'font-headline text-lg font-bold text-on-surface mb-4'">7 天趋势</h3>
           <svg viewBox="0 0 240 120" :class="store.presentationMode ? 'w-full min-h-[240px]' : 'w-full'">
             <defs>
@@ -346,7 +346,7 @@
         </div>
 
         <!-- Today Quick View (hidden in presentation — banner has the data) -->
-        <div v-if="!store.presentationMode" class="bg-white p-6 rounded-3xl shadow-sm border border-outline-variant/20">
+        <div v-if="!store.presentationMode" class="bg-surface p-6 rounded-3xl shadow-sm border border-outline-variant/20">
           <h3 class="font-headline text-lg font-bold text-on-surface mb-4">今日速览</h3>
           <div class="space-y-3">
             <router-link to="/elders" class="flex gap-3 p-3 rounded-xl bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer">

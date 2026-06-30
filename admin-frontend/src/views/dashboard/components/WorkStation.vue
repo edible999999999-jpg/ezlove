@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white rounded-3xl shadow-sm border border-outline-variant/20 p-6">
+  <div class="bg-surface rounded-3xl shadow-sm border border-outline-variant/20 p-6">
     <h3 class="font-headline text-lg font-bold text-on-surface mb-4">工作台</h3>
 
     <!-- Tabs -->

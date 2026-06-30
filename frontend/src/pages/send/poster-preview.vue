@@ -86,6 +86,7 @@ const originalCaption = ref("");
 const scrollLeft = ref(0);
 const params = ref({});
 const showSuccess = ref(false);
+const sending = ref(false);
 
 const captionChanged = computed(() => editCaption.value !== originalCaption.value);
 
@@ -154,7 +155,8 @@ async function regenerate() {
 }
 
 async function sendPoster() {
-  if (variants.value.length === 0) return;
+  if (variants.value.length === 0 || sending.value) return;
+  sending.value = true;
   const chosen = variants.value[selectedIndex.value];
   uni.showLoading({ title: "发送中..." });
   try {
@@ -176,6 +178,7 @@ async function sendPoster() {
     }, 2000);
   } catch (e) {
     uni.hideLoading();
+    sending.value = false;
     uni.showToast({ title: "发送失败", icon: "none" });
   }
 }

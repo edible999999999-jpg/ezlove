@@ -29,7 +29,7 @@
       <select
         v-model="filters.care_level"
         @change="store.load(filters)"
-        class="bg-white border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-48"
+        class="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-48"
       >
         <option value="">按分级筛选</option>
         <option value="A">A级（需重点关爱）</option>
@@ -41,7 +41,7 @@
         <input
           v-model="filters.search"
           @input="debouncedSearch"
-          class="bg-white border border-outline-variant rounded-xl pl-10 pr-4 py-2.5 text-sm text-on-surface placeholder:text-outline-variant/60 focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-56"
+          class="bg-surface border border-outline-variant rounded-xl pl-10 pr-4 py-2.5 text-sm text-on-surface placeholder:text-outline-variant/60 focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-56"
           placeholder="搜索姓名..."
           type="text"
         />
@@ -49,7 +49,7 @@
     </div>
 
     <!-- Table -->
-    <div class="bg-white rounded-2xl border border-outline-variant/20 shadow-sm overflow-hidden">
+    <div class="bg-surface rounded-2xl border border-outline-variant/20 shadow-sm overflow-hidden">
       <table class="w-full">
         <thead>
           <tr class="border-b border-outline-variant/20">

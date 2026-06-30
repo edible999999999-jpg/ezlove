@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white rounded-2xl border border-outline-variant/20 p-5">
+  <div class="bg-surface rounded-2xl border border-outline-variant/20 p-5">
     <div class="flex items-center justify-between mb-4">
       <h5 class="font-headline text-base font-bold text-on-surface">
         {{ building }}

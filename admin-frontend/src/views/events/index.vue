@@ -29,7 +29,7 @@
       <select
         v-model="filters.severity"
         @change="store.load(filters)"
-        class="bg-white border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-40"
+        class="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-40"
       >
         <option value="">严重程度</option>
         <option value="urgent">紧急</option>
@@ -39,7 +39,7 @@
       <select
         v-model="filters.event_type"
         @change="store.load(filters)"
-        class="bg-white border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-40"
+        class="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-40"
       >
         <option value="">事件类型</option>
         <option value="fall">跌倒</option>
@@ -51,7 +51,7 @@
       <select
         v-model="filters.is_resolved"
         @change="store.load(filters)"
-        class="bg-white border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-40"
+        class="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-40"
       >
         <option :value="null">处理状态</option>
         <option :value="false">未处理</option>
@@ -60,7 +60,7 @@
     </div>
 
     <!-- Events Table -->
-    <div class="bg-white rounded-2xl border border-outline-variant/20 shadow-sm overflow-hidden">
+    <div class="bg-surface rounded-2xl border border-outline-variant/20 shadow-sm overflow-hidden">
       <table class="w-full">
         <thead>
           <tr class="border-b border-outline-variant/20">

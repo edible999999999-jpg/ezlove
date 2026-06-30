@@ -68,10 +68,10 @@ async def community_refresh(data: RefreshRequest, db: AsyncSession = Depends(get
     try:
         payload = jwt.decode(data.refresh_token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])
         if payload.get("type") != "refresh":
-            raise HTTPException(status_code=401, detail="无效的 refresh token")
+            raise HTTPException(status_code=401, detail="刷新令牌无效")
         worker_id = payload.get("sub")
     except JWTError:
-        raise HTTPException(status_code=401, detail="无效的 refresh token")
+        raise HTTPException(status_code=401, detail="刷新令牌无效")
 
     result = await db.execute(select(CommunityWorker).where(CommunityWorker.id == worker_id))
     worker = result.scalar_one_or_none()

@@ -2,7 +2,7 @@
   <div
     :class="[
       'p-4 rounded-2xl border cursor-pointer transition-all hover:shadow-md',
-      expanded ? 'ring-2 ring-primary/30 bg-primary/5 border-primary/20' : 'bg-white border-outline-variant/20 hover:border-outline-variant/40',
+      expanded ? 'ring-2 ring-primary/30 bg-primary/5 border-primary/20' : 'bg-surface border-outline-variant/20 hover:border-outline-variant/40',
     ]"
     @click="$emit('toggle', building.name)"
   >

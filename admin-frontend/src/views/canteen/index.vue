@@ -29,13 +29,13 @@
 
     <div class="flex flex-col gap-6">
       <!-- Menu Empty State -->
-      <div v-if="!store.menus.length" class="bg-white rounded-3xl shadow-sm border border-outline-variant/20 p-12 text-center">
+      <div v-if="!store.menus.length" class="bg-surface rounded-3xl shadow-sm border border-outline-variant/20 p-12 text-center">
         <span class="material-symbols-outlined text-5xl text-inactive-gray">restaurant_menu</span>
         <p class="text-inactive-gray text-sm mt-3">暂无菜单，点击上方「生成今日菜单」开始</p>
       </div>
 
       <!-- Menu Card -->
-      <div v-if="store.menus.length" class="bg-white rounded-3xl shadow-sm border border-outline-variant/20 overflow-hidden">
+      <div v-if="store.menus.length" class="bg-surface rounded-3xl shadow-sm border border-outline-variant/20 overflow-hidden">
         <div class="px-6 py-5 border-b border-outline-variant/20 flex justify-between items-center">
           <h3 class="font-headline text-lg font-bold text-on-surface flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">restaurant_menu</span>
@@ -119,7 +119,7 @@
       </div>
 
       <!-- Input Card -->
-      <div class="bg-white rounded-3xl shadow-sm border border-outline-variant/20 overflow-hidden">
+      <div class="bg-surface rounded-3xl shadow-sm border border-outline-variant/20 overflow-hidden">
         <div class="px-6 py-5 border-b border-outline-variant/20">
           <h3 class="font-headline text-lg font-bold text-on-surface">录入就餐数据</h3>
         </div>
@@ -165,7 +165,7 @@
       </div>
 
       <!-- Parsed Results Card -->
-      <div v-if="lastParsed" class="bg-white rounded-3xl shadow-sm border border-outline-variant/20 overflow-hidden">
+      <div v-if="lastParsed" class="bg-surface rounded-3xl shadow-sm border border-outline-variant/20 overflow-hidden">
         <div class="px-6 py-5 border-b border-outline-variant/20 flex justify-between items-center">
           <h3 class="font-headline text-lg font-bold text-on-surface">解析结果</h3>
           <button class="text-sm text-on-surface-variant hover:text-primary transition-colors" @click="lastParsed = null">关闭</button>
@@ -210,7 +210,7 @@
       </div>
 
       <!-- History Card -->
-      <div class="bg-white rounded-3xl shadow-sm border border-outline-variant/20 overflow-hidden">
+      <div class="bg-surface rounded-3xl shadow-sm border border-outline-variant/20 overflow-hidden">
         <div class="px-6 py-5 border-b border-outline-variant/20 flex justify-between items-center">
           <h3 class="font-headline text-lg font-bold text-on-surface">历史记录</h3>
           <button class="flex items-center gap-1 text-sm text-on-surface-variant hover:text-primary transition-colors" @click="store.load()">

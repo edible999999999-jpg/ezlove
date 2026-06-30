@@ -20,7 +20,7 @@
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-3 gap-4 mb-6">
-      <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/20 p-5">
+      <div class="bg-surface rounded-2xl shadow-sm border border-outline-variant/20 p-5">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center">
             <span class="material-symbols-outlined text-secondary">group</span>
@@ -31,7 +31,7 @@
           </div>
         </div>
       </div>
-      <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/20 p-5">
+      <div class="bg-surface rounded-2xl shadow-sm border border-outline-variant/20 p-5">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
             <span class="material-symbols-outlined text-accent">assignment</span>
@@ -42,7 +42,7 @@
           </div>
         </div>
       </div>
-      <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/20 p-5">
+      <div class="bg-surface rounded-2xl shadow-sm border border-outline-variant/20 p-5">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
             <span class="material-symbols-outlined text-primary">check_circle</span>
@@ -79,7 +79,7 @@
         <select
           v-model="taskFilters.status"
           @change="store.loadTasks(cleanFilters)"
-          class="bg-white border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-40"
+          class="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-40"
         >
           <option value="">全部状态</option>
           <option value="pending">待接取</option>
@@ -90,7 +90,7 @@
         <select
           v-model="taskFilters.task_type"
           @change="store.loadTasks(cleanFilters)"
-          class="bg-white border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-40"
+          class="bg-surface border border-outline-variant rounded-xl px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-40"
         >
           <option value="">全部类型</option>
           <option value="visit">探访</option>
@@ -100,7 +100,7 @@
         </select>
       </div>
 
-      <div class="bg-white rounded-2xl border border-outline-variant/20 shadow-sm overflow-hidden">
+      <div class="bg-surface rounded-2xl border border-outline-variant/20 shadow-sm overflow-hidden">
         <table class="w-full">
           <thead>
             <tr class="border-b border-outline-variant/20">
@@ -159,7 +159,7 @@
 
     <!-- 志愿者名单 Tab -->
     <div v-if="activeTab === 'volunteers'">
-      <div class="bg-white rounded-2xl border border-outline-variant/20 shadow-sm overflow-hidden">
+      <div class="bg-surface rounded-2xl border border-outline-variant/20 shadow-sm overflow-hidden">
         <table class="w-full">
           <thead>
             <tr class="border-b border-outline-variant/20">
@@ -209,7 +209,7 @@
 
     <!-- 积分排行 Tab -->
     <div v-if="activeTab === 'leaderboard'">
-      <div class="bg-white rounded-2xl border border-outline-variant/20 shadow-sm overflow-hidden">
+      <div class="bg-surface rounded-2xl border border-outline-variant/20 shadow-sm overflow-hidden">
         <div class="divide-y divide-outline-variant/10">
           <div
             v-for="(entry, index) in store.leaderboard"

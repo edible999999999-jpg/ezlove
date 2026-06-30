@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white rounded-2xl shadow-sm border border-outline-variant/20 p-6 space-y-6">
+  <div class="bg-surface rounded-2xl shadow-sm border border-outline-variant/20 p-6 space-y-6">
     <h3 class="font-headline text-lg font-bold text-on-surface">30 天趋势</h3>
 
     <!-- Active days bar chart -->

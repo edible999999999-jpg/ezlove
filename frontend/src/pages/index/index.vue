@@ -230,6 +230,7 @@ const alertStore = useAlertStore();
 const checkedInToday = ref(false);
 const checkinTimeText = ref("");
 const showRipple = ref(false);
+const checkingIn = ref(false);
 const todayMenus = ref([]);
 
 const todayMenuData = computed(() => todayMenus.value[0]?.dishes || {});
@@ -269,7 +270,8 @@ async function loadCheckinStatus() {
 }
 
 async function handleCheckIn() {
-  if (checkedInToday.value) return;
+  if (checkedInToday.value || checkingIn.value) return;
+  checkingIn.value = true;
   try {
     const res = await selfCheckIn();
     showRipple.value = true;
@@ -279,6 +281,8 @@ async function handleCheckIn() {
     uni.showToast({ title: "已报平安，家人们安心了", icon: "none" });
   } catch (e) {
     uni.showToast({ title: "报平安失败，请稍后再试", icon: "none" });
+  } finally {
+    checkingIn.value = false;
   }
 }
 
