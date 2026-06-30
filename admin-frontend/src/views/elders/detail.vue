@@ -113,9 +113,9 @@
           />
 
           <!-- 家人关系卡片 -->
-          <div v-if="store.current.family_relations?.length" class="mt-6 bg-white rounded-2xl shadow-sm border border-outline-variant/20 p-6">
+          <div class="mt-6 bg-white rounded-2xl shadow-sm border border-outline-variant/20 p-6">
             <h3 class="font-headline text-lg font-bold text-on-surface mb-4">家人关系</h3>
-            <div class="space-y-3">
+            <div v-if="store.current.family_relations?.length" class="space-y-3">
               <div
                 v-for="rel in store.current.family_relations"
                 :key="rel.relation_id"
@@ -130,6 +130,10 @@
                   {{ rel.status === 'active' ? '已绑定' : '待确认' }}
                 </span>
               </div>
+            </div>
+            <div v-else class="text-center py-6">
+              <span class="material-symbols-outlined text-3xl text-inactive-gray">family_restroom</span>
+              <p class="text-sm text-inactive-gray mt-2">暂无家人绑定</p>
             </div>
           </div>
         </div>
