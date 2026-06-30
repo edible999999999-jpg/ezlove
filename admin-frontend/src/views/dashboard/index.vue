@@ -349,7 +349,7 @@
         <div v-if="!store.presentationMode" class="bg-white p-6 rounded-3xl shadow-sm border border-outline-variant/20">
           <h3 class="font-headline text-lg font-bold text-on-surface mb-4">今日速览</h3>
           <div class="space-y-3">
-            <div class="flex gap-3 p-3 rounded-xl bg-primary/5">
+            <router-link to="/elders" class="flex gap-3 p-3 rounded-xl bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer">
               <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
                 <span class="material-symbols-outlined text-white text-sm">ring_volume</span>
               </div>
@@ -357,8 +357,8 @@
                 <p class="text-sm font-bold text-on-surface">{{ pendingConfirmCount }} 人待确认</p>
                 <p class="text-[10px] text-inactive-gray">A/B级今日未活跃</p>
               </div>
-            </div>
-            <div class="flex gap-3 p-3 rounded-xl bg-accent/5">
+            </router-link>
+            <router-link to="/events" class="flex gap-3 p-3 rounded-xl bg-accent/5 hover:bg-accent/10 transition-colors cursor-pointer">
               <div class="w-8 h-8 rounded-lg bg-accent flex items-center justify-center shrink-0">
                 <span class="material-symbols-outlined text-white text-sm">warning</span>
               </div>
@@ -366,7 +366,7 @@
                 <p class="text-sm font-bold text-on-surface">{{ store.data?.pending_events || 0 }} 条告警</p>
                 <p class="text-[10px] text-inactive-gray">待处理事件</p>
               </div>
-            </div>
+            </router-link>
             <div class="flex gap-3 p-3 rounded-xl bg-secondary/5">
               <div class="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
                 <span class="material-symbols-outlined text-white text-sm">bolt</span>

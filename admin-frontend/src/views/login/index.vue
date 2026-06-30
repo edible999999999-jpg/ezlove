@@ -58,6 +58,7 @@
                 name="phone"
                 placeholder="请输入手机号"
                 type="tel"
+                autofocus
               />
             </div>
             <p v-if="errors.phone" class="text-xs text-primary ml-1 mt-1">{{ errors.phone }}</p>
