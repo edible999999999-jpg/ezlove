@@ -209,16 +209,32 @@ function scrollToBottom() {
 
 function formatContent(text) {
   if (!text) return ''
-  return text
+  let html = text
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/\n/g, '<br>')
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(
       /\[\[elder:([\w-]+):(.*?)\]\]/g,
       '<a href="/elders/$1" class="text-primary font-bold hover:underline cursor-pointer">$2</a>'
     )
+
+  const lines = html.split('\n')
+  const result = []
+  let inList = false
+  for (const line of lines) {
+    const bullet = line.match(/^[\s]*[-•]\s+(.*)/)
+    const numbered = line.match(/^[\s]*\d+[.)]\s+(.*)/)
+    if (bullet || numbered) {
+      if (!inList) { result.push('<ul class="list-disc pl-4 my-1">'); inList = true }
+      result.push(`<li>${(bullet || numbered)[1]}</li>`)
+    } else {
+      if (inList) { result.push('</ul>'); inList = false }
+      result.push(line ? `${line}<br>` : '<br>')
+    }
+  }
+  if (inList) result.push('</ul>')
+  return result.join('').replace(/<br>$/, '')
 }
 
 onMounted(() => inputEl.value?.focus())

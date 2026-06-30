@@ -66,6 +66,7 @@
       >
         <span class="material-symbols-outlined text-lg">fullscreen</span>
         全屏展示
+        <span class="text-[10px] text-inactive-gray ml-1 font-normal">(F11)</span>
       </button>
     </div>
 
