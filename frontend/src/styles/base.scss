@@ -75,7 +75,7 @@ page {
   transition: all $duration-normal $ease-out;
   &:active {
     transform: scale(0.95);
-    box-shadow: 0 2rpx 8rpx rgba(196, 116, 92, 0.2);
+    box-shadow: 0 2rpx 8rpx rgba($c-primary, 0.2);
     transition-timing-function: $ease-spring;
   }
   &::after { border: none; }
@@ -122,7 +122,7 @@ page {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6rpx 24rpx rgba(196, 116, 92, 0.3);
+  box-shadow: 0 6rpx 24rpx rgba($c-primary, 0.3);
   letter-spacing: 4rpx;
 }
 
@@ -141,14 +141,14 @@ page {
   @extend .badge;
   background: $c-safe-bg;
   color: $c-safe;
-  box-shadow: 0 0 0 6rpx rgba(239, 246, 241, 0.6);
+  box-shadow: 0 0 0 6rpx rgba($c-safe-bg, 0.6);
 }
 
 .badge-warn {
   @extend .badge;
   background: $c-warn-bg;
   color: $c-warn;
-  box-shadow: 0 0 0 6rpx rgba(250, 240, 238, 0.6);
+  box-shadow: 0 0 0 6rpx rgba($c-warn-bg, 0.6);
 }
 
 .badge-neutral {
@@ -194,6 +194,6 @@ page {
 .deco-circle {
   position: absolute;
   border-radius: 50%;
-  background: rgba(196, 116, 92, 0.04);
+  background: rgba($c-primary, 0.04);
   pointer-events: none;
 }

@@ -141,7 +141,7 @@ $c-info-gray: #717171;
   background: $c-surface;
   border-radius: $r-xl;
   padding: $sp-20;
-  box-shadow: 0 4rpx 40rpx -4rpx rgba(199, 92, 58, 0.05);
+  box-shadow: 0 4rpx 40rpx -4rpx rgba($c-primary, 0.05);
   border: 2rpx solid rgba($c-primary, 0.05);
   position: relative;
   overflow: hidden;

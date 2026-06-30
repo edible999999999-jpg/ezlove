@@ -118,7 +118,7 @@ function useSuggestion() {
   height: 16rpx;
   border-radius: 50%;
   background: $gradient-warm;
-  box-shadow: 0 2rpx 8rpx rgba(196, 116, 92, 0.3);
+  box-shadow: 0 2rpx 8rpx rgba($c-primary, 0.3);
   animation: dotPulse 1.2s ease-in-out infinite;
   &:nth-child(2) { animation-delay: 200ms; }
   &:nth-child(3) { animation-delay: 400ms; }
@@ -168,7 +168,7 @@ function useSuggestion() {
   padding: $sp-4 $sp-16;
   border-radius: $r-full;
   font-weight: $fw-medium;
-  box-shadow: 0 0 0 4rpx rgba(196, 116, 92, 0.06);
+  box-shadow: 0 0 0 4rpx rgba($c-primary, 0.06);
 }
 
 .check-mark {
@@ -179,7 +179,7 @@ function useSuggestion() {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4rpx 12rpx rgba(196, 116, 92, 0.3);
+  box-shadow: 0 4rpx 12rpx rgba($c-primary, 0.3);
 }
 
 .check-icon-img {

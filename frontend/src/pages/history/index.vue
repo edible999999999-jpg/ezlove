@@ -227,8 +227,8 @@ function goViewDetail(m) {
   background: $c-surface;
   border-radius: $r-2xl;
   padding: $sp-16;
-  box-shadow: 0 4rpx 40rpx -4rpx rgba(44, 40, 37, 0.05);
-  border: 2rpx solid rgba(154, 142, 130, 0.05);
+  box-shadow: 0 4rpx 40rpx -4rpx rgba($c-text, 0.05);
+  border: 2rpx solid rgba($c-text-sub, 0.05);
   transition: transform $duration-normal $ease-out;
   position: relative;
   overflow: hidden;

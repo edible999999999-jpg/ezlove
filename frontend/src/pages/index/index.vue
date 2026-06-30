@@ -372,7 +372,7 @@ function goVolunteer() {
   left: 0;
   width: 100%;
   z-index: 50;
-  background: rgba(250, 246, 241, 0.85);
+  background: rgba($c-bg, 0.85);
   backdrop-filter: blur(24rpx);
   -webkit-backdrop-filter: blur(24rpx);
   display: flex;
@@ -722,11 +722,11 @@ function goVolunteer() {
 
   &--active {
     background: linear-gradient(135deg, $c-primary 0%, darken($c-primary, 8%) 100%);
-    box-shadow: 0 8rpx 32rpx rgba(196, 116, 92, 0.35);
+    box-shadow: 0 8rpx 32rpx rgba($c-primary, 0.35);
 
     &:active {
       transform: scale(0.97);
-      box-shadow: 0 4rpx 16rpx rgba(196, 116, 92, 0.25);
+      box-shadow: 0 4rpx 16rpx rgba($c-primary, 0.25);
     }
   }
 
@@ -766,10 +766,10 @@ function goVolunteer() {
 }
 
 @keyframes ripplePulse {
-  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(123, 174, 142, 0.5); }
-  30% { transform: scale(1.03); box-shadow: 0 0 0 20rpx rgba(123, 174, 142, 0.3); }
-  60% { transform: scale(0.98); box-shadow: 0 0 0 40rpx rgba(123, 174, 142, 0); }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(123, 174, 142, 0); }
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba($c-safe, 0.5); }
+  30% { transform: scale(1.03); box-shadow: 0 0 0 20rpx rgba($c-safe, 0.3); }
+  60% { transform: scale(0.98); box-shadow: 0 0 0 40rpx rgba($c-safe, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba($c-safe, 0); }
 }
 
 // ── 老人端：今日菜单 ──
@@ -1133,6 +1133,6 @@ function goVolunteer() {
 
 @keyframes fabBreath {
   0%, 100% { box-shadow: $shadow-lg; }
-  50% { box-shadow: 0 12rpx 48rpx rgba(196, 116, 92, 0.35); }
+  50% { box-shadow: 0 12rpx 48rpx rgba($c-primary, 0.35); }
 }
 </style>

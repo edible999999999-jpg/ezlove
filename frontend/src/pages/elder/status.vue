@@ -278,18 +278,18 @@ async function resumeAlert() {
   border-radius: 50%;
   &.active {
     background: $c-safe;
-    box-shadow: 0 0 0 6rpx rgba(123, 174, 142, 0.2);
+    box-shadow: 0 0 0 6rpx rgba($c-safe, 0.2);
   }
   &.inactive {
     background: $c-warn;
-    box-shadow: 0 0 0 6rpx rgba(201, 123, 107, 0.2);
+    box-shadow: 0 0 0 6rpx rgba($c-warn, 0.2);
     animation: pulse-warn 2s infinite;
   }
 }
 
 @keyframes pulse-warn {
-  0%, 100% { box-shadow: 0 0 0 6rpx rgba(201, 123, 107, 0.2); }
-  50% { box-shadow: 0 0 0 10rpx rgba(201, 123, 107, 0.1); }
+  0%, 100% { box-shadow: 0 0 0 6rpx rgba($c-warn, 0.2); }
+  50% { box-shadow: 0 0 0 10rpx rgba($c-warn, 0.1); }
 }
 
 .status-label {
@@ -480,7 +480,7 @@ async function resumeAlert() {
   transition: all $duration-normal $ease-out;
   &.active {
     border-color: $c-safe;
-    box-shadow: 0 0 0 4rpx rgba(123, 174, 142, 0.15);
+    box-shadow: 0 0 0 4rpx rgba($c-safe, 0.15);
     animation: ringPop 400ms $ease-spring both;
   }
 }
@@ -490,7 +490,7 @@ async function resumeAlert() {
   height: 28rpx;
   border-radius: 50%;
   background: $c-safe;
-  box-shadow: 0 2rpx 6rpx rgba(123, 174, 142, 0.3);
+  box-shadow: 0 2rpx 6rpx rgba($c-safe, 0.3);
   animation: fillPop 350ms $ease-spring both;
 }
 

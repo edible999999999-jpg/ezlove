@@ -97,7 +97,7 @@ async function confirmRole() {
   height: 40%;
   top: -10%;
   left: -10%;
-  background: rgba(196, 116, 92, 0.05);
+  background: rgba($c-primary, 0.05);
   filter: blur(120rpx);
 }
 
@@ -106,7 +106,7 @@ async function confirmRole() {
   height: 30%;
   bottom: -5%;
   right: -5%;
-  background: rgba(123, 174, 142, 0.05);
+  background: rgba($c-safe, 0.05);
   filter: blur(100rpx);
 }
 

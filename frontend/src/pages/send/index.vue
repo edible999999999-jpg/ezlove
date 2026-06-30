@@ -132,18 +132,23 @@
 import { ref, computed, onMounted } from "vue";
 import { onShow } from "@dcloudio/uni-app";
 import { useRelationStore } from "@/stores/relation";
+import { useMomentStore } from "@/stores/moment";
 import { uploadImage } from "@/api/upload";
 import { requestSubscribe } from "@/utils/subscribe";
 
 const relationStore = useRelationStore();
+const momentStore = useMomentStore();
 
 const selectedElderId = ref("");
 const textContent = ref("");
 const imageUrl = ref("");
 const uploadedUrl = ref("");
 const uploading = ref(false);
+const sending = ref(false);
 
-const canGenerate = computed(() => !!uploadedUrl.value && !!selectedElderId.value && !uploading.value);
+const canGenerate = computed(
+  () => (!!uploadedUrl.value || !!textContent.value.trim()) && !!selectedElderId.value && !uploading.value && !sending.value
+);
 
 const timeOfDayHint = computed(() => {
   const h = new Date().getHours();
@@ -204,24 +209,42 @@ function chooseImage() {
   });
 }
 
-function handleGenerate() {
+async function handleGenerate() {
   if (!canGenerate.value) {
-    if (!uploadedUrl.value) {
-      uni.showToast({ title: "先选一张照片吧", icon: "none" });
-    } else if (!selectedElderId.value) {
+    if (!selectedElderId.value) {
       uni.showToast({ title: "选择要分享给谁", icon: "none" });
+    } else {
+      uni.showToast({ title: "写点文字或选张照片吧", icon: "none" });
     }
     return;
   }
 
-  uni.setStorageSync("poster_params", {
-    image_url: uploadedUrl.value,
-    user_text: textContent.value || null,
-    elder_id: selectedElderId.value,
-  });
-
-  requestSubscribe(['unread']);
-  uni.navigateTo({ url: "/pages/send/poster-preview" });
+  if (uploadedUrl.value) {
+    uni.setStorageSync("poster_params", {
+      image_url: uploadedUrl.value,
+      user_text: textContent.value || null,
+      elder_id: selectedElderId.value,
+    });
+    requestSubscribe(['unread']);
+    uni.navigateTo({ url: "/pages/send/poster-preview" });
+  } else {
+    sending.value = true;
+    try {
+      await momentStore.send({
+        elder_id: selectedElderId.value,
+        content_type: "text",
+        text_content: textContent.value.trim(),
+      });
+      requestSubscribe(['unread']);
+      uni.showToast({ title: "已发送", icon: "success" });
+      textContent.value = "";
+      setTimeout(() => uni.navigateBack(), 1200);
+    } catch {
+      uni.showToast({ title: "发送失败", icon: "none" });
+    } finally {
+      sending.value = false;
+    }
+  }
 }
 </script>
 
@@ -233,7 +256,7 @@ function handleGenerate() {
   left: 0;
   right: 0;
   z-index: 50;
-  background: rgba(250, 246, 241, 0.8);
+  background: rgba($c-bg, 0.8);
   backdrop-filter: blur(24rpx);
   -webkit-backdrop-filter: blur(24rpx);
 }
@@ -376,7 +399,7 @@ function handleGenerate() {
 .recipient-chip--active {
   background: $c-primary;
   border-color: $c-primary;
-  box-shadow: $shadow-sm, 0 4rpx 16rpx rgba(196, 116, 92, 0.15);
+  box-shadow: $shadow-sm, 0 4rpx 16rpx rgba($c-primary, 0.15);
 
   .recipient-chip__label {
     color: $c-text-inverse;
@@ -599,7 +622,7 @@ function handleGenerate() {
   z-index: 50;
   padding: $sp-16 $sp-24;
   padding-bottom: calc(#{$sp-32} + env(safe-area-inset-bottom));
-  background: rgba(250, 246, 241, 0.7);
+  background: rgba($c-bg, 0.7);
   backdrop-filter: blur(40rpx);
   -webkit-backdrop-filter: blur(40rpx);
   border-radius: $r-xl $r-xl 0 0;
@@ -640,7 +663,7 @@ function handleGenerate() {
   flex: 1.5;
   background: $c-primary;
   border: none;
-  box-shadow: 0 8rpx 24rpx rgba(196, 116, 92, 0.2);
+  box-shadow: 0 8rpx 24rpx rgba($c-primary, 0.2);
 }
 
 .action-btn--disabled {
