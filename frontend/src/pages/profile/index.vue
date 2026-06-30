@@ -30,20 +30,22 @@
       </view>
 
       <view class="menu-section fade-in stagger-2">
-        <view class="menu-card" @tap="goBindList">
-          <view class="menu-left">
-            <image class="menu-icon-img" src="/static/icons/family.svg" mode="aspectFit" />
-            <text class="menu-text">我的家人</text>
+        <template v-if="userStore.isFamily">
+          <view class="menu-card" @tap="goBindList">
+            <view class="menu-left">
+              <image class="menu-icon-img" src="/static/icons/family.svg" mode="aspectFit" />
+              <text class="menu-text">我的家人</text>
+            </view>
+            <text class="menu-arrow">›</text>
           </view>
-          <text class="menu-arrow">›</text>
-        </view>
-        <view class="menu-card" @tap="goInvite">
-          <view class="menu-left">
-            <image class="menu-icon-img" src="/static/icons/link.svg" mode="aspectFit" />
-            <text class="menu-text">邀请绑定</text>
+          <view class="menu-card" @tap="goInvite">
+            <view class="menu-left">
+              <image class="menu-icon-img" src="/static/icons/link.svg" mode="aspectFit" />
+              <text class="menu-text">邀请绑定</text>
+            </view>
+            <text class="menu-arrow">›</text>
           </view>
-          <text class="menu-arrow">›</text>
-        </view>
+        </template>
         <view class="menu-card" @tap="goVolunteer">
           <view class="menu-left">
             <image class="menu-icon-img" src="/static/icons/heart-send.svg" mode="aspectFit" />
@@ -57,6 +59,7 @@
         <view class="logout-btn" @tap="handleLogout">
           <text class="logout-text">退出登录</text>
         </view>
+        <text class="version-text">易挂念 v1.0.0</text>
       </view>
     </view>
   </view>
@@ -307,5 +310,14 @@ function handleLogout() {
   font-size: $fs-body;
   color: $c-warn;
   font-weight: $fw-medium;
+}
+
+.version-text {
+  display: block;
+  text-align: center;
+  margin-top: $sp-24;
+  font-size: $fs-caption;
+  color: $c-text-hint;
+  opacity: 0.5;
 }
 </style>
