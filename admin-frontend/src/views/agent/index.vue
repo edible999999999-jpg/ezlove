@@ -22,7 +22,7 @@
     </div>
 
     <!-- Messages -->
-    <div ref="messagesContainer" class="flex-1 overflow-y-auto py-6 space-y-4">
+    <div ref="messagesContainer" class="flex-1 overflow-y-auto py-6 space-y-4" @click="handleContentClick">
       <div
         v-for="(msg, i) in messages"
         :key="i"
@@ -111,7 +111,10 @@
 
 <script setup>
 import { ref, nextTick, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { streamAgentChat } from '@/api/agent'
+
+const router = useRouter()
 const messagesContainer = ref(null)
 const inputEl = ref(null)
 const inputText = ref('')
@@ -216,7 +219,7 @@ function formatContent(text) {
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(
       /\[\[elder:([\w-]+):(.*?)\]\]/g,
-      '<a href="/elders/$1" class="text-primary font-bold hover:underline cursor-pointer">$2</a>'
+      '<a data-elder-id="$1" class="text-primary font-bold hover:underline cursor-pointer">$2</a>'
     )
 
   const lines = html.split('\n')
@@ -235,6 +238,14 @@ function formatContent(text) {
   }
   if (inList) result.push('</ul>')
   return result.join('').replace(/<br>$/, '')
+}
+
+function handleContentClick(e) {
+  const el = e.target.closest('[data-elder-id]')
+  if (el) {
+    e.preventDefault()
+    router.push(`/elders/${el.dataset.elderId}`)
+  }
 }
 
 onMounted(() => inputEl.value?.focus())

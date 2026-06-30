@@ -367,15 +367,15 @@
                 <p class="text-[10px] text-inactive-gray">待处理事件</p>
               </div>
             </router-link>
-            <div class="flex gap-3 p-3 rounded-xl bg-secondary/5">
+            <router-link to="/canteen" class="flex gap-3 p-3 rounded-xl bg-secondary/5 hover:bg-secondary/10 transition-colors cursor-pointer">
               <div class="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined text-white text-sm">bolt</span>
+                <span class="material-symbols-outlined text-white text-sm">restaurant</span>
               </div>
               <div>
-                <p class="text-sm font-bold text-on-surface">活跃 {{ store.data?.today_active_count || 0 }} 人</p>
-                <p class="text-[10px] text-inactive-gray">{{ store.data?.today_active_rate || 0 }}% 活跃率</p>
+                <p class="text-sm font-bold text-on-surface">食堂管理</p>
+                <p class="text-[10px] text-inactive-gray">今日出勤 · 缺席预警</p>
               </div>
-            </div>
+            </router-link>
           </div>
         </div>
 
