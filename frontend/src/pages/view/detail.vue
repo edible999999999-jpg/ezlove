@@ -13,8 +13,17 @@
       </view>
     </view>
 
+    <!-- Loading -->
+    <view v-if="loading" class="loading-center">
+      <view class="loading-dots">
+        <view class="ld-dot" />
+        <view class="ld-dot" />
+        <view class="ld-dot" />
+      </view>
+    </view>
+
     <!-- Message Card -->
-    <view class="message-card fade-in">
+    <view v-if="!loading && moment.id" class="message-card fade-in">
       <!-- Sender Header -->
       <view class="sender-header">
         <view class="sender-info">
@@ -59,7 +68,7 @@
     </view>
 
     <!-- Reaction Section -->
-    <view class="reaction-section fade-in stagger-2">
+    <view v-if="!loading && moment.id" class="reaction-section fade-in stagger-2">
       <!-- Divider with text -->
       <view class="reaction-divider">
         <view class="divider-line" />
@@ -101,11 +110,12 @@
 <script setup>
 import { ref, computed } from "vue";
 import { onLoad } from "@dcloudio/uni-app";
-import { getMomentDetail, recordView } from "@/api/moment";
+import { getMomentDetail, recordView, sendResponse } from "@/api/moment";
 import { getFullUrl } from "@/api/config";
 
 const moment = ref({});
 const momentId = ref("");
+const loading = ref(true);
 
 const timeText = computed(() => {
   if (!moment.value.created_at) return "";
@@ -128,11 +138,14 @@ onLoad((query) => {
 });
 
 async function loadMoment() {
+  loading.value = true;
   try {
     moment.value = await getMomentDetail(momentId.value);
     await recordView(momentId.value);
   } catch (e) {
     uni.showToast({ title: "内容加载失败", icon: "none" });
+  } finally {
+    loading.value = false;
   }
 }
 
@@ -150,7 +163,7 @@ function goBack() {
 
 async function sendReaction(type) {
   try {
-    await recordView(momentId.value);
+    await sendResponse(momentId.value, { response_type: type });
     uni.showToast({ title: "已发送", icon: "success" });
   } catch {
     uni.showToast({ title: "发送失败", icon: "none" });
@@ -234,6 +247,33 @@ async function sendReaction(type) {
   font-size: $fs-title;
   font-weight: $fw-bold;
   color: $c-primary;
+}
+
+/* Loading */
+.loading-center {
+  display: flex;
+  justify-content: center;
+  padding-top: 200rpx;
+}
+
+.loading-dots {
+  display: flex;
+  gap: $sp-12;
+}
+
+.ld-dot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  background: $c-primary-soft;
+  animation: ldPulse 1.2s ease-in-out infinite;
+  &:nth-child(2) { animation-delay: 200ms; }
+  &:nth-child(3) { animation-delay: 400ms; }
+}
+
+@keyframes ldPulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1.2); }
 }
 
 /* Message Card */

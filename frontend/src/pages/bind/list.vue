@@ -59,8 +59,12 @@ function confirmRemove(id) {
     content: "解除后将无法查看对方状态",
     success: async (res) => {
       if (res.confirm) {
-        await relationStore.remove(id);
-        uni.showToast({ title: "已解除", icon: "success" });
+        try {
+          await relationStore.remove(id);
+          uni.showToast({ title: "已解除", icon: "success" });
+        } catch {
+          uni.showToast({ title: "解除失败", icon: "none" });
+        }
       }
     },
   });

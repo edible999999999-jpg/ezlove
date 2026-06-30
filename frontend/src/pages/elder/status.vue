@@ -1,6 +1,13 @@
 <template>
   <view class="page-gradient">
-    <view class="status-content">
+    <view v-if="loading" class="loading-center">
+      <view class="loading-dots">
+        <view class="ld-dot" />
+        <view class="ld-dot" />
+        <view class="ld-dot" />
+      </view>
+    </view>
+    <view v-else class="status-content">
       <view class="status-header fade-in">
         <view class="elder-avatar-lg">
           <text class="avatar-letter">{{ elderName[0] || '家' }}</text>
@@ -49,13 +56,29 @@
         </view>
       </view>
 
-      <view class="week-card fade-in stagger-3">
+      <!-- 提醒设置入口 -->
+      <view v-if="relationId" class="settings-entry fade-in stagger-3" @tap="goSettings">
+        <view class="settings-left">
+          <text class="settings-icon">⚙</text>
+          <view class="settings-info">
+            <text class="settings-title">提醒设置</text>
+            <text class="settings-desc">调整未读提醒时间阈值</text>
+          </view>
+        </view>
+        <text class="settings-arrow">›</text>
+      </view>
+
+      <view class="week-card fade-in stagger-4">
         <text class="section-label">最近 7 天</text>
         <view class="calendar-row">
-          <view v-for="day in weekDays" :key="day.date" class="day-cell">
+          <view v-for="(day, idx) in weekDays" :key="day.date" class="day-cell">
             <text class="day-label">{{ day.label }}</text>
-            <view class="day-ring" :class="day.active ? 'active' : 'inactive'">
-              <view v-if="day.active" class="day-fill" />
+            <view
+              class="day-ring"
+              :class="day.active ? 'active' : 'inactive'"
+              :style="day.active ? `animation-delay: ${idx * 100}ms` : ''"
+            >
+              <view v-if="day.active" class="day-fill" :style="`animation-delay: ${idx * 100 + 150}ms`" />
             </view>
           </view>
         </view>
@@ -77,6 +100,7 @@ const lastActiveText = ref("暂无记录");
 const pausedUntil = ref(null);
 const weekDays = ref([]);
 const relationId = ref("");
+const loading = ref(true);
 
 onLoad((query) => {
   elderId.value = query.id;
@@ -100,6 +124,8 @@ async function loadData() {
     if (rel) relationId.value = rel.id;
   } catch (e) {
     uni.showToast({ title: "加载失败", icon: "none" });
+  } finally {
+    loading.value = false;
   }
 }
 
@@ -133,6 +159,12 @@ function formatDate(isoStr) {
   return `${d.getMonth() + 1}月${d.getDate()}日`;
 }
 
+function goSettings() {
+  uni.navigateTo({
+    url: `/pages/elder/settings?relationId=${relationId.value}&threshold=8`,
+  });
+}
+
 async function resumeAlert() {
   if (!relationId.value) return;
   try {
@@ -146,6 +178,32 @@ async function resumeAlert() {
 </script>
 
 <style lang="scss" scoped>
+.loading-center {
+  display: flex;
+  justify-content: center;
+  padding-top: 300rpx;
+}
+
+.loading-dots {
+  display: flex;
+  gap: $sp-12;
+}
+
+.ld-dot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  background: $c-primary-soft;
+  animation: ldPulse 1.2s ease-in-out infinite;
+  &:nth-child(2) { animation-delay: 200ms; }
+  &:nth-child(3) { animation-delay: 400ms; }
+}
+
+@keyframes ldPulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1.2); }
+}
+
 .status-content {
   padding: 0 $sp-24;
   padding-bottom: 200rpx;
@@ -339,6 +397,47 @@ async function resumeAlert() {
   }
 }
 
+.settings-entry {
+  background: $c-surface;
+  border-radius: $r-xl;
+  padding: $sp-24;
+  box-shadow: $shadow-md;
+  margin-bottom: $sp-20;
+  border: $border-subtle;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all $duration-normal $ease-out;
+  &:active { transform: scale(0.98); background: $c-surface-warm; }
+}
+
+.settings-left {
+  display: flex;
+  align-items: center;
+  gap: $sp-16;
+}
+
+.settings-icon { font-size: $fs-title; }
+
+.settings-title {
+  font-size: $fs-body;
+  font-weight: $fw-semibold;
+  color: $c-text;
+  display: block;
+}
+
+.settings-desc {
+  font-size: $fs-body-sm;
+  color: $c-text-hint;
+  margin-top: $sp-2;
+  display: block;
+}
+
+.settings-arrow {
+  font-size: $fs-title;
+  color: $c-text-hint;
+}
+
 .week-card {
   background: $c-surface;
   border-radius: $r-xl;
@@ -377,6 +476,7 @@ async function resumeAlert() {
   &.active {
     border-color: $c-safe;
     box-shadow: 0 0 0 4rpx rgba(123, 174, 142, 0.15);
+    animation: ringPop 400ms $ease-spring both;
   }
 }
 
@@ -386,5 +486,16 @@ async function resumeAlert() {
   border-radius: 50%;
   background: $c-safe;
   box-shadow: 0 2rpx 6rpx rgba(123, 174, 142, 0.3);
+  animation: fillPop 350ms $ease-spring both;
+}
+
+@keyframes ringPop {
+  0% { transform: scale(0.4); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fillPop {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
 </style>

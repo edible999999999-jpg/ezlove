@@ -194,7 +194,7 @@ onShow(() => {
 <style lang="scss" scoped>
 .page-volunteer {
   min-height: 100vh;
-  background-color: #FBF7F2;
+  background-color: $c-bg;
 }
 
 .volunteer-content {

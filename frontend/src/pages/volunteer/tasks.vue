@@ -110,7 +110,7 @@ onShow(() => {
 <style lang="scss" scoped>
 .page-tasks {
   min-height: 100vh;
-  background-color: #FBF7F2;
+  background-color: $c-bg;
 }
 
 .tasks-content {

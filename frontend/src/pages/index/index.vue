@@ -87,7 +87,7 @@
         <view class="checkin-section fade-in stagger-1">
           <view
             class="checkin-btn"
-            :class="checkedInToday ? 'checkin-btn--done' : 'checkin-btn--active'"
+            :class="[checkedInToday ? 'checkin-btn--done' : 'checkin-btn--active', { 'checkin-ripple': showRipple }]"
             @tap="handleCheckIn"
           >
             <text class="checkin-btn__icon">{{ checkedInToday ? '✓' : '☀' }}</text>
@@ -207,7 +207,6 @@ import { useMomentStore } from "@/stores/moment";
 import { useAlertStore } from "@/stores/alert";
 import { selfCheckIn, getTodayCheckIn } from "@/api/user";
 import { getTodayMenu } from "@/api/canteen";
-import { getFullUrl } from "@/api/config";
 
 const userStore = useUserStore();
 const relationStore = useRelationStore();
@@ -216,6 +215,7 @@ const alertStore = useAlertStore();
 
 const checkedInToday = ref(false);
 const checkinTimeText = ref("");
+const showRipple = ref(false);
 const todayMenus = ref([]);
 
 const todayMenuData = computed(() => todayMenus.value[0]?.dishes || {});
@@ -254,6 +254,8 @@ async function handleCheckIn() {
   if (checkedInToday.value) return;
   try {
     const res = await selfCheckIn();
+    showRipple.value = true;
+    setTimeout(() => { showRipple.value = false; }, 800);
     checkedInToday.value = true;
     checkinTimeText.value = formatCheckinTime(res.checked_in_at);
     uni.showToast({ title: "已报平安，家人们安心了", icon: "none" });
@@ -311,7 +313,7 @@ function goVolunteer() {
 // ── 页面背景 ──
 .page-home {
   min-height: 100vh;
-  background-color: #FBF7F2;
+  background-color: $c-bg;
 }
 
 // ── 顶部导航栏 ──
@@ -668,6 +670,17 @@ function goVolunteer() {
     .checkin-btn--active & { color: rgba(255, 255, 255, 0.85); }
     .checkin-btn--done & { color: $c-text-sub; }
   }
+}
+
+.checkin-ripple {
+  animation: ripplePulse 800ms $ease-spring both;
+}
+
+@keyframes ripplePulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(123, 174, 142, 0.5); }
+  30% { transform: scale(1.03); box-shadow: 0 0 0 20rpx rgba(123, 174, 142, 0.3); }
+  60% { transform: scale(0.98); box-shadow: 0 0 0 40rpx rgba(123, 174, 142, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(123, 174, 142, 0); }
 }
 
 // ── 老人端：今日菜单 ──

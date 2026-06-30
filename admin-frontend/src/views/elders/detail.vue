@@ -139,6 +139,7 @@
 <script setup>
 import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { useEldersStore } from '@/stores/elders'
 import { recalculateRisk, getAiAnalysis } from '@/api/community'
 import ActivityTimeline from './components/ActivityTimeline.vue'
@@ -186,6 +187,8 @@ onMounted(async () => {
   try {
     await store.loadDetail(route.params.id)
     await store.loadTimeline(route.params.id)
+  } catch {
+    ElMessage.error('加载老人详情失败')
   } finally {
     pageLoading.value = false
   }
@@ -203,6 +206,8 @@ async function handleRefreshRisk() {
         calculated_at: new Date().toISOString(),
       }
     }
+  } catch {
+    ElMessage.error('风险评分刷新失败')
   } finally {
     riskRefreshing.value = false
   }
@@ -212,6 +217,8 @@ async function handleRequestAi() {
   aiLoading.value = true
   try {
     aiResult.value = await getAiAnalysis(route.params.id)
+  } catch {
+    ElMessage.error('AI 分析请求失败')
   } finally {
     aiLoading.value = false
   }

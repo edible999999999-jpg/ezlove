@@ -51,6 +51,24 @@
       </div>
     </div>
 
+    <!-- Live Status Bar -->
+    <div v-if="!store.presentationMode && store.data" class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-3">
+        <h2 class="font-headline text-2xl font-bold text-on-surface">社区看板</h2>
+        <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/10">
+          <span :class="['w-2 h-2 rounded-full bg-secondary transition-all duration-500', dataFresh ? 'scale-150 shadow-[0_0_6px_rgba(107,143,113,0.6)]' : '']"></span>
+          <span class="text-xs font-medium text-secondary">实时</span>
+        </div>
+      </div>
+      <button
+        class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-container transition-colors"
+        @click="enterPresentation"
+      >
+        <span class="material-symbols-outlined text-lg">fullscreen</span>
+        全屏展示
+      </button>
+    </div>
+
     <!-- 1. Top Stat Row: 6 cards (hidden in presentation mode) -->
     <div v-if="!store.presentationMode" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
       <div class="bg-white p-5 rounded-2xl shadow-sm border border-outline-variant/20 hover:shadow-md transition-shadow">
@@ -380,7 +398,23 @@ import ElderTileGrid from './components/ElderTileGrid.vue'
 import SparkLine from './components/SparkLine.vue'
 
 const store = useDashboardStore()
+const dataFresh = ref(false)
+
 onMounted(() => store.load())
+
+let refreshInterval
+onMounted(() => {
+  refreshInterval = setInterval(async () => {
+    try {
+      await store.load()
+      dataFresh.value = true
+      setTimeout(() => { dataFresh.value = false }, 2000)
+    } catch {
+      // network hiccup — silently skip this refresh cycle
+    }
+  }, 30000)
+})
+onUnmounted(() => clearInterval(refreshInterval))
 
 const currentTime = ref(new Date().toLocaleTimeString('zh-CN', { hour12: true }))
 const currentDate = ref(new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }))

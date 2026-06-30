@@ -1,5 +1,13 @@
 <template>
   <view class="page-gradient">
+    <!-- 发送成功动画 -->
+    <view v-if="showSuccess" class="success-overlay">
+      <view class="success-heart">
+        <text class="success-heart__emoji">❤️</text>
+      </view>
+      <text class="success-text">牵挂已送达</text>
+    </view>
+
     <view class="preview-content">
       <view v-if="loading" class="loading-area fade-in">
         <view class="loading-poster">
@@ -41,7 +49,6 @@
               v-model="editCaption"
               :maxlength="60"
               class="caption-input"
-              @blur="onCaptionChange"
             />
             <text class="caption-count">{{ editCaption.length }}/60</text>
           </view>
@@ -78,6 +85,7 @@ const editCaption = ref("");
 const originalCaption = ref("");
 const scrollLeft = ref(0);
 const params = ref({});
+const showSuccess = ref(false);
 
 const captionChanged = computed(() => editCaption.value !== originalCaption.value);
 
@@ -120,8 +128,6 @@ function selectPoster(idx) {
   originalCaption.value = editCaption.value;
 }
 
-function onCaptionChange() {}
-
 async function refreshPreview() {
   if (!captionChanged.value) return;
   const current = variants.value[selectedIndex.value];
@@ -163,11 +169,11 @@ async function sendPoster() {
       },
     });
     uni.hideLoading();
-    uni.showToast({ title: "海报已发送", icon: "success" });
     uni.removeStorageSync("poster_params");
+    showSuccess.value = true;
     setTimeout(() => {
       uni.navigateBack({ delta: 2 });
-    }, 1500);
+    }, 2000);
   } catch (e) {
     uni.hideLoading();
     uni.showToast({ title: "发送失败", icon: "none" });
@@ -176,6 +182,64 @@ async function sendPoster() {
 </script>
 
 <style lang="scss" scoped>
+.success-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  animation: overlayIn 300ms $ease-out both;
+}
+
+.success-heart {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  background: $c-surface;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 40rpx rgba(255, 140, 66, 0.35);
+  animation: heartPop 600ms $ease-spring both;
+  animation-delay: 150ms;
+  margin-bottom: $sp-24;
+}
+
+.success-heart__emoji {
+  font-size: 80rpx;
+  line-height: 1;
+}
+
+.success-text {
+  font-size: $fs-headline;
+  font-weight: $fw-bold;
+  color: $c-text-inverse;
+  animation: textSlide 400ms $ease-out both;
+  animation-delay: 400ms;
+}
+
+@keyframes overlayIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes heartPop {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes textSlide {
+  0% { opacity: 0; transform: translateY(20rpx); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
 .preview-content {
   padding: 0 $sp-24;
   padding-bottom: 200rpx;

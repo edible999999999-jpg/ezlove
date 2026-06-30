@@ -53,26 +53,10 @@
           </select>
         </div>
       </div>
-      <div class="flex items-center gap-6">
-        <div class="relative flex items-center">
-          <span class="material-symbols-outlined absolute left-3 text-on-surface-variant text-lg">search</span>
-          <input
-            class="bg-surface-container border-none rounded-full py-1.5 pl-10 pr-4 text-sm w-64 focus:ring-1 focus:ring-primary/30 focus:outline-none transition-all"
-            placeholder="搜索姓名..."
-            type="text"
-          />
-        </div>
-        <div class="flex items-center gap-4 text-on-surface-variant">
-          <button class="hover:text-primary transition-colors" @click="userStore.logout()">
-            <span class="material-symbols-outlined">logout</span>
-          </button>
-          <button class="hover:text-primary transition-colors">
-            <span class="material-symbols-outlined">help</span>
-          </button>
-          <button class="hover:text-primary transition-colors">
-            <span class="material-symbols-outlined">apps</span>
-          </button>
-        </div>
+      <div class="flex items-center gap-4 text-on-surface-variant">
+        <button class="hover:text-primary transition-colors" @click="userStore.logout()">
+          <span class="material-symbols-outlined">logout</span>
+        </button>
       </div>
     </header>
 

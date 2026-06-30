@@ -74,7 +74,7 @@ async function confirmRole() {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #FBF7F2;
+  background-color: $c-bg;
   position: relative;
   overflow: hidden;
 }
@@ -97,7 +97,7 @@ async function confirmRole() {
   height: 40%;
   top: -10%;
   left: -10%;
-  background: rgba(199, 92, 58, 0.05);
+  background: rgba(196, 116, 92, 0.05);
   filter: blur(120rpx);
 }
 
@@ -106,7 +106,7 @@ async function confirmRole() {
   height: 30%;
   bottom: -5%;
   right: -5%;
-  background: rgba(138, 154, 139, 0.05);
+  background: rgba(123, 174, 142, 0.05);
   filter: blur(100rpx);
 }
 
@@ -117,7 +117,7 @@ async function confirmRole() {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 160rpx 48rpx 0;
+  padding: 160rpx $sp-24 0;
   position: relative;
   z-index: 1;
   max-width: 600rpx;
@@ -127,13 +127,13 @@ async function confirmRole() {
 
 .hero-section {
   text-align: center;
-  margin-bottom: 64rpx;
+  margin-bottom: $sp-32;
 }
 
 .hero-title {
   font-size: 96rpx;
   font-weight: $fw-bold;
-  color: #C75C3A;
+  color: $c-primary;
   letter-spacing: 2rpx;
 }
 
@@ -142,48 +142,48 @@ async function confirmRole() {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 24rpx;
+  gap: $sp-12;
 }
 
 .role-card {
-  background: #FFFFFF;
-  padding: 48rpx 32rpx;
-  border-radius: 32rpx;
+  background: $c-surface;
+  padding: $sp-24 $sp-16;
+  border-radius: $r-xl;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  box-shadow: 0 2rpx 8rpx rgba(44, 40, 37, 0.04);
+  box-shadow: $shadow-sm;
   border: 4rpx solid transparent;
-  transition: all 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 300ms $ease-spring;
   &:active {
     transform: scale(0.97);
   }
 }
 
 .role-card-active {
-  border-color: #C75C3A;
+  border-color: $c-primary;
   transform: scale(1.02);
-  box-shadow: 0 12rpx 40rpx rgba(199, 92, 58, 0.12);
+  box-shadow: $shadow-glow;
 }
 
 .role-card-icon {
   width: 96rpx;
   height: 96rpx;
-  margin-bottom: 16rpx;
+  margin-bottom: $sp-8;
 }
 
 .role-card-title {
-  font-size: 40rpx;
+  font-size: $fs-title;
   font-weight: $fw-bold;
-  color: #2C2825;
+  color: $c-text;
   display: block;
-  margin-bottom: 8rpx;
+  margin-bottom: $sp-4;
 }
 
 .role-card-desc {
-  font-size: 28rpx;
-  color: #7A746E;
+  font-size: $fs-body-sm;
+  color: $c-text-sub;
   line-height: $lh-relaxed;
   display: block;
   max-width: 400rpx;
@@ -191,7 +191,7 @@ async function confirmRole() {
 
 // ── 确认按钮 ──
 .confirm-area {
-  margin-top: 64rpx;
+  margin-top: $sp-32;
   width: 100%;
   opacity: 0;
   transform: translateY(16rpx);
@@ -207,11 +207,11 @@ async function confirmRole() {
 
 .confirm-btn {
   width: 100%;
-  background: #C75C3A;
+  background: $c-primary;
   border-radius: $r-full;
-  padding: 32rpx 0;
+  padding: $sp-16 0;
   border: none;
-  box-shadow: 0 8rpx 32rpx rgba(199, 92, 58, 0.20);
+  box-shadow: $shadow-glow;
   transition: all $duration-normal $ease-out;
   &:active {
     transform: scale(0.95);
@@ -220,23 +220,23 @@ async function confirmRole() {
 }
 
 .confirm-btn-text {
-  font-size: 34rpx;
+  font-size: $fs-subtitle;
   font-weight: $fw-medium;
-  color: #FFFFFF;
+  color: $c-text-inverse;
   letter-spacing: 4rpx;
 }
 
 // ── Footer ──
 .role-footer {
-  padding: 48rpx;
+  padding: $sp-24;
   text-align: center;
   position: relative;
   z-index: 1;
 }
 
 .footer-text {
-  font-size: 28rpx;
-  color: #D5CCC2;
+  font-size: $fs-body-sm;
+  color: $c-text-hint;
   letter-spacing: 4rpx;
 }
 </style>

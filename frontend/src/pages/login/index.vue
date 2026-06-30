@@ -71,8 +71,8 @@ async function handleLogin(openid) {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #2C2825 0%, #A04828 100%);
-  padding: 64rpx 48rpx;
+  background: linear-gradient(135deg, $c-text 0%, $c-primary-hover 100%);
+  padding: $sp-32 $sp-24;
   position: relative;
   overflow: hidden;
 }
@@ -154,10 +154,10 @@ async function handleLogin(openid) {
 .brand-name {
   font-size: 96rpx;
   font-weight: $fw-bold;
-  color: #FFFFFF;
+  color: $c-text-inverse;
   letter-spacing: 4rpx;
   display: block;
-  margin-bottom: 12rpx;
+  margin-bottom: $sp-6;
 }
 
 .brand-subtitle {
@@ -207,7 +207,7 @@ async function handleLogin(openid) {
 .wx-login-btn {
   width: 100%;
   height: 104rpx;
-  background-color: #07C160;
+  background-color: #07C160; // WeChat brand green
   border-radius: $r-full;
   display: flex;
   align-items: center;
@@ -223,9 +223,9 @@ async function handleLogin(openid) {
 }
 
 .wx-btn-text {
-  font-size: 32rpx;
+  font-size: $fs-subtitle;
   font-weight: $fw-semibold;
-  color: #FFFFFF;
+  color: $c-text-inverse;
   letter-spacing: 4rpx;
 }
 

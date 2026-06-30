@@ -9,9 +9,27 @@
         <view class="role-tag">
           <text>{{ userStore.isFamily ? '子女/亲属' : '长辈' }}</text>
         </view>
+        <text class="greeting-text">{{ greeting }}</text>
       </view>
 
-      <view class="menu-section fade-in stagger-1">
+      <view v-if="userStore.isFamily && statsLoaded" class="stats-row fade-in stagger-1">
+        <view class="stat-item">
+          <text class="stat-num">{{ elderCount }}</text>
+          <text class="stat-label">守护家人</text>
+        </view>
+        <view class="stat-divider" />
+        <view class="stat-item">
+          <text class="stat-num">{{ momentCount }}</text>
+          <text class="stat-label">牵挂已送</text>
+        </view>
+        <view class="stat-divider" />
+        <view class="stat-item">
+          <text class="stat-num">{{ careStreak }}</text>
+          <text class="stat-label">连续天数</text>
+        </view>
+      </view>
+
+      <view class="menu-section fade-in stagger-2">
         <view class="menu-card" @tap="goBindList">
           <view class="menu-left">
             <image class="menu-icon-img" src="/static/icons/family.svg" mode="aspectFit" />
@@ -35,7 +53,7 @@
         </view>
       </view>
 
-      <view class="logout-section fade-in stagger-2">
+      <view class="logout-section fade-in stagger-3">
         <view class="logout-btn" @tap="handleLogout">
           <text class="logout-text">退出登录</text>
         </view>
@@ -45,11 +63,66 @@
 </template>
 
 <script setup>
+import { ref, computed } from "vue";
+import { onShow } from "@dcloudio/uni-app";
 import { useUserStore } from "@/stores/user";
-import { computed } from "vue";
+import { getRelations } from "@/api/relation";
+import { getMoments } from "@/api/moment";
 
 const userStore = useUserStore();
-const isElder = computed(() => userStore.isElder);
+const elderCount = ref(0);
+const momentCount = ref(0);
+const careStreak = ref(0);
+const statsLoaded = ref(false);
+
+const greeting = computed(() => {
+  const h = new Date().getHours();
+  const name = userStore.profile?.nickname || "";
+  if (h < 6) return `${name}，夜深了，注意休息`;
+  if (h < 11) return `${name}，早上好`;
+  if (h < 14) return `${name}，中午好`;
+  if (h < 18) return `${name}，下午好`;
+  return `${name}，晚上好`;
+});
+
+onShow(() => {
+  if (userStore.isFamily) loadStats();
+});
+
+async function loadStats() {
+  try {
+    const [relations, moments] = await Promise.all([
+      getRelations(),
+      getMoments({ limit: 200 }),
+    ]);
+    elderCount.value = relations.length;
+    momentCount.value = moments.length;
+    careStreak.value = calcStreak(moments);
+    statsLoaded.value = true;
+  } catch {
+    // silent
+  }
+}
+
+function calcStreak(moments) {
+  if (!moments.length) return 0;
+  const days = new Set();
+  moments.forEach((m) => {
+    if (m.created_at) days.add(m.created_at.slice(0, 10));
+  });
+  const sorted = [...days].sort().reverse();
+  const today = new Date().toISOString().slice(0, 10);
+  if (sorted[0] !== today) return 0;
+  let streak = 1;
+  for (let i = 1; i < sorted.length; i++) {
+    const prev = new Date(sorted[i - 1]);
+    const cur = new Date(sorted[i]);
+    const diff = (prev - cur) / 86400000;
+    if (diff === 1) streak++;
+    else break;
+  }
+  return streak;
+}
 
 function goBindList() {
   uni.navigateTo({ url: "/pages/bind/list" });
@@ -122,6 +195,48 @@ function handleLogout() {
   font-size: $fs-body-sm;
   color: $c-primary;
   font-weight: $fw-medium;
+}
+
+.greeting-text {
+  margin-top: $sp-16;
+  font-size: $fs-body;
+  color: $c-text-sub;
+}
+
+.stats-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: $c-surface;
+  border-radius: $r-xl;
+  padding: $sp-24 $sp-16;
+  margin-bottom: $sp-20;
+  box-shadow: $shadow-md;
+  border: $border-subtle;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-6;
+}
+
+.stat-num {
+  font-size: $fs-headline;
+  font-weight: $fw-bold;
+  color: $c-primary;
+}
+
+.stat-label {
+  font-size: $fs-body-sm;
+  color: $c-text-sub;
+}
+
+.stat-divider {
+  width: 1rpx;
+  height: 60rpx;
+  background: $c-border-light;
 }
 
 .menu-section {
