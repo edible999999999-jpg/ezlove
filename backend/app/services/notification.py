@@ -22,6 +22,7 @@ async def notify_family_unread(
 ):
     template_id = settings.WECHAT_UNREAD_TEMPLATE_ID
     if not template_id:
+        logger.debug("WECHAT_UNREAD_TEMPLATE_ID 未配置，跳过未读通知")
         return
 
     result = await db.execute(
@@ -47,6 +48,7 @@ async def notify_worker_alert(
 ):
     template_id = settings.WECHAT_ALERT_TEMPLATE_ID
     if not template_id:
+        logger.debug("WECHAT_ALERT_TEMPLATE_ID 未配置，跳过告警通知")
         return
 
     alert = await db.get(Alert, alert_id)
