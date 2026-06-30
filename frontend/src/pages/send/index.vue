@@ -64,7 +64,11 @@
           <view v-if="imageUrl" class="image-item-wrap">
             <view class="image-preview">
               <image :src="imageUrl" mode="aspectFill" class="image-preview__img" />
+              <view v-if="uploading" class="upload-overlay">
+                <view class="upload-spinner" />
+              </view>
               <view
+                v-else
                 class="image-preview__remove"
                 @tap.stop="imageUrl = ''; uploadedUrl = ''"
               >
@@ -450,6 +454,32 @@ function handleGenerate() {
   left: 0;
   width: 100%;
   height: 100%;
+}
+
+.upload-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.upload-spinner {
+  width: 56rpx;
+  height: 56rpx;
+  border: 4rpx solid rgba(255, 255, 255, 0.3);
+  border-top-color: $c-text-inverse;
+  border-radius: 50%;
+  animation: spin 800ms linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .image-preview__remove {

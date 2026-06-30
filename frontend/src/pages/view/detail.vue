@@ -23,7 +23,7 @@
     </view>
 
     <!-- Message Card -->
-    <view v-if="!loading && moment.id" class="message-card fade-in">
+    <view v-if="!loading && moment.id" class="message-card card-enter">
       <!-- Sender Header -->
       <view class="sender-header">
         <view class="sender-info">
@@ -68,7 +68,7 @@
     </view>
 
     <!-- Reaction Section -->
-    <view v-if="!loading && moment.id" class="reaction-section fade-in stagger-2">
+    <view v-if="!loading && moment.id" class="reaction-section reactions-enter">
       <!-- Divider with text -->
       <view class="reaction-divider">
         <view class="divider-line" />
@@ -274,6 +274,27 @@ async function sendReaction(type) {
 @keyframes ldPulse {
   0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
   40% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Entrance Animations */
+.card-enter {
+  animation: cardSlideUp 500ms $ease-out both;
+}
+
+.reactions-enter {
+  animation: cardSlideUp 500ms $ease-out both;
+  animation-delay: 250ms;
+}
+
+@keyframes cardSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(40rpx) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* Message Card */
