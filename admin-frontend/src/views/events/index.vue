@@ -103,8 +103,8 @@
               >
                 处理
               </button>
-              <span v-else-if="row.resolution_note" class="text-xs text-on-surface-variant" :title="row.resolution_note">
-                {{ row.resolution_note.length > 12 ? row.resolution_note.slice(0, 12) + '…' : row.resolution_note }}
+              <span v-else-if="row.resolution_note" class="text-xs text-on-surface-variant cursor-help max-w-[160px] block truncate" :title="row.resolution_note">
+                {{ row.resolution_note }}
               </span>
             </td>
           </tr>
