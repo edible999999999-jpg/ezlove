@@ -28,6 +28,19 @@
         </view>
       </view>
 
+      <!-- 子女端：今日摘要 -->
+      <view v-if="userStore.isFamily && !relationStore.loading && relationStore.relations.length > 0" class="today-summary fade-in stagger-1">
+        <view class="summary-item">
+          <text class="summary-num" :class="allRead ? 'summary-num--safe' : 'summary-num--warn'">{{ readCount }}/{{ relationStore.relations.length }}</text>
+          <text class="summary-label">今日已读</text>
+        </view>
+        <view class="summary-divider" />
+        <view class="summary-item">
+          <text class="summary-num">{{ momentsSentToday }}</text>
+          <text class="summary-label">今日牵挂</text>
+        </view>
+      </view>
+
       <!-- 子女端：绑定家人列表 -->
       <view v-if="userStore.isFamily" class="elder-section">
         <view v-if="relationStore.loading" class="loading-center fade-in">
@@ -207,6 +220,7 @@ import { useMomentStore } from "@/stores/moment";
 import { useAlertStore } from "@/stores/alert";
 import { selfCheckIn, getTodayCheckIn } from "@/api/user";
 import { getTodayMenu } from "@/api/canteen";
+import { getMoments } from "@/api/moment";
 
 const userStore = useUserStore();
 const relationStore = useRelationStore();
@@ -231,6 +245,10 @@ const greeting = computed(() => {
   if (hour < 18) return "下午好";
   return "晚上好";
 });
+
+const readCount = computed(() => relationStore.relations.filter((r) => r.today_read).length);
+const allRead = computed(() => readCount.value === relationStore.relations.length && relationStore.relations.length > 0);
+const momentsSentToday = ref(0);
 
 function formatCheckinTime(isoStr) {
   if (!isoStr) return "";
@@ -268,6 +286,7 @@ onShow(() => {
   alertStore.loadAlerts();
   if (userStore.isFamily) {
     relationStore.loadRelations();
+    loadTodaySentCount();
   } else {
     momentStore.loadMoments();
     loadCheckinStatus();
@@ -281,6 +300,16 @@ async function loadTodayMenu() {
     todayMenus.value = res.menus || [];
   } catch (e) {
     // 静默处理
+  }
+}
+
+async function loadTodaySentCount() {
+  try {
+    const moments = await getMoments({ limit: 50 });
+    const today = new Date().toISOString().slice(0, 10);
+    momentsSentToday.value = moments.filter((m) => m.created_at?.startsWith(today)).length;
+  } catch {
+    // silent
   }
 }
 
@@ -389,7 +418,7 @@ function goVolunteer() {
     align-items: center;
     justify-content: center;
     padding: 0 8rpx;
-    border: 3rpx solid #FFFFFF;
+    border: 3rpx solid $c-surface;
   }
 
   &__badge-text {
@@ -457,6 +486,46 @@ function goVolunteer() {
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.3; }
+}
+
+// ── 子女端：今日摘要 ──
+.today-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: $c-surface;
+  border-radius: $r-xl;
+  padding: $sp-20 $sp-16;
+  margin-bottom: $sp-24;
+  box-shadow: $shadow-sm;
+  border: $border-subtle;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-4;
+}
+
+.summary-num {
+  font-size: $fs-headline;
+  font-weight: $fw-bold;
+  color: $c-text;
+
+  &--safe { color: $c-safe; }
+  &--warn { color: $c-warn; }
+}
+
+.summary-label {
+  font-size: $fs-body-sm;
+  color: $c-text-sub;
+}
+
+.summary-divider {
+  width: 1rpx;
+  height: 60rpx;
+  background: $c-border-light;
 }
 
 // ── 子女端：空状态 ──
