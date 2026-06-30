@@ -66,11 +66,13 @@
 </template>
 
 <script setup>
+import { ref } from "vue";
 import { onShow, onPullDownRefresh } from "@dcloudio/uni-app";
 import { useAlertStore } from "@/stores/alert";
 import { requestSubscribe } from "@/utils/subscribe";
 
 const alertStore = useAlertStore();
+const resolving = ref(new Set());
 let subscribeRequested = false;
 
 onShow(() => {
@@ -95,11 +97,15 @@ function levelText(level) {
 }
 
 async function handleResolve(id) {
+  if (resolving.value.has(id)) return;
+  resolving.value.add(id);
   try {
     await alertStore.resolve(id);
     uni.showToast({ title: "已标记", icon: "success" });
   } catch {
     uni.showToast({ title: "操作失败", icon: "none" });
+  } finally {
+    resolving.value.delete(id);
   }
 }
 </script>

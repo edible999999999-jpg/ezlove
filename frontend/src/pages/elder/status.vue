@@ -101,6 +101,7 @@ const pausedUntil = ref(null);
 const weekDays = ref([]);
 const relationId = ref("");
 const loading = ref(true);
+const submitting = ref(false);
 
 onLoad((query) => {
   elderId.value = query.id;
@@ -130,6 +131,8 @@ async function loadData() {
 }
 
 async function handleCheckin() {
+  if (submitting.value) return;
+  submitting.value = true;
   try {
     await manualCheckin(elderId.value);
     todayRead.value = true;
@@ -137,6 +140,8 @@ async function handleCheckin() {
     loadData();
   } catch (e) {
     uni.showToast({ title: "标记失败", icon: "none" });
+  } finally {
+    submitting.value = false;
   }
 }
 

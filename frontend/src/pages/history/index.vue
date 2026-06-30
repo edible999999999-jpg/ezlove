@@ -34,6 +34,7 @@
           :key="m.id"
           class="history-card fade-in"
           :class="['stagger-' + Math.min(index + 1, 4), { unread: !m.is_read }]"
+          @tap="goViewDetail(m)"
         >
           <!-- Card Header: Avatar + Name/Status + Time -->
           <view class="card-header">
