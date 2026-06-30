@@ -1,5 +1,5 @@
 <template>
-  <view class="page">
+  <view class="page page-gradient">
     <!-- Loading -->
     <view v-if="momentStore.loading" class="loading-center fade-in">
       <view class="loading-dot-wrap">
@@ -23,8 +23,13 @@
     <view v-else class="history-content">
       <!-- Section Header -->
       <view class="section-header">
-        <text class="section-title">{{ userStore.isElder ? '收到的牵挂' : '记录' }}</text>
-        <text class="section-subtitle">{{ userStore.isElder ? '家人们的每一份心意' : '珍惜每一次跨越距离的叮嘱' }}</text>
+        <view class="section-header-row">
+          <text class="section-emoji">📬</text>
+          <view>
+            <text class="section-title">{{ userStore.isElder ? '收到的牵挂' : '记录' }}</text>
+            <text class="section-subtitle">{{ userStore.isElder ? '家人们的每一份心意' : '珍惜每一次跨越距离的叮嘱' }}</text>
+          </view>
+        </view>
       </view>
 
       <!-- Cards -->
@@ -200,9 +205,20 @@ function goViewDetail(m) {
   margin-bottom: $sp-32;
 }
 
+.section-header-row {
+  display: flex;
+  align-items: center;
+  gap: $sp-16;
+}
+
+.section-emoji {
+  font-size: 72rpx;
+  line-height: 1;
+}
+
 .section-title {
-  font-size: 60rpx;
-  font-weight: $fw-medium;
+  font-size: 56rpx;
+  font-weight: $fw-bold;
   color: $c-text;
   letter-spacing: -2rpx;
   display: block;
@@ -226,9 +242,9 @@ function goViewDetail(m) {
 .history-card {
   background: $c-surface;
   border-radius: $r-2xl;
-  padding: $sp-16;
-  box-shadow: 0 4rpx 40rpx -4rpx rgba($c-text, 0.05);
-  border: 2rpx solid rgba($c-text-sub, 0.05);
+  padding: $sp-20;
+  box-shadow: $shadow-md;
+  border: 2rpx solid rgba($c-border, 0.3);
   transition: transform $duration-normal $ease-out;
   position: relative;
   overflow: hidden;
@@ -239,6 +255,7 @@ function goViewDetail(m) {
 
   &.unread {
     border-left: 6rpx solid $c-primary;
+    box-shadow: $shadow-md, 0 0 0 2rpx rgba($c-primary, 0.06);
   }
 }
 

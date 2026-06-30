@@ -305,7 +305,7 @@ async function handleGenerate() {
 // ── Page Layout ──
 .send-page {
   min-height: 100vh;
-  background: $c-bg;
+  background: $gradient-page;
 }
 
 .page-body {
@@ -572,10 +572,11 @@ async function handleGenerate() {
 
 .bento-card {
   flex: 1;
-  padding: $sp-16;
+  padding: $sp-20;
   border-radius: $r-xl;
   display: flex;
   flex-direction: column;
+  box-shadow: $shadow-sm;
 }
 
 .bento-card--amber {
@@ -589,9 +590,9 @@ async function handleGenerate() {
 }
 
 .bento-card__icon {
-  width: 40rpx;
-  height: 40rpx;
-  margin-bottom: $sp-8;
+  width: 48rpx;
+  height: 48rpx;
+  margin-bottom: $sp-12;
 }
 
 .bento-card__body {

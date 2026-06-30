@@ -1,7 +1,9 @@
 <template>
-  <view class="page">
+  <view class="page page-gradient">
     <!-- Header -->
     <view class="section-header">
+      <text class="section-emoji">🔔</text>
+      <text class="section-title">提醒</text>
       <text class="section-subtitle">实时关注家人动态</text>
     </view>
 
@@ -120,6 +122,21 @@ $c-info-gray: #717171;
 .section-header {
   margin-bottom: $sp-32;
   margin-top: $sp-8;
+}
+
+.section-emoji {
+  font-size: 64rpx;
+  line-height: 1;
+  display: block;
+  margin-bottom: $sp-8;
+}
+
+.section-title {
+  font-size: 56rpx;
+  font-weight: $fw-bold;
+  color: $c-text;
+  display: block;
+  margin-bottom: $sp-4;
 }
 
 .section-subtitle {
@@ -260,14 +277,16 @@ $c-info-gray: #717171;
 }
 
 .empty-icon-circle {
-  width: 128rpx;
-  height: 128rpx;
-  background: rgba($c-primary-bg, 0.3);
+  width: 180rpx;
+  height: 180rpx;
+  background: $gradient-warm-soft;
   border-radius: $r-full;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: $sp-16;
+  margin-bottom: $sp-24;
+  box-shadow: $shadow-md;
+  border: 2rpx solid rgba($c-primary, 0.06);
 }
 
 .empty-icon-img {

@@ -1,5 +1,9 @@
 <template>
   <view class="page-home">
+    <!-- 装饰圆 -->
+    <view class="deco-circle deco-1" />
+    <view class="deco-circle deco-2" />
+
     <!-- 顶部导航栏 -->
     <view class="top-bar">
       <view class="top-bar__left">
@@ -362,7 +366,25 @@ function goVolunteer() {
 // ── 页面背景 ──
 .page-home {
   min-height: 100vh;
-  background-color: $c-bg;
+  background: $gradient-page;
+  position: relative;
+  overflow: hidden;
+}
+
+.deco-1 {
+  width: 600rpx;
+  height: 600rpx;
+  top: -160rpx;
+  right: -200rpx;
+  background: rgba($c-primary, 0.04);
+}
+
+.deco-2 {
+  width: 400rpx;
+  height: 400rpx;
+  top: 500rpx;
+  left: -180rpx;
+  background: rgba($c-safe, 0.03);
 }
 
 // ── 顶部导航栏 ──
@@ -461,13 +483,13 @@ function goVolunteer() {
 // ── 问候区域 ──
 .greeting-section {
   margin-bottom: $sp-40;
-  background: $gradient-warm-soft;
-  border-radius: $r-xl;
-  padding: $sp-24 $sp-24 $sp-20;
+  background: transparent;
+  padding: $sp-8 0 $sp-20;
+  position: relative;
 }
 
 .greeting-title {
-  font-size: 72rpx;
+  font-size: $fs-hero;
   font-weight: $fw-bold;
   color: $c-text;
   display: block;
@@ -513,12 +535,12 @@ function goVolunteer() {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  background: $c-surface;
+  background: $gradient-warm-soft;
   border-radius: $r-xl;
   padding: $sp-20 $sp-16;
   margin-bottom: $sp-24;
-  box-shadow: $shadow-sm;
-  border: $border-subtle;
+  box-shadow: $shadow-md;
+  border: 2rpx solid rgba($c-primary, 0.08);
 }
 
 .summary-item {
@@ -605,7 +627,9 @@ function goVolunteer() {
   background: $c-surface;
   border-radius: $r-lg;
   padding: $sp-20 $sp-20;
-  box-shadow: $shadow-sm;
+  box-shadow: $shadow-md;
+  border: 2rpx solid rgba($c-border, 0.3);
+  border-left: 6rpx solid $c-primary-soft;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -615,6 +639,7 @@ function goVolunteer() {
     transform: scale(0.98);
     background: $c-surface-warm;
     box-shadow: $shadow-xs;
+    border-left-color: $c-primary;
   }
 
   &__left {
@@ -1096,14 +1121,16 @@ function goVolunteer() {
   bottom: 180rpx;
   right: $sp-24;
   z-index: 40;
-  background: $c-primary;
+  background: linear-gradient(135deg, $c-primary 0%, darken($c-primary, 5%) 100%);
   color: $c-text-inverse;
   display: flex;
   align-items: center;
   gap: $sp-8;
   padding: $sp-16 $sp-24;
   border-radius: $r-full;
-  box-shadow: $shadow-lg;
+  box-shadow: $shadow-xl, 0 0 0 4rpx rgba($c-primary, 0.1);
+  backdrop-filter: blur(12rpx);
+  -webkit-backdrop-filter: blur(12rpx);
   transition: all $duration-normal $ease-out;
   animation: fabBounceIn 600ms $ease-spring both 400ms, fabBreath 3s ease-in-out infinite 1.2s;
 

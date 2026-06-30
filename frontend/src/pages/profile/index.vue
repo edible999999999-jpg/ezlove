@@ -1,16 +1,21 @@
 <template>
   <view class="page-gradient">
     <view class="profile-content">
-      <view class="profile-header fade-in">
-        <view class="avatar-circle">
-          <text class="avatar-letter">{{ (userStore.profile?.nickname || '我')[0] }}</text>
+      <!-- 渐变 Hero Header -->
+      <view class="profile-hero fade-in">
+        <view class="hero-deco hero-deco-1" />
+        <view class="hero-deco hero-deco-2" />
+        <view class="hero-inner">
+          <view class="avatar-circle">
+            <text class="avatar-letter">{{ (userStore.profile?.nickname || '我')[0] }}</text>
+          </view>
+          <text class="nickname">{{ userStore.profile?.nickname || '未设置昵称' }}</text>
+          <view class="role-tag">
+            <text>{{ userStore.isFamily ? '子女/亲属' : '长辈' }}</text>
+          </view>
         </view>
-        <text class="nickname">{{ userStore.profile?.nickname || '未设置昵称' }}</text>
-        <view class="role-tag">
-          <text>{{ userStore.isFamily ? '子女/亲属' : '长辈' }}</text>
-        </view>
-        <text class="greeting-text">{{ greeting }}</text>
       </view>
+      <text class="greeting-text fade-in stagger-1">{{ greeting }}</text>
 
       <view v-if="userStore.isFamily && statsLoaded" class="stats-row fade-in stagger-1">
         <view class="stat-item">
@@ -156,25 +161,59 @@ function handleLogout() {
   padding-bottom: 200rpx;
 }
 
-.profile-header {
+.profile-hero {
+  position: relative;
+  margin: 0 (-$sp-24);
+  padding: 120rpx $sp-24 $sp-48;
+  background: $gradient-warm;
+  border-radius: 0 0 $r-2xl $r-2xl;
+  overflow: hidden;
+  margin-bottom: $sp-24;
+}
+
+.hero-deco {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.hero-deco-1 {
+  width: 400rpx;
+  height: 400rpx;
+  top: -100rpx;
+  right: -120rpx;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.hero-deco-2 {
+  width: 300rpx;
+  height: 300rpx;
+  bottom: -60rpx;
+  left: -80rpx;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 120rpx;
-  padding-bottom: $sp-48;
 }
 
 .avatar-circle {
-  width: 160rpx;
-  height: 160rpx;
-  background: $gradient-warm;
+  width: 180rpx;
+  height: 180rpx;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12rpx);
+  -webkit-backdrop-filter: blur(12rpx);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: $shadow-glow;
   margin-bottom: $sp-20;
-  border: 6rpx solid rgba(255, 255, 255, 0.8);
+  border: 6rpx solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
 }
 
 .avatar-letter {
@@ -186,24 +225,29 @@ function handleLogout() {
 .nickname {
   font-size: $fs-headline;
   font-weight: $fw-bold;
-  color: $c-text;
+  color: $c-text-inverse;
   display: block;
 }
 
 .role-tag {
   margin-top: $sp-12;
   padding: $sp-6 $sp-20;
-  background: $c-primary-bg;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8rpx);
+  -webkit-backdrop-filter: blur(8rpx);
   border-radius: $r-full;
+  border: 1rpx solid rgba(255, 255, 255, 0.3);
   font-size: $fs-body-sm;
-  color: $c-primary;
+  color: $c-text-inverse;
   font-weight: $fw-medium;
 }
 
 .greeting-text {
-  margin-top: $sp-16;
+  display: block;
+  text-align: center;
   font-size: $fs-body;
   color: $c-text-sub;
+  margin-bottom: $sp-24;
 }
 
 .stats-row {

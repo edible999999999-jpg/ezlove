@@ -20,6 +20,7 @@ page {
   padding: 0 $sp-24;
   padding-bottom: calc(180rpx + env(safe-area-inset-bottom));
   overscroll-behavior: contain;
+  background: $gradient-page;
 }
 
 .page-gradient {
