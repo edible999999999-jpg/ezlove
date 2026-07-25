@@ -216,10 +216,12 @@ function formatContent(text) {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(
       /\[\[elder:([\w-]+):(.*?)\]\]/g,
-      '<a data-elder-id="$1" class="text-primary font-bold hover:underline cursor-pointer">$2</a>'
+      '<a data-elder-id="$1" class="text-primary font-bold hover:underline cursor-pointer" rel="noopener noreferrer">$2</a>'
     )
 
   const lines = html.split('\n')

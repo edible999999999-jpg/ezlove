@@ -6,11 +6,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 
 from app.database import get_db
-from app.deps import get_current_worker
+from app.deps import get_current_worker, get_pagination
 from app.models.alert import Alert
 from app.models.community import CommunityWorker, CommunityElder
 from app.schemas.alert import AlertResponse, AlertRespondRequest
 from app.schemas.community import ElderCreate, ElderUpdate, ElderResponse
+from app.schemas.pagination import PaginatedResponse
 from app.services import community as community_service
 from app.services.community_elder_detail import get_elder_full_detail
 from app.services import risk_scoring
@@ -23,13 +24,21 @@ router = APIRouter(prefix="/community", tags=["community"])
 async def list_elders(
     care_level: str | None = None,
     search: str | None = None,
+    pagination: dict = Depends(get_pagination),
     worker: CommunityWorker = Depends(get_current_worker),
     db: AsyncSession = Depends(get_db),
 ):
-    elders = await community_service.list_elders(
+    total = await community_service.count_elders(
         db, worker.community_id, care_level=care_level, search=search
     )
-    return elders
+    elders = await community_service.list_elders(
+        db, worker.community_id, care_level=care_level, search=search,
+        offset=pagination["offset"], limit=pagination["limit"],
+    )
+    return PaginatedResponse.create(
+        items=elders, total=total,
+        page=pagination["page"], page_size=pagination["page_size"],
+    )
 
 
 @router.post("/elders", response_model=ElderResponse)

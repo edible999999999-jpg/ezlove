@@ -11,9 +11,9 @@
           <image class="setting-icon" src="/static/icons/clock.svg" mode="aspectFit" />
           <text class="setting-label">未读提醒时间</text>
         </view>
-        <picker :value="thresholdIndex" :range="thresholdOptions" @change="onThresholdChange">
-          <view class="picker-trigger">
-            <text class="picker-value">{{ thresholdOptions[thresholdIndex] }}</text>
+        <picker :value="thresholdIndex" :range="thresholdOptions" :disabled="saving" @change="onThresholdChange">
+          <view class="picker-trigger" :class="{ 'picker-trigger--disabled': saving }">
+            <text class="picker-value">{{ saving ? '保存中...' : thresholdOptions[thresholdIndex] }}</text>
             <text class="picker-arrow">›</text>
           </view>
         </picker>
@@ -31,6 +31,7 @@ const relationId = ref("");
 const thresholdIndex = ref(2);
 const thresholdOptions = ["6小时", "8小时", "12小时", "24小时"];
 const thresholdValues = [6, 8, 12, 24];
+const saving = ref(false);
 
 onLoad((query) => {
   relationId.value = query.relationId;
@@ -41,14 +42,19 @@ onLoad((query) => {
 });
 
 async function onThresholdChange(e) {
+  const prevIndex = thresholdIndex.value;
   thresholdIndex.value = e.detail.value;
+  saving.value = true;
   try {
     await updateRelation(relationId.value, {
       alert_threshold: thresholdValues[thresholdIndex.value],
     });
     uni.showToast({ title: "已保存", icon: "success" });
   } catch (err) {
+    thresholdIndex.value = prevIndex;
     uni.showToast({ title: "保存失败", icon: "none" });
+  } finally {
+    saving.value = false;
   }
 }
 </script>
@@ -115,6 +121,11 @@ async function onThresholdChange(e) {
   border-radius: $r-full;
   box-shadow: 0 2rpx 8rpx rgba($c-primary, 0.1);
   transition: all $duration-normal $ease-out;
+
+  &--disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
 }
 
 .picker-value {

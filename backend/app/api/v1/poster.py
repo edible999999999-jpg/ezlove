@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from pathlib import Path
 
@@ -17,12 +18,21 @@ from app.services.poster_generator import generate_all_posters, generate_single_
 router = APIRouter(prefix="/poster", tags=["poster"])
 
 STATIC_DIR = Path(__file__).resolve().parents[3] / "static"
+# 预计算允许的目录真实路径，用于路径遍历校验
+_STATIC_REAL = os.path.realpath(str(STATIC_DIR))
 
 
 def _resolve_image_path(image_url: str) -> str:
     if image_url.startswith("/static/"):
-        return str(STATIC_DIR.parent / image_url.lstrip("/"))
-    return str(STATIC_DIR / "uploads" / image_url.split("/")[-1])
+        candidate = str(STATIC_DIR.parent / image_url.lstrip("/"))
+    else:
+        candidate = str(STATIC_DIR / "uploads" / image_url.split("/")[-1])
+
+    # 使用 realpath 解析符号链接和 ../ 等，确保最终路径在 STATIC_DIR 内
+    resolved = os.path.realpath(candidate)
+    if not resolved.startswith(_STATIC_REAL + os.sep) and resolved != _STATIC_REAL:
+        raise HTTPException(status_code=400, detail="非法的图片路径")
+    return resolved
 
 
 @router.post("/generate", response_model=PosterGenerateResponse)

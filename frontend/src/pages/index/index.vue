@@ -262,7 +262,7 @@ async function loadCheckinStatus() {
     checkedInToday.value = res.checked_in;
     checkinTimeText.value = formatCheckinTime(res.checked_in_at);
   } catch (e) {
-    // 静默处理
+    console.warn('报平安状态加载失败', e);
   }
 }
 
@@ -314,7 +314,7 @@ async function loadTodayMenu() {
     const res = await getTodayMenu();
     todayMenus.value = res.menus || [];
   } catch (e) {
-    // 静默处理
+    console.warn('今日菜单加载失败', e);
   }
 }
 
@@ -595,6 +595,10 @@ function goVolunteer() {
     font-size: 36rpx;
     font-weight: $fw-bold;
     color: $c-text;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 200rpx;
   }
 
   &__badge {

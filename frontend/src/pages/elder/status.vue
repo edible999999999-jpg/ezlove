@@ -100,6 +100,7 @@ const lastActiveText = ref("暂无记录");
 const pausedUntil = ref(null);
 const weekDays = ref([]);
 const relationId = ref("");
+const alertThreshold = ref(null);
 const loading = ref(true);
 const submitting = ref(false);
 
@@ -122,7 +123,10 @@ async function loadData() {
     weekDays.value = activity.days || [];
 
     const rel = relations.find((r) => r.elder_user_id === elderId.value);
-    if (rel) relationId.value = rel.id;
+    if (rel) {
+      relationId.value = rel.id;
+      alertThreshold.value = rel.alert_threshold ?? null;
+    }
   } catch (e) {
     uni.showToast({ title: "加载失败", icon: "none" });
   } finally {
@@ -165,8 +169,9 @@ function formatDate(isoStr) {
 }
 
 function goSettings() {
+  const threshold = alertThreshold.value ?? 8;
   uni.navigateTo({
-    url: `/pages/elder/settings?relationId=${relationId.value}&threshold=8`,
+    url: `/pages/elder/settings?relationId=${relationId.value}&threshold=${threshold}`,
   });
 }
 

@@ -108,7 +108,7 @@ async function loadStats() {
     careStreak.value = calcStreak(moments);
     statsLoaded.value = true;
   } catch {
-    // silent
+    uni.showToast({ title: '数据加载失败', icon: 'none' });
   }
 }
 

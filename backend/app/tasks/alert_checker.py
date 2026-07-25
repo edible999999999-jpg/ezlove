@@ -19,10 +19,14 @@ from app.models.user import User
 logger = logging.getLogger("ezlove.alert_checker")
 scheduler = AsyncIOScheduler()
 
+# 老人姓名缓存，避免同一轮检测中重复查询 User 表
+_name_cache: dict = {}
+
 
 # ── Job 1: 多维度规则引擎（社区侧） ──
 
 async def run_alert_rules():
+    _name_cache.clear()
     async with async_session() as db:
         communities = (await db.execute(select(Community.id))).scalars().all()
         now = datetime.now()
@@ -109,15 +113,19 @@ async def _check_unread(db, elder, threshold_hours, now) -> tuple[bool, str]:
     if not moments:
         return False, ""
 
-    for m in moments:
-        view = (await db.execute(
-            select(ViewEvent).where(
-                ViewEvent.moment_id == m.id,
-                ViewEvent.viewer_id == elder.elder_id,
-            ).limit(1)
-        )).scalar_one_or_none()
-        if view:
-            return False, ""
+    # 批量查询这些牵挂的查看记录，避免逐条查询 N+1
+    moment_ids = [m.id for m in moments]
+    viewed = (await db.execute(
+        select(ViewEvent.moment_id)
+        .where(
+            ViewEvent.moment_id.in_(moment_ids),
+            ViewEvent.viewer_id == elder.elder_id,
+        )
+        .distinct()
+    )).scalars().all()
+
+    if viewed:
+        return False, ""
 
     elder_name = await _get_elder_name(db, elder.elder_id)
     return True, f"{elder_name} 超过{threshold_hours}小时未查看牵挂内容"
@@ -196,14 +204,19 @@ async def _check_no_signal(db, elder, community_id, threshold_hours, now) -> tup
 
 
 async def _get_elder_name(db, elder_user_id) -> str:
+    if elder_user_id in _name_cache:
+        return _name_cache[elder_user_id]
     result = await db.execute(select(User.nickname).where(User.id == elder_user_id))
     name = result.scalar_one_or_none()
-    return name or "未知老人"
+    name = name or "未知老人"
+    _name_cache[elder_user_id] = name
+    return name
 
 
 # ── Job 2: 家属侧未读告警（保留现有逻辑） ──
 
 async def check_unread_alerts():
+    _name_cache.clear()
     async with async_session() as db:
         now = datetime.now()
         today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -232,16 +245,17 @@ async def check_unread_alerts():
                 continue
 
             has_view = False
-            for m in today_moments:
-                view_result = await db.execute(
-                    select(ViewEvent).where(
-                        ViewEvent.moment_id == m.id,
-                        ViewEvent.viewer_id == rel.elder_user_id,
-                    ).limit(1)
+            # 批量查询查看记录，避免逐条 N+1
+            moment_ids = [m.id for m in today_moments]
+            viewed_result = await db.execute(
+                select(ViewEvent.moment_id)
+                .where(
+                    ViewEvent.moment_id.in_(moment_ids),
+                    ViewEvent.viewer_id == rel.elder_user_id,
                 )
-                if view_result.scalar_one_or_none():
-                    has_view = True
-                    break
+                .limit(1)
+            )
+            has_view = viewed_result.scalar_one_or_none() is not None
 
             if has_view:
                 continue
@@ -352,6 +366,7 @@ async def recalculate_risk_scores():
 
 async def morning_silence_check():
     """A/B 类老人如果昨天下午到现在无任何信号，产生晨间预警"""
+    _name_cache.clear()
     async with async_session() as db:
         now = datetime.now()
         communities = (await db.execute(select(Community.id))).scalars().all()

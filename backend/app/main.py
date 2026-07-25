@@ -1,11 +1,13 @@
 import logging
 import time
+from collections import defaultdict
 from contextlib import asynccontextmanager
 
 from pathlib import Path
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from jose import jwt, JWTError
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -14,6 +16,7 @@ from app.config import settings
 from app.api.v1.router import api_router
 
 access_logger = logging.getLogger("ezlove.access")
+logger = logging.getLogger("ezlove")
 
 
 @asynccontextmanager
@@ -62,6 +65,43 @@ class AccessLogMiddleware(BaseHTTPMiddleware):
             return None
 
 
+class RateLimitMiddleware(BaseHTTPMiddleware):
+    """基于滑动窗口的简易速率限制器（内存存储）"""
+
+    def __init__(self, app, general_limit: int = 100, sensitive_limit: int = 10, window: int = 60):
+        super().__init__(app)
+        self.general_limit = general_limit
+        self.sensitive_limit = sensitive_limit
+        self.window = window  # 秒
+        # 存储结构：{ip: [(timestamp, ...), ...]}
+        self._general_requests: dict[str, list[float]] = defaultdict(list)
+        self._sensitive_requests: dict[str, list[float]] = defaultdict(list)
+
+    async def dispatch(self, request: Request, call_next):
+        client_ip = request.client.host if request.client else "unknown"
+        now = time.time()
+        cutoff = now - self.window
+
+        path = request.url.path
+        is_sensitive = "/auth/" in path or "/ai/" in path
+
+        store = self._sensitive_requests if is_sensitive else self._general_requests
+        limit = self.sensitive_limit if is_sensitive else self.general_limit
+
+        # 清除过期记录
+        timestamps = store[client_ip]
+        store[client_ip] = [t for t in timestamps if t > cutoff]
+
+        if len(store[client_ip]) >= limit:
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "请求过于频繁，请稍后再试"},
+            )
+
+        store[client_ip].append(now)
+        return await call_next(request)
+
+
 app = FastAPI(
     title=settings.APP_NAME,
     lifespan=lifespan,
@@ -69,12 +109,20 @@ app = FastAPI(
     redoc_url="/redoc" if settings.DEBUG else None,
 )
 
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unhandled exception: {exc}", exc_info=True)
+    return JSONResponse(status_code=500, content={"detail": "服务器内部错误，请稍后再试"})
+
+
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(AccessLogMiddleware)
+app.add_middleware(RateLimitMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"] if settings.DEBUG else settings.CORS_ORIGINS,
-    allow_credentials=True,
+    allow_credentials=False if settings.DEBUG else True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"] if settings.DEBUG else ["Authorization", "Content-Type"],
 )

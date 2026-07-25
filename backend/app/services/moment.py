@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.care_moment import CareMoment
@@ -34,13 +34,37 @@ async def create_moment(db: AsyncSession, sender_id: UUID, elder_id: UUID, text_
     return moment
 
 
-async def get_moments_for_user(db: AsyncSession, user_id: UUID, role: str) -> list[CareMoment]:
+async def get_moments_for_user(
+    db: AsyncSession, user_id: UUID, role: str,
+    offset: int = 0, limit: int = 20,
+) -> list[CareMoment]:
     if role == "family":
-        stmt = select(CareMoment).where(CareMoment.sender_id == user_id).order_by(CareMoment.created_at.desc())
+        stmt = (
+            select(CareMoment)
+            .where(CareMoment.sender_id == user_id)
+            .order_by(CareMoment.created_at.desc())
+            .offset(offset)
+            .limit(limit)
+        )
     else:
-        stmt = select(CareMoment).where(CareMoment.elder_id == user_id).order_by(CareMoment.created_at.desc())
+        stmt = (
+            select(CareMoment)
+            .where(CareMoment.elder_id == user_id)
+            .order_by(CareMoment.created_at.desc())
+            .offset(offset)
+            .limit(limit)
+        )
     result = await db.execute(stmt)
     return list(result.scalars().all())
+
+
+async def count_moments_for_user(db: AsyncSession, user_id: UUID, role: str) -> int:
+    if role == "family":
+        stmt = select(func.count(CareMoment.id)).where(CareMoment.sender_id == user_id)
+    else:
+        stmt = select(func.count(CareMoment.id)).where(CareMoment.elder_id == user_id)
+    result = await db.execute(stmt)
+    return result.scalar() or 0
 
 
 async def record_view(db: AsyncSession, moment_id: UUID, viewer_id: UUID, duration: int | None = None) -> ViewEvent:
@@ -54,6 +78,18 @@ async def record_view(db: AsyncSession, moment_id: UUID, viewer_id: UUID, durati
 async def is_moment_read(db: AsyncSession, moment_id: UUID) -> bool:
     result = await db.execute(select(ViewEvent).where(ViewEvent.moment_id == moment_id).limit(1))
     return result.scalar_one_or_none() is not None
+
+
+async def batch_get_read_moment_ids(db: AsyncSession, moment_ids: list[UUID]) -> set[UUID]:
+    """一次查询返回已读的 moment_id 集合，替代逐条调用 is_moment_read。"""
+    if not moment_ids:
+        return set()
+    result = await db.execute(
+        select(ViewEvent.moment_id)
+        .where(ViewEvent.moment_id.in_(moment_ids))
+        .distinct()
+    )
+    return {row[0] for row in result.all()}
 
 
 async def create_response(db: AsyncSession, moment_id: UUID, responder_id: UUID,

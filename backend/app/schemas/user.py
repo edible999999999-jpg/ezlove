@@ -1,10 +1,10 @@
 from uuid import UUID
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class UserUpdate(BaseModel):
-    nickname: str | None = None
+    nickname: str | None = Field(default=None, max_length=50)
     role: str | None = None
     avatar_url: str | None = None
     phone: str | None = None

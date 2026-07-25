@@ -48,13 +48,18 @@
 </template>
 
 <script setup>
-import { onShow } from "@dcloudio/uni-app";
+import { onShow, onPullDownRefresh } from "@dcloudio/uni-app";
 import { useRelationStore } from "@/stores/relation";
 
 const relationStore = useRelationStore();
 
 onShow(() => {
   relationStore.loadRelations();
+});
+
+onPullDownRefresh(async () => {
+  await relationStore.loadRelations()
+  uni.stopPullDownRefresh()
 });
 
 function goInvite() {

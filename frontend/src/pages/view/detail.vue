@@ -23,7 +23,7 @@
     </view>
 
     <!-- Error State -->
-    <view v-if="!loading && !moment.id" class="error-state">
+    <view v-else-if="error" class="error-state">
       <image class="error-icon" src="/static/icons/elderly.svg" mode="aspectFit" />
       <text class="error-title">内容加载失败</text>
       <text class="error-desc">网络不太好，再试一次吧</text>
@@ -32,8 +32,9 @@
       </view>
     </view>
 
-    <!-- Message Card -->
-    <view v-if="!loading && moment.id" class="message-card card-enter">
+    <!-- Message Card + Reaction -->
+    <template v-else>
+    <view class="message-card card-enter">
       <!-- Sender Header -->
       <view class="sender-header">
         <view class="sender-info">
@@ -70,7 +71,7 @@
     </view>
 
     <!-- Reaction Section -->
-    <view v-if="!loading && moment.id" class="reaction-section reactions-enter">
+    <view class="reaction-section reactions-enter">
       <!-- Divider with text -->
       <view class="reaction-divider">
         <view class="divider-line" />
@@ -106,6 +107,7 @@
         </view>
       </view>
     </view>
+    </template>
   </view>
 </template>
 
@@ -118,6 +120,7 @@ import { getFullUrl } from "@/api/config";
 const moment = ref({});
 const momentId = ref("");
 const loading = ref(true);
+const error = ref(false);
 const reacting = ref(false);
 
 const timeText = computed(() => {
@@ -142,14 +145,22 @@ onLoad((query) => {
 
 async function loadMoment() {
   loading.value = true;
+  error.value = false;
   try {
     moment.value = await getMomentDetail(momentId.value);
+  } catch (e) {
+    error.value = true;
+    uni.showToast({ title: "内容加载失败", icon: "none" });
+    loading.value = false;
+    return;
+  }
+  try {
     await recordView(momentId.value);
   } catch (e) {
-    uni.showToast({ title: "内容加载失败", icon: "none" });
-  } finally {
-    loading.value = false;
+    // 记录查看失败不影响内容展示
+    console.warn("记录查看失败", e);
   }
+  loading.value = false;
 }
 
 function previewPoster() {

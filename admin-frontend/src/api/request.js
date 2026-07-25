@@ -85,6 +85,52 @@ request.interceptors.response.use(
   }
 )
 
+/**
+ * 确保 access token 未过期，过期则自动刷新。
+ * 供非 axios 请求（如 fetch SSE 流）在发起请求前调用。
+ */
+export async function ensureFreshToken() {
+  const token = localStorage.getItem('community_access_token')
+  if (!token) return token
+
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    if (payload.exp * 1000 > Date.now()) return token
+  } catch {
+    // token 格式异常，走刷新逻辑
+  }
+
+  const refresh = localStorage.getItem('community_refresh_token')
+  if (!refresh) return token
+
+  // 复用拦截器的刷新队列机制，避免并发刷新
+  if (isRefreshing) {
+    return new Promise((resolve) => {
+      addRefreshSubscriber(resolve)
+    })
+  }
+
+  isRefreshing = true
+  try {
+    const res = await axios.post(
+      `${import.meta.env.VITE_API_BASE_URL}/community/auth/refresh`,
+      { refresh_token: refresh }
+    )
+    const newToken = res.data.access_token
+    localStorage.setItem('community_access_token', newToken)
+    if (res.data.refresh_token) {
+      localStorage.setItem('community_refresh_token', res.data.refresh_token)
+    }
+    onTokenRefreshed(newToken)
+    return newToken
+  } catch {
+    clearAuth()
+    return null
+  } finally {
+    isRefreshing = false
+  }
+}
+
 export const api = {
   get: (url, params) => request.get(url, { params }),
   post: (url, data) => request.post(url, data),

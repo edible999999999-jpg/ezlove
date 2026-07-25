@@ -8,6 +8,19 @@
       </div>
     </div>
 
+    <!-- Error State -->
+    <div v-else-if="store.error && !store.data" class="flex items-center justify-center py-32">
+      <div class="bg-surface rounded-2xl shadow-sm border border-outline-variant/20 p-8 text-center max-w-sm">
+        <span class="material-symbols-outlined text-4xl text-primary mb-3 block">error</span>
+        <p class="text-sm font-semibold text-on-surface mb-1">数据加载失败</p>
+        <p class="text-xs text-on-surface-variant mb-5">{{ store.error.message || store.error || '网络异常，请稍后再试' }}</p>
+        <button
+          class="px-6 py-2.5 rounded-xl text-sm font-semibold bg-primary text-white shadow-sm hover:bg-terracotta transition-colors"
+          @click="store.load()"
+        >重新加载</button>
+      </div>
+    </div>
+
     <!-- Presentation Mode: Floating Exit Button -->
     <button
       v-if="store.presentationMode"

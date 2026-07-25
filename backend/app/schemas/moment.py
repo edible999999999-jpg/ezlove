@@ -1,12 +1,12 @@
 from uuid import UUID
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class MomentCreate(BaseModel):
     elder_id: UUID
     content_type: str | None = None
-    text_content: str | None = None
+    text_content: str | None = Field(default=None, max_length=2000)
     media_urls: list[str] | None = None
     is_ai_generated: bool = False
     poster_meta: dict | None = None

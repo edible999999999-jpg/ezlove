@@ -176,7 +176,7 @@
         </div>
         <div class="px-6 py-4 border-t border-outline-variant/20 flex justify-end gap-3">
           <button class="px-6 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-container transition-colors" @click="showDialog = false">取消</button>
-          <button class="px-6 py-2.5 rounded-xl text-sm font-semibold bg-primary text-white shadow-sm hover:bg-terracotta transition-colors" @click="handleCreate">确认添加</button>
+          <button :disabled="submitting" :class="['px-6 py-2.5 rounded-xl text-sm font-semibold text-white shadow-sm transition-colors', submitting ? 'bg-inactive-gray cursor-not-allowed' : 'bg-primary hover:bg-terracotta']" @click="handleCreate">{{ submitting ? '提交中...' : '确认添加' }}</button>
         </div>
       </div>
     </div>
@@ -191,6 +191,7 @@ import { downloadExport } from '@/api/export'
 
 const store = useEldersStore()
 const showDialog = ref(false)
+const submitting = ref(false)
 const filters = reactive({ care_level: '', search: '' })
 const form = reactive({ elder_id: '', care_level: 'B', address: '', health_notes: '' })
 let searchTimer = null
@@ -216,6 +217,7 @@ async function handleCreate() {
     ElMessage.warning('请填写必填项')
     return
   }
+  submitting.value = true
   try {
     await store.create(form)
     showDialog.value = false
@@ -226,6 +228,8 @@ async function handleCreate() {
     ElMessage.success('老人档案已创建')
   } catch (e) {
     // handled by interceptor
+  } finally {
+    submitting.value = false
   }
 }
 </script>

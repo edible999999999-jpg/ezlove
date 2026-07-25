@@ -492,7 +492,7 @@ async function handleGenerate() {
   top: 50%;
   left: 50%;
   transform: translate(-50%, 40%);
-  font-size: 20rpx;
+  font-size: $fs-caption;
   color: $c-text-sub;
   letter-spacing: 2rpx;
   white-space: nowrap;
@@ -602,13 +602,13 @@ async function handleGenerate() {
 }
 
 .bento-card__hint {
-  font-size: 20rpx;
+  font-size: $fs-caption;
   color: $c-text-sub;
   line-height: $lh-tight;
 }
 
 .bento-card__value {
-  font-size: 20rpx;
+  font-size: $fs-caption;
   color: $c-text;
   font-weight: $fw-medium;
   line-height: $lh-tight;

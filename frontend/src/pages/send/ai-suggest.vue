@@ -14,7 +14,7 @@
       <text class="loading-text">正在为您生成...</text>
     </view>
 
-    <view v-else class="suggestion-list">
+    <view v-else-if="suggestions.length > 0" class="suggestion-list">
       <view
         v-for="(item, index) in suggestions"
         :key="index"
@@ -29,6 +29,13 @@
           </view>
         </view>
         <text class="suggestion-text">{{ item.text }}</text>
+      </view>
+    </view>
+
+    <view v-else class="empty-state">
+      <text class="empty-text">AI 暂时无法生成建议</text>
+      <view class="retry-btn" @tap="loadSuggestions">
+        <text class="retry-btn-text">重新生成</text>
       </view>
     </view>
 
@@ -132,6 +139,38 @@ function useSuggestion() {
 .loading-text {
   font-size: $fs-body;
   color: $c-text-hint;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 160rpx;
+}
+
+.empty-text {
+  font-size: $fs-body;
+  color: $c-text-hint;
+  display: block;
+  margin-bottom: $sp-24;
+}
+
+.retry-btn {
+  padding: $sp-12 $sp-40;
+  background: $c-primary;
+  border-radius: $r-full;
+  box-shadow: $shadow-sm;
+  transition: all $duration-normal $ease-out;
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.retry-btn-text {
+  font-size: $fs-body;
+  font-weight: $fw-semibold;
+  color: $c-text-inverse;
 }
 
 .suggestion-card {

@@ -42,6 +42,8 @@ async def list_elders(
     community_id: uuid.UUID,
     care_level: str | None = None,
     search: str | None = None,
+    offset: int = 0,
+    limit: int = 20,
 ) -> list[dict]:
     stmt = (
         select(CommunityElder, User.nickname, User.phone)
@@ -53,6 +55,7 @@ async def list_elders(
     if search:
         stmt = stmt.where(User.nickname.ilike(f"%{search}%"))
     stmt = stmt.order_by(CommunityElder.created_at.desc())
+    stmt = stmt.offset(offset).limit(limit)
 
     result = await db.execute(stmt)
     rows = result.all()
@@ -77,6 +80,25 @@ async def list_elders(
         }
         for row in rows
     ]
+
+
+async def count_elders(
+    db: AsyncSession,
+    community_id: uuid.UUID,
+    care_level: str | None = None,
+    search: str | None = None,
+) -> int:
+    stmt = (
+        select(func.count(CommunityElder.id))
+        .join(User, CommunityElder.elder_id == User.id)
+        .where(CommunityElder.community_id == community_id)
+    )
+    if care_level:
+        stmt = stmt.where(CommunityElder.care_level == care_level)
+    if search:
+        stmt = stmt.where(User.nickname.ilike(f"%{search}%"))
+    result = await db.execute(stmt)
+    return result.scalar() or 0
 
 
 async def get_elder_detail(

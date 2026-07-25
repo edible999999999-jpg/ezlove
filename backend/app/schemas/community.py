@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel
 from uuid import UUID
 from datetime import datetime
@@ -5,7 +7,7 @@ from datetime import datetime
 
 class ElderCreate(BaseModel):
     elder_id: UUID
-    care_level: str  # A / B / C
+    care_level: Literal["A", "B", "C"]
     address: str | None = None
     emergency_contact_name: str | None = None
     emergency_contact_phone: str | None = None
@@ -14,7 +16,7 @@ class ElderCreate(BaseModel):
 
 
 class ElderUpdate(BaseModel):
-    care_level: str | None = None
+    care_level: Literal["A", "B", "C"] | None = None
     address: str | None = None
     emergency_contact_name: str | None = None
     emergency_contact_phone: str | None = None

@@ -1,6 +1,6 @@
 from uuid import UUID
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class AlertResponse(BaseModel):
@@ -43,6 +43,6 @@ class AlertRuleResponse(BaseModel):
 
 
 class AlertRuleUpdate(BaseModel):
-    threshold_hours: int | None = None
+    threshold_hours: int | None = Field(default=None, ge=1, le=168)
     enabled: bool | None = None
     config: dict | None = None

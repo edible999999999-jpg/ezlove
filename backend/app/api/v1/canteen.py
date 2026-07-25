@@ -16,6 +16,8 @@ from app.services import canteen_menu as menu_service
 
 router = APIRouter(prefix="/community/canteen", tags=["canteen"])
 
+MAX_EXCEL_SIZE = 10 * 1024 * 1024  # 10MB
+
 
 @router.post("/submit")
 async def submit_canteen(
@@ -27,6 +29,8 @@ async def submit_canteen(
     excel_bytes = None
     if file and file.filename.endswith((".xlsx", ".xls")):
         excel_bytes = await file.read()
+        if len(excel_bytes) > MAX_EXCEL_SIZE:
+            raise HTTPException(status_code=400, detail="Excel 文件不能超过 10MB")
     elif not raw_text:
         raise HTTPException(status_code=400, detail="请输入文本或上传 Excel 文件")
 

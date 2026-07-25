@@ -4,11 +4,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.deps import get_current_user
+from app.deps import get_current_user, get_pagination
 from app.models.user import User
 from app.schemas.moment import MomentCreate, MomentResponse, ViewRequest, ResponseCreate
+from app.schemas.pagination import PaginatedResponse
 from app.services.moment import (
-    create_moment, get_moments_for_user, record_view, is_moment_read, create_response,
+    create_moment, get_moments_for_user, count_moments_for_user, record_view,
+    is_moment_read, batch_get_read_moment_ids, create_response,
 )
 
 router = APIRouter(prefix="/moments", tags=["moments"])
@@ -25,16 +27,30 @@ async def send_moment(data: MomentCreate, user: User = Depends(get_current_user)
     return moment
 
 
-@router.get("", response_model=list[MomentResponse])
-async def list_moments(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
-    moments = await get_moments_for_user(db, user.id, user.role or "family")
+@router.get("")
+async def list_moments(
+    pagination: dict = Depends(get_pagination),
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    role = user.role or "family"
+    total = await count_moments_for_user(db, user.id, role)
+    moments = await get_moments_for_user(
+        db, user.id, role,
+        offset=pagination["offset"], limit=pagination["limit"],
+    )
+    # 批量查询已读状态，避免 N+1
+    moment_ids = [m.id for m in moments]
+    read_ids = await batch_get_read_moment_ids(db, moment_ids)
     result = []
     for m in moments:
-        read = await is_moment_read(db, m.id)
         resp = MomentResponse.model_validate(m)
-        resp.is_read = read
+        resp.is_read = m.id in read_ids
         result.append(resp)
-    return result
+    return PaginatedResponse.create(
+        items=result, total=total,
+        page=pagination["page"], page_size=pagination["page_size"],
+    )
 
 
 @router.get("/{moment_id}", response_model=MomentResponse)

@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Query, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
 from sqlalchemy import select
@@ -10,6 +10,19 @@ from app.models.user import User
 from app.models.community import CommunityWorker
 
 security = HTTPBearer()
+
+
+def get_pagination(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+):
+    """分页参数依赖，返回 offset/limit 及原始页码信息"""
+    return {
+        "offset": (page - 1) * page_size,
+        "limit": page_size,
+        "page": page,
+        "page_size": page_size,
+    }
 
 
 async def get_current_user(

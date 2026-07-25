@@ -31,6 +31,7 @@
           placeholder="输入邀请码"
           class="code-input"
           :adjust-position="true"
+          maxlength="20"
         />
       </view>
       <view class="btn-primary bind-btn" @tap="handleBind">绑定</view>
@@ -68,14 +69,15 @@ function copyCode() {
 }
 
 async function handleBind() {
-  if (!inputCode.value) {
+  const code = inputCode.value.trim()
+  if (!code) {
     uni.showToast({ title: "请输入邀请码", icon: "none" });
     return;
   }
   if (binding.value) return;
   binding.value = true;
   try {
-    await relationStore.bind(inputCode.value);
+    await relationStore.bind(code);
     uni.showToast({ title: "绑定成功", icon: "success" });
     setTimeout(() => uni.navigateBack(), 1500);
   } catch (e) {

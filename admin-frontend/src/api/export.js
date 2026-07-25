@@ -1,4 +1,5 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL
+import { ElMessage } from 'element-plus'
 
 export function downloadExport(path, params = {}) {
   const token = localStorage.getItem('community_access_token')
@@ -23,5 +24,8 @@ export function downloadExport(path, params = {}) {
       a.download = filename
       a.click()
       URL.revokeObjectURL(a.href)
+    })
+    .catch(() => {
+      ElMessage.error('导出失败，请稍后再试')
     })
 }

@@ -4,9 +4,10 @@ from uuid import UUID
 from pydantic import BaseModel
 
 from app.database import get_db
-from app.deps import get_current_worker
+from app.deps import get_current_worker, get_pagination
 from app.models.community import CommunityWorker
 from app.services import community_event as event_service
+from app.schemas.pagination import PaginatedResponse
 
 router = APIRouter(prefix="/community/events", tags=["community-events"])
 
@@ -27,14 +28,20 @@ async def list_events(
     severity: str | None = None,
     event_type: str | None = None,
     is_resolved: bool | None = None,
+    pagination: dict = Depends(get_pagination),
     worker: CommunityWorker = Depends(get_current_worker),
     db: AsyncSession = Depends(get_db),
 ):
-    events = await event_service.list_events(
+    total = await event_service.count_events(
         db, worker.community_id,
         severity=severity, event_type=event_type, is_resolved=is_resolved,
     )
-    return [
+    events = await event_service.list_events(
+        db, worker.community_id,
+        severity=severity, event_type=event_type, is_resolved=is_resolved,
+        offset=pagination["offset"], limit=pagination["limit"],
+    )
+    items = [
         {
             "id": str(e.id),
             "elder_id": str(e.elder_id),
@@ -49,6 +56,10 @@ async def list_events(
         }
         for e in events
     ]
+    return PaginatedResponse.create(
+        items=items, total=total,
+        page=pagination["page"], page_size=pagination["page_size"],
+    )
 
 
 @router.post("")

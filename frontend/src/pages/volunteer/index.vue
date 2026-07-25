@@ -10,6 +10,18 @@
         </view>
       </view>
 
+      <!-- 加载失败 -->
+      <view v-else-if="errorLoading" class="error-state fade-in">
+        <view class="error-icon-wrap">
+          <text class="error-icon-text">!</text>
+        </view>
+        <text class="error-title">加载失败</text>
+        <text class="error-desc">网络不太好，请稍后再试</text>
+        <view class="error-retry-btn" @tap="retryLoad">
+          <text class="error-retry-btn-text">重新加载</text>
+        </view>
+      </view>
+
       <!-- 未注册：邀请卡片 -->
       <view v-else-if="!volunteerStore.profile" class="invite-section fade-in">
         <view class="invite-card">
@@ -135,11 +147,12 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { ref, computed } from "vue";
 import { onShow, onPullDownRefresh } from "@dcloudio/uni-app";
 import { useVolunteerStore } from "@/stores/volunteer";
 
 const volunteerStore = useVolunteerStore();
+const errorLoading = ref(false);
 
 const myTasks = computed(() => {
   return volunteerStore.tasks.filter((t) => t.status === "accepted");
@@ -193,10 +206,26 @@ function goTasks() {
   uni.navigateTo({ url: "/pages/volunteer/tasks" });
 }
 
-onShow(() => {
-  volunteerStore.loadProfile();
-  volunteerStore.loadTasks();
-  volunteerStore.loadPoints();
+async function retryLoad() {
+  errorLoading.value = false;
+  try {
+    await volunteerStore.loadProfile();
+    volunteerStore.loadTasks();
+    volunteerStore.loadPoints();
+  } catch {
+    errorLoading.value = true;
+  }
+}
+
+onShow(async () => {
+  try {
+    await volunteerStore.loadProfile();
+    errorLoading.value = false;
+    volunteerStore.loadTasks();
+    volunteerStore.loadPoints();
+  } catch {
+    errorLoading.value = true;
+  }
 });
 
 onPullDownRefresh(async () => {
@@ -206,6 +235,9 @@ onPullDownRefresh(async () => {
       volunteerStore.loadTasks(),
       volunteerStore.loadPoints(),
     ]);
+    errorLoading.value = false;
+  } catch {
+    errorLoading.value = true;
   } finally {
     uni.stopPullDownRefresh();
   }
@@ -248,6 +280,64 @@ onPullDownRefresh(async () => {
 @keyframes ldPulse {
   0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
   40% { opacity: 1; transform: scale(1.2); }
+}
+
+// ── 加载失败 ──
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 200rpx;
+}
+
+.error-icon-wrap {
+  width: 96rpx;
+  height: 96rpx;
+  background: $c-warn-bg;
+  border-radius: $r-full;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: $sp-24;
+}
+
+.error-icon-text {
+  font-size: 48rpx;
+  font-weight: $fw-bold;
+  color: $c-warn;
+}
+
+.error-title {
+  font-size: $fs-headline;
+  font-weight: $fw-bold;
+  color: $c-text;
+  display: block;
+}
+
+.error-desc {
+  font-size: $fs-body;
+  color: $c-text-sub;
+  margin-top: $sp-8;
+  display: block;
+}
+
+.error-retry-btn {
+  margin-top: $sp-32;
+  padding: $sp-16 $sp-48;
+  background: $c-primary;
+  border-radius: $r-full;
+  box-shadow: $shadow-md;
+  transition: transform $duration-normal $ease-out;
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.error-retry-btn-text {
+  font-size: $fs-body;
+  font-weight: $fw-bold;
+  color: $c-text-inverse;
 }
 
 // ── 邀请卡片 ──
@@ -599,6 +689,11 @@ onPullDownRefresh(async () => {
     color: $c-text;
     display: block;
     font-weight: $fw-medium;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
   }
 
   &__time {

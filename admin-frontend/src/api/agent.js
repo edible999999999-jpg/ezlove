@@ -1,29 +1,5 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL || ''
-
-function getToken() {
-  return localStorage.getItem('community_access_token') || ''
-}
-
-async function refreshToken() {
-  const refresh = localStorage.getItem('community_refresh_token')
-  if (!refresh) return null
-  try {
-    const res = await fetch(`${API_BASE}/community/auth/refresh`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refresh_token: refresh }),
-    })
-    if (!res.ok) return null
-    const data = await res.json()
-    localStorage.setItem('community_access_token', data.access_token)
-    if (data.refresh_token) {
-      localStorage.setItem('community_refresh_token', data.refresh_token)
-    }
-    return data.access_token
-  } catch {
-    return null
-  }
-}
+import { ensureFreshToken } from './request'
 
 async function doFetch(messages, token) {
   return fetch(`${API_BASE}/community/agent/chat`, {
@@ -37,11 +13,11 @@ async function doFetch(messages, token) {
 }
 
 export async function* streamAgentChat(messages) {
-  let token = getToken()
+  let token = await ensureFreshToken()
   let res = await doFetch(messages, token)
 
   if (res.status === 401 || res.status === 403) {
-    const newToken = await refreshToken()
+    const newToken = await ensureFreshToken()
     if (newToken) {
       token = newToken
       res = await doFetch(messages, token)

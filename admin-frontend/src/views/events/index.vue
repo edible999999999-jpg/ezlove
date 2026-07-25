@@ -140,7 +140,7 @@
         </div>
         <div class="px-6 py-4 border-t border-outline-variant/20 flex justify-end gap-3">
           <button class="px-6 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-container transition-colors" @click="showResolveDialog = false">取消</button>
-          <button class="px-6 py-2.5 rounded-xl text-sm font-semibold bg-primary text-white shadow-sm hover:bg-terracotta transition-colors" @click="handleResolve">确认处理</button>
+          <button :disabled="submitting" :class="['px-6 py-2.5 rounded-xl text-sm font-semibold text-white shadow-sm transition-colors', submitting ? 'bg-inactive-gray cursor-not-allowed' : 'bg-primary hover:bg-terracotta']" @click="handleResolve">{{ submitting ? '提交中...' : '确认处理' }}</button>
         </div>
       </div>
     </div>
@@ -184,7 +184,7 @@
         </div>
         <div class="px-6 py-4 border-t border-outline-variant/20 flex justify-end gap-3">
           <button class="px-6 py-2.5 rounded-xl text-sm font-semibold text-on-surface-variant hover:bg-surface-container transition-colors" @click="showDialog = false">取消</button>
-          <button class="px-6 py-2.5 rounded-xl text-sm font-semibold bg-primary text-white shadow-sm hover:bg-terracotta transition-colors" @click="handleCreate">确认创建</button>
+          <button :disabled="submitting" :class="['px-6 py-2.5 rounded-xl text-sm font-semibold text-white shadow-sm transition-colors', submitting ? 'bg-inactive-gray cursor-not-allowed' : 'bg-primary hover:bg-terracotta']" @click="handleCreate">{{ submitting ? '提交中...' : '确认创建' }}</button>
         </div>
       </div>
     </div>
@@ -200,6 +200,7 @@ import { downloadExport } from '@/api/export'
 const store = useEventsStore()
 const showDialog = ref(false)
 const showResolveDialog = ref(false)
+const submitting = ref(false)
 const resolveTarget = ref(null)
 const resolveNote = ref('')
 const filters = reactive({ severity: '', event_type: '', is_resolved: null })
@@ -252,6 +253,7 @@ function openResolve(row) {
 
 async function handleResolve() {
   if (!resolveTarget.value) return
+  submitting.value = true
   try {
     await store.resolve(resolveTarget.value.id, { resolution_note: resolveNote.value || null })
     showResolveDialog.value = false
@@ -259,6 +261,8 @@ async function handleResolve() {
     ElMessage.success('事件已处理')
   } catch (e) {
     // handled by interceptor
+  } finally {
+    submitting.value = false
   }
 }
 
@@ -267,6 +271,7 @@ async function handleCreate() {
     ElMessage.warning('请填写老人ID')
     return
   }
+  submitting.value = true
   try {
     await store.create(form)
     showDialog.value = false
@@ -277,6 +282,8 @@ async function handleCreate() {
     ElMessage.success('事件已创建')
   } catch (e) {
     // handled by interceptor
+  } finally {
+    submitting.value = false
   }
 }
 </script>

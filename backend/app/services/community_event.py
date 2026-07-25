@@ -13,6 +13,8 @@ async def list_events(
     severity: str | None = None,
     event_type: str | None = None,
     is_resolved: bool | None = None,
+    offset: int = 0,
+    limit: int = 20,
 ) -> list[CommunityEvent]:
     stmt = select(CommunityEvent).where(CommunityEvent.community_id == community_id)
     if severity:
@@ -22,8 +24,27 @@ async def list_events(
     if is_resolved is not None:
         stmt = stmt.where(CommunityEvent.is_resolved == is_resolved)
     stmt = stmt.order_by(CommunityEvent.created_at.desc())
+    stmt = stmt.offset(offset).limit(limit)
     result = await db.execute(stmt)
     return list(result.scalars().all())
+
+
+async def count_events(
+    db: AsyncSession,
+    community_id: uuid.UUID,
+    severity: str | None = None,
+    event_type: str | None = None,
+    is_resolved: bool | None = None,
+) -> int:
+    stmt = select(func.count(CommunityEvent.id)).where(CommunityEvent.community_id == community_id)
+    if severity:
+        stmt = stmt.where(CommunityEvent.severity == severity)
+    if event_type:
+        stmt = stmt.where(CommunityEvent.event_type == event_type)
+    if is_resolved is not None:
+        stmt = stmt.where(CommunityEvent.is_resolved == is_resolved)
+    result = await db.execute(stmt)
+    return result.scalar() or 0
 
 
 async def create_event(

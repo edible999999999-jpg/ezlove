@@ -28,12 +28,14 @@
       </button>
 
       <!-- #ifdef H5 -->
-      <button class="dev-login-btn" @tap="handleLogin('demo_family')">
-        <text class="dev-btn-text">子女端体验</text>
-      </button>
-      <button class="dev-login-btn" @tap="handleLogin('demo_elder')">
-        <text class="dev-btn-text">长辈端体验</text>
-      </button>
+      <view v-if="isDev" class="dev-login-group">
+        <button class="dev-login-btn" @tap="handleLogin('demo_family')">
+          <text class="dev-btn-text">子女端体验</text>
+        </button>
+        <button class="dev-login-btn" @tap="handleLogin('demo_elder')">
+          <text class="dev-btn-text">长辈端体验</text>
+        </button>
+      </view>
       <!-- #endif -->
 
       <text class="login-terms">登录即代表您已同意《服务协议》与《隐私政策》</text>
@@ -48,6 +50,7 @@
 import { useUserStore } from "@/stores/user";
 
 const userStore = useUserStore();
+const isDev = import.meta.env.DEV;
 
 async function handleLogin(openid) {
   try {
@@ -205,6 +208,13 @@ async function handleLogin(openid) {
   gap: 24rpx;
   position: relative;
   z-index: 1;
+}
+
+.dev-login-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
 }
 
 .wx-login-btn {

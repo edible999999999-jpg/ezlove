@@ -174,7 +174,9 @@ async function sendPoster() {
     uni.removeStorageSync("poster_params");
     showSuccess.value = true;
     setTimeout(() => {
-      uni.navigateBack({ delta: 2 });
+      const pages = getCurrentPages();
+      const delta = pages.length >= 3 ? 2 : 1;
+      uni.navigateBack({ delta });
     }, 2000);
   } catch (e) {
     uni.hideLoading();

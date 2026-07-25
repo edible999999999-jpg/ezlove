@@ -291,7 +291,10 @@ onPullDownRefresh(async () => {
     font-size: $fs-body-sm;
     color: $c-text-sub;
     line-height: $lh-relaxed;
-    display: block;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   &__bottom {
