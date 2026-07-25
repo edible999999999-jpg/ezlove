@@ -14,3 +14,11 @@ frontend/unpackage/
 .superpowers/
 backend/venv/
 backend/static/uploads/
+.qoder/
+*.db
+*.sqlite
+*.sqlite3
+.idea/
+.vscode/
+*.log
+Thumbs.db
