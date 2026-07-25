@@ -24,7 +24,7 @@
       <!-- Section Header -->
       <view class="section-header">
         <view class="section-header-row">
-          <text class="section-emoji">📬</text>
+          <image class="section-icon" src="/static/icons/edit-note.svg" mode="aspectFit" />
           <view>
             <text class="section-title">{{ userStore.isElder ? '收到的牵挂' : '记录' }}</text>
             <text class="section-subtitle">{{ userStore.isElder ? '家人们的每一份心意' : '珍惜每一次跨越距离的叮嘱' }}</text>
@@ -211,9 +211,9 @@ function goViewDetail(m) {
   gap: $sp-16;
 }
 
-.section-emoji {
-  font-size: 72rpx;
-  line-height: 1;
+.section-icon {
+  width: 48rpx;
+  height: 48rpx;
 }
 
 .section-title {

@@ -24,7 +24,7 @@
 
     <!-- Error State -->
     <view v-if="!loading && !moment.id" class="error-state">
-      <text class="error-icon">😔</text>
+      <image class="error-icon" src="/static/icons/elderly.svg" mode="aspectFit" />
       <text class="error-title">内容加载失败</text>
       <text class="error-desc">网络不太好，再试一次吧</text>
       <view class="retry-btn" @tap="loadMoment">
@@ -296,9 +296,10 @@ async function sendReaction(type) {
 }
 
 .error-icon {
-  font-size: 120rpx;
-  line-height: 1;
+  width: 96rpx;
+  height: 96rpx;
   margin-bottom: $sp-24;
+  opacity: 0.4;
 }
 
 .error-title {

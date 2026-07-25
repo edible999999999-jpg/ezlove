@@ -2,7 +2,7 @@
   <view class="page page-gradient">
     <!-- Header -->
     <view class="section-header">
-      <text class="section-emoji">🔔</text>
+      <image class="section-icon" src="/static/icons/notification.svg" mode="aspectFit" />
       <text class="section-title">提醒</text>
       <text class="section-subtitle">实时关注家人动态</text>
     </view>
@@ -124,9 +124,9 @@ $c-info-gray: #717171;
   margin-top: $sp-8;
 }
 
-.section-emoji {
-  font-size: 64rpx;
-  line-height: 1;
+.section-icon {
+  width: 48rpx;
+  height: 48rpx;
   display: block;
   margin-bottom: $sp-8;
 }

@@ -112,7 +112,7 @@
           class="action-btn action-btn--outline"
           @tap="uni.navigateTo({ url: `/pages/send/ai-suggest?elderId=${selectedElderId}` })"
         >
-          <text class="action-btn__sparkle">✦</text>
+          <image class="action-btn__sparkle" src="/static/icons/sparkle.svg" mode="aspectFit" />
           <text class="action-btn__text">AI 帮我写</text>
         </view>
         <!-- Send Button -->
@@ -673,8 +673,8 @@ async function handleGenerate() {
 }
 
 .action-btn__sparkle {
-  color: $c-primary;
-  font-size: $fs-body;
+  width: 32rpx;
+  height: 32rpx;
   margin-right: $sp-8;
 }
 

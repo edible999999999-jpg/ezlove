@@ -33,7 +33,7 @@
       <view class="pause-card fade-in stagger-2">
         <view class="pause-header">
           <view class="pause-left">
-            <text class="pause-icon">🔕</text>
+            <image class="pause-icon" src="/static/icons/clock.svg" mode="aspectFit" />
             <view class="pause-info">
               <text class="pause-title">暂停提醒</text>
               <text class="pause-desc">{{ pausedUntil ? '提醒已暂停至 ' + formatDate(pausedUntil) : '老人有事时可暂停几天' }}</text>
@@ -346,7 +346,9 @@ async function resumeAlert() {
 }
 
 .pause-icon {
-  font-size: $fs-title;
+  width: 40rpx;
+  height: 40rpx;
+  flex-shrink: 0;
 }
 
 .pause-title {

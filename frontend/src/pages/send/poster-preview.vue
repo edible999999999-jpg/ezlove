@@ -3,7 +3,7 @@
     <!-- 发送成功动画 -->
     <view v-if="showSuccess" class="success-overlay">
       <view class="success-heart">
-        <text class="success-heart__emoji">❤️</text>
+        <image class="success-heart__icon" src="/static/icons/heart-send.svg" mode="aspectFit" />
       </view>
       <text class="success-text">牵挂已送达</text>
     </view>
@@ -214,9 +214,9 @@ async function sendPoster() {
   margin-bottom: $sp-24;
 }
 
-.success-heart__emoji {
-  font-size: 80rpx;
-  line-height: 1;
+.success-heart__icon {
+  width: 80rpx;
+  height: 80rpx;
 }
 
 .success-text {

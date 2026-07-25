@@ -1,9 +1,5 @@
 <template>
   <view class="page-home">
-    <!-- 装饰圆 -->
-    <view class="deco-circle deco-1" />
-    <view class="deco-circle deco-2" />
-
     <!-- 顶部导航栏 -->
     <view class="top-bar">
       <view class="top-bar__left">
@@ -29,19 +25,6 @@
             {{ userStore.isFamily ? '今日牵挂状态' : '看看孩子们的分享' }}
           </text>
           <view class="pulse-dot"></view>
-        </view>
-      </view>
-
-      <!-- 子女端：今日摘要 -->
-      <view v-if="userStore.isFamily && !relationStore.loading && relationStore.relations.length > 0" class="today-summary fade-in stagger-1">
-        <view class="summary-item">
-          <text class="summary-num" :class="allRead ? 'summary-num--safe' : 'summary-num--warn'">{{ readCount }}/{{ relationStore.relations.length }}</text>
-          <text class="summary-label">今日已读</text>
-        </view>
-        <view class="summary-divider" />
-        <view class="summary-item">
-          <text class="summary-num">{{ momentsSentToday }}</text>
-          <text class="summary-label">今日牵挂</text>
         </view>
       </view>
 
@@ -74,9 +57,9 @@
             <view class="elder-card__left">
               <view
                 class="elder-card__avatar"
-                :class="elder.today_read ? 'elder-card__avatar--read' : 'elder-card__avatar--unread'"
+                :style="{ backgroundColor: getAvatarColor(index).bg }"
               >
-                <text class="elder-card__avatar-text" :class="elder.today_read ? 'text--read' : 'text--unread'">
+                <text class="elder-card__avatar-text" :style="{ color: getAvatarColor(index).text }">
                   {{ (elder.relation_label || '家')[0] }}
                 </text>
               </view>
@@ -107,7 +90,11 @@
             :class="[checkedInToday ? 'checkin-btn--done' : 'checkin-btn--active', { 'checkin-ripple': showRipple }]"
             @tap="handleCheckIn"
           >
-            <text class="checkin-btn__icon">{{ checkedInToday ? '✓' : '☀' }}</text>
+            <image
+              class="checkin-btn__icon"
+              :src="checkedInToday ? '/static/icons/checkmark.svg' : '/static/icons/sun.svg'"
+              mode="aspectFit"
+            />
             <view class="checkin-btn__text-wrap">
               <text class="checkin-btn__title">{{ checkedInToday ? '今天已报平安' : '我今天很好' }}</text>
               <text class="checkin-btn__sub">{{ checkedInToday ? checkinTimeText : '点一下，让关心你的人放心' }}</text>
@@ -119,7 +106,7 @@
         <view v-if="todayMenuDishes.length" class="menu-section fade-in stagger-2">
           <view class="menu-card">
             <view class="menu-card__header">
-              <text class="menu-card__icon">🍽</text>
+              <image class="menu-card__icon" src="/static/icons/utensils.svg" mode="aspectFit" />
               <text class="menu-card__title">今日菜单</text>
               <text class="menu-card__meal">{{ menuMealLabel }}</text>
             </view>
@@ -149,7 +136,7 @@
         <!-- 邻里帮入口 -->
         <view class="volunteer-entry fade-in stagger-2" @tap="goVolunteer">
           <view class="volunteer-entry__left">
-            <text class="volunteer-entry__icon">🤝</text>
+            <image class="volunteer-entry__icon" src="/static/icons/handshake.svg" mode="aspectFit" />
             <view class="volunteer-entry__info">
               <text class="volunteer-entry__title">邻里帮</text>
               <text class="volunteer-entry__desc">帮助邻居，赚取积分</text>
@@ -224,7 +211,16 @@ import { useMomentStore } from "@/stores/moment";
 import { useAlertStore } from "@/stores/alert";
 import { selfCheckIn, getTodayCheckIn } from "@/api/user";
 import { getTodayMenu } from "@/api/canteen";
-import { getMoments } from "@/api/moment";
+
+const AVATAR_COLORS = [
+  { bg: '#FBEAE8', text: '#C44D3E' },
+  { bg: '#FBF3E8', text: '#C4943E' },
+  { bg: '#E8F3E7', text: '#5E8F5A' },
+];
+
+function getAvatarColor(index) {
+  return AVATAR_COLORS[index % AVATAR_COLORS.length];
+}
 
 const userStore = useUserStore();
 const relationStore = useRelationStore();
@@ -251,9 +247,6 @@ const greeting = computed(() => {
   return "晚上好";
 });
 
-const readCount = computed(() => relationStore.relations.filter((r) => r.today_read).length);
-const allRead = computed(() => readCount.value === relationStore.relations.length && relationStore.relations.length > 0);
-const momentsSentToday = ref(0);
 
 function formatCheckinTime(isoStr) {
   if (!isoStr) return "";
@@ -294,7 +287,6 @@ onShow(() => {
   alertStore.loadAlerts();
   if (userStore.isFamily) {
     relationStore.loadRelations();
-    loadTodaySentCount();
   } else {
     momentStore.loadMoments();
     loadCheckinStatus();
@@ -307,7 +299,6 @@ onPullDownRefresh(async () => {
     alertStore.loadAlerts();
     if (userStore.isFamily) {
       await relationStore.loadRelations();
-      await loadTodaySentCount();
     } else {
       await momentStore.loadMoments();
       await loadCheckinStatus();
@@ -324,16 +315,6 @@ async function loadTodayMenu() {
     todayMenus.value = res.menus || [];
   } catch (e) {
     // 静默处理
-  }
-}
-
-async function loadTodaySentCount() {
-  try {
-    const moments = await getMoments({ limit: 50 });
-    const today = new Date().toISOString().slice(0, 10);
-    momentsSentToday.value = moments.filter((m) => m.created_at?.startsWith(today)).length;
-  } catch {
-    // silent
   }
 }
 
@@ -366,25 +347,8 @@ function goVolunteer() {
 // ── 页面背景 ──
 .page-home {
   min-height: 100vh;
-  background: $gradient-page;
+  background: #FBF7F2;
   position: relative;
-  overflow: hidden;
-}
-
-.deco-1 {
-  width: 600rpx;
-  height: 600rpx;
-  top: -160rpx;
-  right: -200rpx;
-  background: rgba($c-primary, 0.04);
-}
-
-.deco-2 {
-  width: 400rpx;
-  height: 400rpx;
-  top: 500rpx;
-  left: -180rpx;
-  background: rgba($c-safe, 0.03);
 }
 
 // ── 顶部导航栏 ──
@@ -394,27 +358,25 @@ function goVolunteer() {
   left: 0;
   width: 100%;
   z-index: 50;
-  background: rgba($c-bg, 0.85);
-  backdrop-filter: blur(24rpx);
-  -webkit-backdrop-filter: blur(24rpx);
+  background: #FBF7F2;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: $sp-16 $sp-24;
-  padding-top: calc(var(--status-bar-height, 50rpx) + #{$sp-16});
+  padding: 32rpx 48rpx;
+  padding-top: calc(var(--status-bar-height, 50rpx) + 32rpx);
   box-sizing: border-box;
 
   &__left {
     display: flex;
     align-items: center;
-    gap: $sp-12;
+    gap: 24rpx;
   }
 
   &__avatar {
     width: 80rpx;
     height: 80rpx;
     border-radius: $r-full;
-    background: $c-bg-warm;
+    background: #EFE9E1;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -425,18 +387,18 @@ function goVolunteer() {
   &__avatar-text {
     font-size: $fs-body;
     font-weight: $fw-bold;
-    color: $c-primary;
+    color: #C75C3A;
   }
 
   &__greeting {
     font-size: $fs-body;
     font-weight: $fw-medium;
-    color: $c-primary;
+    color: #C75C3A;
   }
 
   &__bell {
-    width: 96rpx;
-    height: 96rpx;
+    width: 80rpx;
+    height: 80rpx;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -454,18 +416,18 @@ function goVolunteer() {
     right: 0;
     min-width: 32rpx;
     height: 32rpx;
-    background: $c-warn;
+    background: #C44D3E;
     border-radius: $r-full;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0 8rpx;
-    border: 3rpx solid $c-surface;
+    border: 3rpx solid #FFFFFF;
   }
 
   &__badge-text {
     font-size: 20rpx;
-    color: $c-text-inverse;
+    color: #FFFFFF;
     font-weight: $fw-bold;
     line-height: 1;
   }
@@ -473,28 +435,25 @@ function goVolunteer() {
 
 // ── 主内容区 ──
 .home-content {
-  // 顶部留出 top-bar 高度
-  padding-top: calc(var(--status-bar-height, 50rpx) + 140rpx);
-  padding-left: $sp-24;
-  padding-right: $sp-24;
+  padding-top: calc(var(--status-bar-height, 50rpx) + 160rpx);
+  padding-left: 48rpx;
+  padding-right: 48rpx;
   padding-bottom: 260rpx;
 }
 
 // ── 问候区域 ──
 .greeting-section {
-  margin-bottom: $sp-40;
-  background: transparent;
-  padding: $sp-8 0 $sp-20;
-  position: relative;
+  margin-bottom: 80rpx;
+  padding: $sp-8 0 $sp-16;
 }
 
 .greeting-title {
-  font-size: $fs-hero;
+  font-size: 72rpx;
   font-weight: $fw-bold;
   color: $c-text;
   display: block;
   margin-bottom: $sp-8;
-  letter-spacing: -2rpx;
+  letter-spacing: -1rpx;
 
   &--elder {
     font-size: $fs-elder-headline;
@@ -508,9 +467,8 @@ function goVolunteer() {
 }
 
 .greeting-sub {
-  font-size: 36rpx;
+  font-size: 32rpx;
   color: $c-text-sub;
-  opacity: 0.75;
 
   &--elder {
     font-size: $fs-elder-body;
@@ -521,7 +479,7 @@ function goVolunteer() {
   width: 12rpx;
   height: 12rpx;
   border-radius: $r-full;
-  background-color: $c-primary;
+  background-color: #C75C3A;
   animation: pulse 2s ease-in-out infinite;
 }
 
@@ -530,45 +488,6 @@ function goVolunteer() {
   50% { opacity: 0.3; }
 }
 
-// ── 子女端：今日摘要 ──
-.today-summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  background: $gradient-warm-soft;
-  border-radius: $r-xl;
-  padding: $sp-20 $sp-16;
-  margin-bottom: $sp-24;
-  box-shadow: $shadow-md;
-  border: 2rpx solid rgba($c-primary, 0.08);
-}
-
-.summary-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: $sp-4;
-}
-
-.summary-num {
-  font-size: $fs-headline;
-  font-weight: $fw-bold;
-  color: $c-text;
-
-  &--safe { color: $c-safe; }
-  &--warn { color: $c-warn; }
-}
-
-.summary-label {
-  font-size: $fs-body-sm;
-  color: $c-text-sub;
-}
-
-.summary-divider {
-  width: 1rpx;
-  height: 60rpx;
-  background: $c-border-light;
-}
 
 // ── 子女端：空状态 ──
 .empty-state {
@@ -620,32 +539,27 @@ function goVolunteer() {
 .elder-list {
   display: flex;
   flex-direction: column;
-  gap: $sp-24;
+  gap: $sp-12;
 }
 
 .elder-card {
-  background: $c-surface;
-  border-radius: $r-lg;
-  padding: $sp-20 $sp-20;
-  box-shadow: $shadow-md;
-  border: 2rpx solid rgba($c-border, 0.3);
-  border-left: 6rpx solid $c-primary-soft;
+  background: #FFFFFF;
+  border-radius: 32rpx;
+  padding: 40rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  transition: all $duration-normal $ease-out;
+  transition: transform $duration-normal $ease-out;
 
   &:active {
     transform: scale(0.98);
-    background: $c-surface-warm;
-    box-shadow: $shadow-xs;
-    border-left-color: $c-primary;
   }
 
   &__left {
     display: flex;
     align-items: center;
-    gap: $sp-16;
+    gap: 32rpx;
     flex: 1;
     min-width: 0;
   }
@@ -658,14 +572,6 @@ function goVolunteer() {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-
-    &--unread {
-      background-color: $c-warn-bg;
-    }
-
-    &--read {
-      background-color: $c-safe-bg;
-    }
   }
 
   &__avatar-text {
@@ -692,44 +598,35 @@ function goVolunteer() {
   }
 
   &__badge {
-    padding: $sp-2 $sp-10;
+    padding: 4rpx 16rpx;
     border-radius: $r-full;
-    font-size: $fs-caption;
+    font-size: 24rpx;
     font-weight: $fw-medium;
 
     &--unread {
-      background-color: $c-warn-bg;
-      color: $c-warn;
+      background-color: #FBEAE8;
+      color: #C44D3E;
     }
 
     &--read {
-      background-color: $c-safe-bg;
-      color: $c-safe;
+      background-color: #E8F3E7;
+      color: #5E8F5A;
     }
   }
 
   &__time {
-    font-size: $fs-body-sm;
+    font-size: 28rpx;
     color: $c-text-sub;
     display: block;
   }
 
   &__chevron {
-    width: 36rpx;
-    height: 36rpx;
+    width: 40rpx;
+    height: 40rpx;
     flex-shrink: 0;
     margin-left: $sp-8;
-    opacity: 0.4;
+    opacity: 0.3;
   }
-}
-
-// 未读/已读文字颜色
-.text--unread {
-  color: $c-warn;
-}
-
-.text--read {
-  color: $c-safe;
 }
 
 // ── 老人端：报平安按钮 ──
@@ -761,8 +658,9 @@ function goVolunteer() {
   }
 
   &__icon {
-    font-size: 64rpx;
-    line-height: 1;
+    width: 64rpx;
+    height: 64rpx;
+    flex-shrink: 0;
   }
 
   &__text-wrap {
@@ -818,8 +716,9 @@ function goVolunteer() {
   }
 
   &__icon {
-    font-size: 56rpx;
-    line-height: 1;
+    width: 48rpx;
+    height: 48rpx;
+    flex-shrink: 0;
   }
 
   &__title {
@@ -924,8 +823,9 @@ function goVolunteer() {
   }
 
   &__icon {
-    font-size: 56rpx;
-    line-height: 1;
+    width: 48rpx;
+    height: 48rpx;
+    flex-shrink: 0;
   }
 
   &__title {
@@ -1105,13 +1005,13 @@ function goVolunteer() {
 .deco-line-wrap {
   display: flex;
   justify-content: center;
-  margin-top: $sp-48;
+  margin-top: 96rpx;
 }
 
 .deco-line {
-  width: 96rpx;
+  width: 192rpx;
   height: 4rpx;
-  background-color: $c-border-light;
+  background-color: rgba(#EFE9E1, 0.3);
   border-radius: $r-full;
 }
 
@@ -1119,24 +1019,21 @@ function goVolunteer() {
 .fab {
   position: fixed;
   bottom: 180rpx;
-  right: $sp-24;
+  right: 48rpx;
   z-index: 40;
-  background: linear-gradient(135deg, $c-primary 0%, darken($c-primary, 5%) 100%);
-  color: $c-text-inverse;
+  background: #C75C3A;
+  color: #FFFFFF;
   display: flex;
   align-items: center;
   gap: $sp-8;
-  padding: $sp-16 $sp-24;
+  padding: 32rpx 48rpx;
   border-radius: $r-full;
-  box-shadow: $shadow-xl, 0 0 0 4rpx rgba($c-primary, 0.1);
-  backdrop-filter: blur(12rpx);
-  -webkit-backdrop-filter: blur(12rpx);
+  box-shadow: 0 8rpx 32rpx rgba(199, 92, 58, 0.35);
   transition: all $duration-normal $ease-out;
-  animation: fabBounceIn 600ms $ease-spring both 400ms, fabBreath 3s ease-in-out infinite 1.2s;
 
   &:active {
     transform: scale(0.9);
-    animation: none;
+    opacity: 0.9;
   }
 
   &__icon {
@@ -1148,18 +1045,7 @@ function goVolunteer() {
     font-size: $fs-body;
     font-weight: $fw-medium;
     letter-spacing: 2rpx;
-    color: $c-text-inverse;
+    color: #FFFFFF;
   }
-}
-
-@keyframes fabBounceIn {
-  0% { opacity: 0; transform: translateY(60rpx) scale(0.6); }
-  60% { opacity: 1; transform: translateY(-8rpx) scale(1.05); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes fabBreath {
-  0%, 100% { box-shadow: $shadow-lg; }
-  50% { box-shadow: 0 12rpx 48rpx rgba($c-primary, 0.35); }
 }
 </style>
