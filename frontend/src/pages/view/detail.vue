@@ -81,25 +81,25 @@
 
       <!-- Reaction Buttons -->
       <view class="reaction-grid">
-        <view class="reaction-btn" @tap="sendReaction('like')">
+        <view class="reaction-btn" :class="{ 'reaction-btn--selected': selectedReaction === 'like' }" @tap="sendReaction('like')">
           <view class="reaction-circle">
             <text class="reaction-emoji">👍</text>
           </view>
           <text class="reaction-label">点赞</text>
         </view>
-        <view class="reaction-btn" @tap="sendReaction('love')">
+        <view class="reaction-btn" :class="{ 'reaction-btn--selected': selectedReaction === 'love' }" @tap="sendReaction('love')">
           <view class="reaction-circle">
             <text class="reaction-emoji">❤️</text>
           </view>
           <text class="reaction-label">温暖</text>
         </view>
-        <view class="reaction-btn" @tap="sendReaction('happy')">
+        <view class="reaction-btn" :class="{ 'reaction-btn--selected': selectedReaction === 'happy' }" @tap="sendReaction('happy')">
           <view class="reaction-circle">
             <text class="reaction-emoji">😊</text>
           </view>
           <text class="reaction-label">开心</text>
         </view>
-        <view class="reaction-btn" @tap="sendReaction('hug')">
+        <view class="reaction-btn" :class="{ 'reaction-btn--selected': selectedReaction === 'hug' }" @tap="sendReaction('hug')">
           <view class="reaction-circle">
             <text class="reaction-emoji">🤗</text>
           </view>
@@ -122,6 +122,7 @@ const momentId = ref("");
 const loading = ref(true);
 const error = ref(false);
 const reacting = ref(false);
+const selectedReaction = ref(null);
 
 const timeText = computed(() => {
   if (!moment.value.created_at) return "";
@@ -184,6 +185,7 @@ async function sendReaction(type) {
   reacting.value = true;
   try {
     await sendResponse(momentId.value, { response_type: type });
+    selectedReaction.value = type;
     uni.showToast({ title: "已发送", icon: "success" });
   } catch {
     uni.showToast({ title: "发送失败", icon: "none" });
@@ -420,9 +422,8 @@ async function sendReaction(type) {
 }
 
 .sender-time {
-  font-size: $fs-title;
+  font-size: $fs-subtitle;
   color: $c-text-hint;
-  opacity: 0.75;
   display: block;
   margin-top: $sp-2;
 }
@@ -550,5 +551,42 @@ async function sendReaction(type) {
   font-size: $fs-title;
   font-weight: $fw-medium;
   color: $c-text-sub;
+}
+
+.reaction-btn--selected {
+  .reaction-circle {
+    background: $c-primary-soft;
+    border-color: $c-primary;
+    transform: scale(1.05);
+  }
+
+  .reaction-emoji {
+    transform: scale(1.15);
+  }
+
+  .reaction-circle::after {
+    content: '✓';
+    position: absolute;
+    top: -8rpx;
+    right: -8rpx;
+    width: 32rpx;
+    height: 32rpx;
+    border-radius: 50%;
+    background: $c-primary;
+    color: #fff;
+    font-size: 20rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .reaction-circle {
+    position: relative;
+  }
+
+  .reaction-label {
+    color: $c-primary;
+    font-weight: $fw-semibold;
+  }
 }
 </style>

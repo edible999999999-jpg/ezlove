@@ -198,3 +198,109 @@ page {
   background: rgba($c-primary, 0.04);
   pointer-events: none;
 }
+
+// ── Frosted glass header ──
+.glass-header {
+  backdrop-filter: blur($blur-header);
+  -webkit-backdrop-filter: blur($blur-header);
+  background: $glass-bg;
+  border-bottom: 1rpx solid $glass-border;
+}
+
+// ── Fade-in on scroll (for Intersection Observer) ──
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(16rpx);
+  transition: opacity $duration-normal $ease-smooth, transform $duration-normal $ease-smooth;
+  &.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ── Shared loading dots ──
+.loading-dots {
+  display: flex;
+  gap: 8rpx;
+  justify-content: center;
+  align-items: center;
+  padding: $sp-24 0;
+
+  &__dot {
+    width: 12rpx;
+    height: 12rpx;
+    border-radius: 50%;
+    background: $c-primary-soft;
+    animation: dotBounce 1.4s infinite ease-in-out both;
+
+    &:nth-child(1) { animation-delay: -0.32s; }
+    &:nth-child(2) { animation-delay: -0.16s; }
+  }
+}
+
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+// ── Shared empty state ──
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $sp-64 $sp-32;
+  text-align: center;
+
+  &__icon {
+    width: 160rpx;
+    height: 160rpx;
+    border-radius: 50%;
+    background: linear-gradient(135deg, $c-primary-soft, $c-surface-warm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: $sp-24;
+    font-size: 72rpx;
+  }
+
+  &__title {
+    font-size: $fs-subtitle;
+    font-weight: 600;
+    color: $c-text;
+    margin-bottom: $sp-8;
+  }
+
+  &__desc {
+    font-size: $fs-body;
+    color: $c-text-sub;
+    line-height: 1.6;
+    max-width: 480rpx;
+  }
+
+  &__action {
+    margin-top: $sp-32;
+  }
+}
+
+// ── Unified nav back button ──
+.nav-back {
+  width: 72rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8rpx);
+
+  &:active {
+    background: rgba(255, 255, 255, 0.9);
+    transform: scale(0.92);
+  }
+
+  &__icon {
+    width: 36rpx;
+    height: 36rpx;
+    color: $c-text;
+  }
+}

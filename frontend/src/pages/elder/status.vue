@@ -59,7 +59,9 @@
       <!-- 提醒设置入口 -->
       <view v-if="relationId" class="settings-entry fade-in stagger-3" @tap="goSettings">
         <view class="settings-left">
-          <text class="settings-icon">⚙</text>
+          <view class="settings-icon-badge">
+            <text class="settings-icon-text">设</text>
+          </view>
           <view class="settings-info">
             <text class="settings-title">提醒设置</text>
             <text class="settings-desc">调整未读提醒时间阈值</text>
@@ -319,7 +321,7 @@ async function resumeAlert() {
   border-radius: $r-full;
   background: $c-safe-bg;
   color: $c-safe;
-  font-size: $fs-body;
+  font-size: $fs-elder-body;
   font-weight: $fw-semibold;
   transition: all $duration-normal $ease-out;
   &:active {
@@ -429,7 +431,22 @@ async function resumeAlert() {
   gap: $sp-16;
 }
 
-.settings-icon { font-size: $fs-title; }
+.settings-icon-badge {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: $r-md;
+  background: $c-primary-bg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.settings-icon-text {
+  font-size: $fs-body;
+  font-weight: $fw-bold;
+  color: $c-primary;
+}
 
 .settings-title {
   font-size: $fs-body;
@@ -477,8 +494,8 @@ async function resumeAlert() {
 }
 
 .day-ring {
-  width: 48rpx;
-  height: 48rpx;
+  width: 64rpx;
+  height: 64rpx;
   border-radius: 50%;
   border: 3rpx solid $c-border;
   display: flex;
@@ -493,8 +510,8 @@ async function resumeAlert() {
 }
 
 .day-fill {
-  width: 28rpx;
-  height: 28rpx;
+  width: 40rpx;
+  height: 40rpx;
   border-radius: 50%;
   background: $c-safe;
   box-shadow: 0 2rpx 6rpx rgba($c-safe, 0.3);

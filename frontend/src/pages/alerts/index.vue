@@ -113,11 +113,6 @@ async function handleResolve(id) {
 </script>
 
 <style lang="scss" scoped>
-// 告警专用颜色
-$c-error: #BA1A1A;
-$c-caution: #D97706;
-$c-info-gray: #717171;
-
 /* Section Header */
 .section-header {
   margin-bottom: $sp-32;
@@ -175,7 +170,7 @@ $c-info-gray: #717171;
   position: absolute;
   top: 0;
   left: 0;
-  width: 4rpx;
+  width: 8rpx;
   height: 100%;
 
   &.bar-urgent {
@@ -227,8 +222,8 @@ $c-info-gray: #717171;
 }
 
 .alert-time {
-  font-size: $fs-caption;
-  color: rgba($c-text-hint, 0.6);
+  font-size: $fs-body-sm;
+  color: rgba($c-text-hint, 0.75);
 }
 
 /* Alert Message */

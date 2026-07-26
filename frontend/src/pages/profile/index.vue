@@ -36,27 +36,29 @@
 
       <view class="menu-section fade-in stagger-2">
         <template v-if="userStore.isFamily">
+          <text class="menu-group-label">家庭</text>
           <view class="menu-card" @tap="goBindList">
             <view class="menu-left">
               <image class="menu-icon-img" src="/static/icons/family.svg" mode="aspectFit" />
               <text class="menu-text">我的家人</text>
             </view>
-            <text class="menu-arrow">›</text>
+            <image class="menu-arrow-icon" src="/static/icons/chevron-right.svg" mode="aspectFit" />
           </view>
           <view class="menu-card" @tap="goInvite">
             <view class="menu-left">
               <image class="menu-icon-img" src="/static/icons/link.svg" mode="aspectFit" />
               <text class="menu-text">邀请绑定</text>
             </view>
-            <text class="menu-arrow">›</text>
+            <image class="menu-arrow-icon" src="/static/icons/chevron-right.svg" mode="aspectFit" />
           </view>
         </template>
+        <text class="menu-group-label">更多</text>
         <view class="menu-card" @tap="goVolunteer">
           <view class="menu-left">
             <image class="menu-icon-img" src="/static/icons/heart-send.svg" mode="aspectFit" />
             <text class="menu-text">邻里帮</text>
           </view>
-          <text class="menu-arrow">›</text>
+          <image class="menu-arrow-icon" src="/static/icons/chevron-right.svg" mode="aspectFit" />
         </view>
       </view>
 
@@ -327,9 +329,23 @@ function handleLogout() {
   color: $c-text;
 }
 
-.menu-arrow {
-  font-size: $fs-title;
+.menu-arrow-icon {
+  width: 36rpx;
+  height: 36rpx;
+  opacity: 0.4;
+}
+
+.menu-group-label {
+  font-size: $fs-caption;
   color: $c-text-hint;
+  display: block;
+  padding-left: $sp-8;
+  margin-bottom: $sp-4;
+  margin-top: $sp-8;
+
+  &:first-child {
+    margin-top: 0;
+  }
 }
 
 .logout-section {

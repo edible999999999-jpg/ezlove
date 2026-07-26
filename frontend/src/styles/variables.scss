@@ -21,6 +21,15 @@ $c-warn: #C97B6B;            // 柔玫瑰 — 温和的提醒
 $c-warn-soft: #E0AEA3;
 $c-warn-bg: #FAF0EE;
 
+// Status colors
+$c-error: #BA1A1A;
+$c-error-bg: rgba($c-error, 0.08);
+$c-error-soft: rgba($c-error, 0.15);
+$c-caution: #D97706;
+$c-caution-bg: rgba($c-caution, 0.08);
+$c-caution-soft: rgba($c-caution, 0.15);
+$c-info-gray: #6B7280;
+
 // ── Neutrals — 暖调灰 ──
 $c-text: #2D2016;            // 深棕 — 墨水般沉稳
 $c-text-sub: #7A6B5D;        // 中棕 — 不刺眼
@@ -35,7 +44,7 @@ $c-surface: #FFFFFF;
 $c-surface-warm: #FFFCF9;
 
 // ── Typography ──
-$fs-caption: 22rpx;
+$fs-caption: 26rpx;
 $fs-body-sm: 26rpx;
 $fs-body: 30rpx;
 $fs-subtitle: 32rpx;
@@ -99,9 +108,15 @@ $shadow-glow: 0 8rpx 32rpx rgba($c-primary, 0.28);
 $border-subtle: 1rpx solid rgba($c-border, 0.5);
 $gradient-divider: linear-gradient(90deg, transparent 0%, #EDE5DB 50%, transparent 100%);
 
+// ── Glass effect ──
+$blur-header: 24rpx;
+$glass-bg: rgba(251, 247, 242, 0.85);
+$glass-border: rgba(196, 116, 92, 0.08);
+
 // ── Animation ──
-$duration-fast: 120ms;
-$duration-normal: 200ms;
-$duration-slow: 350ms;
+$duration-fast: 200ms;
+$duration-normal: 350ms;
+$duration-slow: 500ms;
 $ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 $ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+$ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
