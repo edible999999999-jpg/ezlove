@@ -56,8 +56,24 @@
         <text class="body-text">{{ moment.text_content }}</text>
       </view>
 
+      <!-- Video Content -->
+      <view v-if="isVideoContent" class="video-area">
+        <video
+          :src="getFullUrl(moment.media_urls[0])"
+          class="content-video"
+          controls
+          :show-center-play-btn="true"
+          :enable-progress-gesture="true"
+          object-fit="contain"
+          :poster="moment.poster_meta?.thumbnail || ''"
+        />
+        <view class="video-badge">
+          <text class="video-badge-text">AI 视频</text>
+        </view>
+      </view>
+
       <!-- Image Content -->
-      <view v-if="moment.media_urls?.length" class="image-area">
+      <view v-else-if="moment.media_urls?.length" class="image-area">
         <image
           :src="getFullUrl(moment.media_urls[0])"
           mode="widthFix"
@@ -83,25 +99,25 @@
       <view class="reaction-grid">
         <view class="reaction-btn" :class="{ 'reaction-btn--selected': selectedReaction === 'like' }" @tap="sendReaction('like')">
           <view class="reaction-circle">
-            <text class="reaction-emoji">👍</text>
+            <image class="reaction-icon" src="/static/icons/thumb-up.svg" mode="aspectFit" />
           </view>
           <text class="reaction-label">点赞</text>
         </view>
         <view class="reaction-btn" :class="{ 'reaction-btn--selected': selectedReaction === 'love' }" @tap="sendReaction('love')">
           <view class="reaction-circle">
-            <text class="reaction-emoji">❤️</text>
+            <image class="reaction-icon" src="/static/icons/heart.svg" mode="aspectFit" />
           </view>
           <text class="reaction-label">温暖</text>
         </view>
         <view class="reaction-btn" :class="{ 'reaction-btn--selected': selectedReaction === 'happy' }" @tap="sendReaction('happy')">
           <view class="reaction-circle">
-            <text class="reaction-emoji">😊</text>
+            <image class="reaction-icon" src="/static/icons/smile.svg" mode="aspectFit" />
           </view>
           <text class="reaction-label">开心</text>
         </view>
         <view class="reaction-btn" :class="{ 'reaction-btn--selected': selectedReaction === 'hug' }" @tap="sendReaction('hug')">
           <view class="reaction-circle">
-            <text class="reaction-emoji">🤗</text>
+            <image class="reaction-icon" src="/static/icons/hug.svg" mode="aspectFit" />
           </view>
           <text class="reaction-label">拥抱</text>
         </view>
@@ -123,6 +139,17 @@ const loading = ref(true);
 const error = ref(false);
 const reacting = ref(false);
 const selectedReaction = ref(null);
+
+const isVideoContent = computed(() => {
+  if (moment.value.content_type === "video") return true;
+  // 也根据文件后缀判断
+  const urls = moment.value.media_urls;
+  if (urls?.length) {
+    const url = urls[0].toLowerCase();
+    return url.endsWith(".mp4") || url.endsWith(".webm");
+  }
+  return false;
+});
 
 const timeText = computed(() => {
   if (!moment.value.created_at) return "";
@@ -467,6 +494,36 @@ async function sendReaction(type) {
   border-radius: $r-xl;
 }
 
+/* Video Area */
+.video-area {
+  width: 100%;
+  border-radius: $r-xl;
+  overflow: hidden;
+  margin-bottom: $sp-8;
+  position: relative;
+  background: #000;
+}
+
+.content-video {
+  width: 100%;
+  border-radius: $r-xl;
+}
+
+.video-badge {
+  position: absolute;
+  top: $sp-12;
+  left: $sp-12;
+  padding: $sp-4 $sp-16;
+  background: rgba($c-primary, 0.85);
+  border-radius: $r-full;
+}
+
+.video-badge-text {
+  font-size: $fs-caption;
+  font-weight: $fw-bold;
+  color: $c-text-inverse;
+}
+
 /* Image Caption */
 .image-caption {
   display: block;
@@ -543,8 +600,9 @@ async function sendReaction(type) {
   transition: all $duration-normal $ease-spring;
 }
 
-.reaction-emoji {
-  font-size: 56rpx;
+.reaction-icon {
+  width: 56rpx;
+  height: 56rpx;
 }
 
 .reaction-label {
@@ -560,12 +618,12 @@ async function sendReaction(type) {
     transform: scale(1.05);
   }
 
-  .reaction-emoji {
+  .reaction-icon {
     transform: scale(1.15);
   }
 
   .reaction-circle::after {
-    content: '✓';
+    content: '';
     position: absolute;
     top: -8rpx;
     right: -8rpx;
@@ -573,11 +631,22 @@ async function sendReaction(type) {
     height: 32rpx;
     border-radius: 50%;
     background: $c-primary;
-    color: #fff;
-    font-size: 20rpx;
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  .reaction-circle::before {
+    content: '';
+    position: absolute;
+    top: -2rpx;
+    right: 2rpx;
+    width: 10rpx;
+    height: 16rpx;
+    border: solid #fff;
+    border-width: 0 3rpx 3rpx 0;
+    transform: rotate(45deg);
+    z-index: 1;
   }
 
   .reaction-circle {

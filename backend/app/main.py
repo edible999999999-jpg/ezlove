@@ -23,6 +23,12 @@ logger = logging.getLogger("ezlove")
 async def lifespan(app: FastAPI):
     if not settings.DEBUG and not settings.JWT_SECRET:
         raise RuntimeError("JWT_SECRET must be set in production (DEBUG=False)")
+    # SQLite 模式：自动建表（开发演示用，生产环境应使用 Alembic 迁移）
+    if settings.DATABASE_URL.startswith("sqlite"):
+        from app.database import engine, Base
+        import app.models  # noqa: F401 确保所有模型注册
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
     from app.tasks.alert_checker import start_scheduler
     start_scheduler()
     yield

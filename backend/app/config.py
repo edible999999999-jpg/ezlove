@@ -28,6 +28,10 @@ class Settings(BaseSettings):
     LLM_BASE_URL: str = ""
     LLM_MODEL: str = "qwen-plus"
 
+    # AI 媒体生成（暂未接入）
+    VIDEO_GEN_API_KEY: str = ""
+    PHOTO_RESTORE_API_KEY: str = ""
+
     class Config:
         env_file = ".env"
 

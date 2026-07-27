@@ -115,6 +115,14 @@
           <image class="action-btn__sparkle" src="/static/icons/sparkle.svg" mode="aspectFit" />
           <text class="action-btn__text">AI 帮我写</text>
         </view>
+        <!-- AI Media Button -->
+        <view
+          class="action-btn action-btn--outline action-btn--accent"
+          @tap="uni.navigateTo({ url: `/pages/send/ai-media?elderId=${selectedElderId}` })"
+        >
+          <image class="action-btn__icon-img" src="/static/icons/video.svg" mode="aspectFit" />
+          <text class="action-btn__text">AI 创作</text>
+        </view>
         <!-- Send Button -->
         <view
           class="action-btn action-btn--primary"
@@ -658,6 +666,24 @@ async function handleGenerate() {
   &:active {
     background: rgba($c-primary, 0.05);
   }
+}
+
+.action-btn--accent {
+  border-color: $c-accent;
+
+  &:active {
+    background: rgba($c-accent, 0.05);
+  }
+
+  .action-btn__text {
+    color: $c-accent;
+  }
+}
+
+.action-btn__icon-img {
+  width: 32rpx;
+  height: 32rpx;
+  margin-right: $sp-4;
 }
 
 .action-btn--primary {

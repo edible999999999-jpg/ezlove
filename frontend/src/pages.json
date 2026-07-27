@@ -12,6 +12,7 @@
     { "path": "pages/send/index", "style": { "navigationBarTitleText": "发送牵挂", "navigationStyle": "custom" } },
     { "path": "pages/send/ai-suggest", "style": { "navigationBarTitleText": "AI 帮我写" } },
     { "path": "pages/send/poster-preview", "style": { "navigationBarTitleText": "选择海报" } },
+    { "path": "pages/send/ai-media", "style": { "navigationBarTitleText": "AI 创作", "navigationStyle": "custom" } },
     { "path": "pages/view/detail", "style": { "navigationBarTitleText": "", "navigationStyle": "custom" } },
     { "path": "pages/history/index", "style": { "navigationBarTitleText": "发送记录", "enablePullDownRefresh": true, "backgroundTextStyle": "dark" } },
     { "path": "pages/bind/invite", "style": { "navigationBarTitleText": "邀请绑定" } },

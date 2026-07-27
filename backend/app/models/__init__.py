@@ -13,6 +13,7 @@ from app.models.community_event import CommunityEvent
 from app.models.community_worker_assignment import CommunityWorkerAssignment
 from app.models.risk_snapshot import RiskScoreSnapshot
 from app.models.volunteer import VolunteerProfile, HelpTask, PointTransaction
+from app.models.user_points import UserPointAccount, UserPointTransaction
 
 __all__ = [
     "User",
@@ -34,4 +35,6 @@ __all__ = [
     "VolunteerProfile",
     "HelpTask",
     "PointTransaction",
+    "UserPointAccount",
+    "UserPointTransaction",
 ]

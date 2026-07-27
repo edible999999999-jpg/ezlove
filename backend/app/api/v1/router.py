@@ -17,6 +17,8 @@ from app.api.v1.poster import router as poster_router
 from app.api.v1.agent import router as agent_router
 from app.api.v1.export import router as export_router
 from app.api.v1.volunteer import router as volunteer_router
+from app.api.v1.points import router as points_router
+from app.api.v1.ai_media import router as ai_media_router
 
 api_router = APIRouter()
 api_router.include_router(auth_router)
@@ -36,3 +38,5 @@ api_router.include_router(poster_router)
 api_router.include_router(agent_router)
 api_router.include_router(export_router)
 api_router.include_router(volunteer_router)
+api_router.include_router(points_router)
+api_router.include_router(ai_media_router)
