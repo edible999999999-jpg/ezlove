@@ -39,6 +39,10 @@ async def list_relations(user: User = Depends(get_current_user), db: AsyncSessio
         resp = RelationResponse.model_validate(r)
         elder_id = r.elder_user_id
         if elder_id:
+            # 查询老人昵称，用于前端展示
+            elder_result = await db.execute(select(User.nickname).where(User.id == elder_id))
+            resp.elder_name = elder_result.scalar_one_or_none()
+
             view_result = await db.execute(
                 select(ViewEvent)
                 .where(ViewEvent.viewer_id == elder_id, ViewEvent.viewed_at >= today_start)

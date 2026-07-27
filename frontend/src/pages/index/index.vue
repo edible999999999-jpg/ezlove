@@ -60,12 +60,12 @@
                 :style="{ backgroundColor: getAvatarColor(index).bg }"
               >
                 <text class="elder-card__avatar-text" :style="{ color: getAvatarColor(index).text }">
-                  {{ (elder.relation_label || '家')[0] }}
+                  {{ (elder.elder_name || elder.relation_label || '家')[0] }}
                 </text>
               </view>
               <view class="elder-card__info">
                 <view class="elder-card__name-row">
-                  <text class="elder-card__name">{{ elder.relation_label || '家人' }}</text>
+                  <text class="elder-card__name">{{ elder.elder_name || elder.relation_label || '家人' }}</text>
                   <view
                     class="elder-card__badge"
                     :class="elder.today_read ? 'elder-card__badge--read' : 'elder-card__badge--unread'"
