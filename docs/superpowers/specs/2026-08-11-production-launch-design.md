@@ -68,94 +68,15 @@ LoveToken 公益 AI 挑战赛让团队把这种个人经验转化成了一个可
 
 ### E.1 试点对象
 
-- 首批范围与仓库 `backend/seed_all.py` 的溪东社区模拟数据规模一致：2,101 位老人、15 名工作人员，不采用此前文档中的 50-100 人小样本假设。
-- 老人分级为 A 级 61 人、B 级 200 人、C 级 1,840 人；覆盖祥盛家园 1,100 人、南北乐章 600 人、桂花溪园 401 人，共 33 栋楼。
-- 家属关系按 `seed_activity.py` 的实际公式生成：A 级 `int(61×0.15)=9`、B 级 `int(200×0.10)=20`、C 级 `int(1840×0.35)=644`，合计 673 个家属用户和 673 条绑定关系。
-- 生产首批数据是否逐人对应模拟档案、哪些人拥有真实家属绑定，必须以项目方提供的正式导入清单为准；不能把 seed 中的随机姓名、手机号、地址和健康备注当作真实居民数据。
-- 对没有智能手机或不会独立操作的老人，不排除在关怀体系之外，由邻里帮任务、护工、食堂和社区走访补充人工信号。
-- 首批只覆盖溪东社区，不在本立项中假设其他社区的数据量。
+首批只覆盖溪东社区。数据规模只采用 `seed_elders.py` 中固定定义的以下五项，其他推导或随机数据不作为立项口径。
 
-### E.1.1 仓库模拟数据量审计
-
-仓库没有提交可直接查询的数据库文件。下表只记录能够从 seed 代码确定的数量；使用 `random` 的条目不伪造“当前实际值”。
-
-| 数据实体 | 可确认数量/口径 | 代码依据 |
+| 数据实体 | 数量 | 代码依据 |
 |---|---:|---|
 | 社区 | 1 | `seed_elders.py` 创建“溪东社区” |
 | 片区 | 3 | 祥盛家园、南北乐章、桂花溪园 |
 | 楼栋 | 33 | 19 + 8 + 6 |
 | 老人 | 2,101 | 1,100 + 600 + 401 |
 | A/B/C 分级 | 61 / 200 / 1,840 | `levels` 固定构造 |
-| 工作人员 | 15 | `WORKERS` 固定列表，其中网格员 8 名 |
-| 家属用户 | 673 | 9 + 20 + 644 |
-| 用户表基线总数 | 2,789 | 2,101 位老人 + 15 名工作人员 + 673 位家属；仅指 `seed_all.py --clean` 后的固定用户 |
-| 家庭绑定关系 | 673 | 每个选中老人创建 1 条关系 |
-| 历史日期点 | 31 | `start_date=today-30` 且 `range(31)`；代码注释称“30 天”，实际是 31 个日期点 |
-| 风险快照 | 65,131 | 2,101 × 31 |
-| 食堂记录 | 30 或 31 | 每个日期 1 条；若执行当天 11:00 前则跳过当天，否则为 31 条 |
-| 食堂 attendee 对象 | 每条 2,101 个 | 存在 `parsed_data.attendees` JSON 中，不是 2,101 条独立数据库记录 |
-| 牵挂内容、查看事件 | 每次 seed 不固定 | 按关系、日期、概率和随机次数生成；必须运行后查询 |
-| 社区走访/跌倒事件 | 每次 seed 不固定 | 每名网格员每天随机走访 3-5 人，跌倒事件按随机次数生成 |
-| 告警 | 每次 seed 不固定 | 食堂连续缺勤固定生成 10 条候选告警；无信号和未读告警按随机概率生成 |
-| 风险评分 | 2,101 位老人各 1 个当前分值 | `recalculate_all` 对全体老人计算；具体分值依赖随机活动数据 |
-
-`seed_demo.py` 是可选的演示剧情脚本，不在 `seed_all.py` 中自动执行。执行它会额外增加 1 位 B 级“张奶奶”、1 位家属、1 条关系、30 条牵挂、29 条与牵挂关联的查看记录、1 条告警、1 条缺席事件、3 个志愿者档案、5 个任务和 2 条积分交易；另有 0-29 条随机报平安记录，食堂记录增加 58 条或 59 条。正式容量口径默认不叠加该脚本，除非项目方明确生产初始化需要这套演示剧情。
-
-仓库无法证明数据库实际占用多少 MB/GB，因为没有提交数据库文件，且随机活动数量、JSON 文本长度和 PostgreSQL 索引膨胀都会影响磁盘占用。磁盘容量只能在实际 seed/导入后使用 `pg_database_size`、`pg_total_relation_size` 和 OSS 对象统计测量，不在本文估算。
-
-### E.1.2 实际数据库计数规则
-
-任何部署环境运行 seed 或导入真实数据后，都必须执行计数审计并把结果、执行时间、Git commit、数据库迁移版本和环境名称附在交付报告中。随机实体只能引用该次查询结果，不能引用本文估算。
-
-```sql
-WITH target AS (
-  SELECT id FROM communities WHERE name = '溪东社区'
-)
-SELECT 'community_elders' AS entity, count(*) AS row_count
-FROM community_elders WHERE community_id = (SELECT id FROM target)
-UNION ALL
-SELECT 'community_workers', count(*)
-FROM community_workers WHERE community_id = (SELECT id FROM target)
-UNION ALL
-SELECT 'care_relations', count(*)
-FROM care_relations
-WHERE elder_user_id IN (
-  SELECT elder_id FROM community_elders WHERE community_id = (SELECT id FROM target)
-)
-UNION ALL
-SELECT 'care_moments', count(*)
-FROM care_moments
-WHERE elder_id IN (
-  SELECT elder_id FROM community_elders WHERE community_id = (SELECT id FROM target)
-)
-UNION ALL
-SELECT 'view_events', count(*)
-FROM view_events
-WHERE viewer_id IN (
-  SELECT elder_id FROM community_elders WHERE community_id = (SELECT id FROM target)
-)
-UNION ALL
-SELECT 'canteen_records', count(*)
-FROM canteen_records WHERE community_id = (SELECT id FROM target)
-UNION ALL
-SELECT 'community_events', count(*)
-FROM community_events WHERE community_id = (SELECT id FROM target)
-UNION ALL
-SELECT 'alerts', count(*)
-FROM alerts WHERE community_id = (SELECT id FROM target)
-UNION ALL
-SELECT 'risk_score_snapshots', count(*)
-FROM risk_score_snapshots WHERE community_id = (SELECT id FROM target);
-
-SELECT pg_size_pretty(pg_database_size(current_database())) AS database_size;
-
-SELECT relname,
-       pg_size_pretty(pg_total_relation_size(relid)) AS total_size
-FROM pg_catalog.pg_statio_user_tables
-ORDER BY pg_total_relation_size(relid) DESC;
-```
-
-正式导入还要单独输出按 A/B/C、片区、楼栋、是否有家属、是否绑定服务号的分组计数。该报告中的手机号、地址和姓名只展示脱敏值。
 
 ### E.2 P0 核心闭环
 
@@ -203,8 +124,8 @@ ORDER BY pg_total_relation_size(relid) DESC;
 | 维度 | 计算口径 | 当前值 |
 |---|---|---|
 | 可触达老人 | 已完成服务号关注且身份绑定成功的老人去重数 / 正式导入老人总数 | 无真实数据，待上线基线 |
-| 家庭绑定 | 存在有效家属关系的老人去重数 / 正式导入老人总数 | seed 为 673/2,101；不能代表真实社区 |
-| 有效互动 | 周内发生查看并回应、家属确认、食堂参与或探访确认之一的老人去重数 | seed 是随机模拟，不能作为基线 |
+| 家庭绑定 | 存在有效家属关系的老人去重数 / 正式导入老人总数 | 无真实数据，待上线基线 |
+| 有效互动 | 周内发生查看并回应、家属确认、食堂参与或探访确认之一的老人去重数 | 无真实数据，待上线基线 |
 | 消息送达 | 微信返回成功的消息数 / 发起发送数，按模板和失败码拆分 | 无真实数据，待服务号联调 |
 | 阅读信号 | 在约定时间窗内产生查看事件的消息数 / 成功送达消息数 | 无真实数据，时间窗由项目方批准 |
 | 家属处理 | 有家属处理记录的持续未读事件数 / 已触发持续未读事件数 | 无真实数据 |
@@ -258,7 +179,7 @@ ORDER BY pg_total_relation_size(relid) DESC;
 | 项目名称 | EZLove 易挂念社区试点项目 |
 | 立项性质 | 公益数字化创新试点，不以商业收入作为首期目标 |
 | 试点周期 | 由项目方立项排期确认；本文阶段顺序不作为已批准工期 |
-| 试点范围 | 溪东社区；容量按 2,101 位老人、15 名工作人员、673 条 seed 家庭关系设计，真实关系以导入清单为准 |
+| 试点范围 | 溪东社区；按 2,101 位老人、3 个片区、33 栋楼的固定口径设计 |
 | 核心假设 | 有价值的家庭/社区内容能形成稳定阅读行为；多来源弱信号能减少社区全量排查；这一过程不会让老人产生明显监控感 |
 | 最终决策 | 试点结束后根据用户价值、社区减负、误扰率、合规和成本决定继续、调整或停止 |
 
@@ -631,7 +552,7 @@ OSS_ENDPOINT=oss-cn-beijing.aliyuncs.com
 ### 7.6 对接验收
 
 - 政府方先提供 OpenAPI/Swagger、字段字典、错误码、测试账号、白名单和联调环境。
-- 使用虚构数据完成契约测试、分页/幂等/重放测试和权限越权测试；容量测试至少覆盖本项目已确认的 2,101 位老人、673 条关系和 65,131 条风险快照口径。
+- 使用虚构数据完成契约测试、分页/幂等/重放测试和权限越权测试；容量测试覆盖已确认的 2,101 位老人、3 个片区和 33 栋楼口径。
 - 按项目方批准的故障窗口执行断网恢复测试，不能丢事件或重复关闭事件；双方以 request ID 对账。
 - 政府 App 页面必须显示数据更新时间、信号来源和“非医疗/非绝对安全判断”说明。
 - 正式传输居民数据前，由项目方签署接口字段清单、保存期限、使用人员范围和安全责任确认单。
